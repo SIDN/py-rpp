@@ -1,0 +1,36 @@
+{
+    "name": "mwtest-dnssec2.nl",
+    "period": {
+        "unit": "y",
+        "text": "1"
+    },
+    "ns": [
+        {
+            "type": "host",
+            "value": "ns1.example.wul"
+        },
+        {
+            "type": "host",
+            "value": "ns2.example.wul"
+        }
+    ],
+    "registrant": "JOR006789-X2627",
+    "contact": [
+        {
+            "type": "admin",
+            "value": "JOR006791-X2627"
+        },
+        {
+            "type": "tech",
+            "value": "JOR006792-X2627"
+        }
+    ],
+    "authInfo": "foobar",
+    "secDNS_keyData": {
+        "flags": "257",
+        "protocol": "3",
+        "alg": "8",
+        "pubKey": "AQPJ////4Q=="
+    },
+    "clTRID": "ABC-12345"
+}

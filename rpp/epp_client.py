@@ -1,6 +1,7 @@
 import socket
 import ssl
 import struct
+import logging
 from rpp.model.config import Config
 from rpp.model.epp.epp_1_0 import EppType, Epp
 from rpp.model.epp.common_commands import login, logout
@@ -9,6 +10,8 @@ from xsdata.formats.dataclass.context import XmlContext
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 from xsdata.formats.dataclass.parsers.config import ParserConfig
+
+logger = logging.getLogger('uvicorn.error')
 
 config = SerializerConfig(pretty_print=True)
 serializer = XmlSerializer(config=config)
@@ -82,7 +85,7 @@ class EppClient:
         return response_data.decode("utf-8", errors="replace")
 
 
-    def send_command(self, epp_request: Epp) -> str:
+    def send_command(self, epp_request: Epp) -> Epp:
         xml_payload = serializer.render(epp_request)
         print(f"send xml: {xml_payload}")
 
@@ -101,7 +104,12 @@ class EppClient:
         response_data = self._recv_exact(self.tls_sock, response_length)
         print(f"Response from EPP server: {response_data.decode('utf-8')}")
                 
-        return parser.from_string(response_data.decode("utf-8", errors="replace"), Epp)
+        response_str = response_data.decode("utf-8")
+        epp_response = parser.from_string(response_str, Epp)
+        logger.debug(f"Response XML object: {serializer.render(epp_response)}")
+        return epp_response
+      
+        
 
     def _recv_exact(self, conn, num_bytes: int) -> bytes:
         """Receive exactly num_bytes or raise."""

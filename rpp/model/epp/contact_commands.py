@@ -2,7 +2,7 @@ from rpp.model.epp.epp_1_0 import CommandType, Epp, ReadWriteType, ExtAnyType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.contact_1_0 import Create, PostalInfoType, AuthInfoType, AddrType, E164Type
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, Ext, CreateType
-from rpp.model.epp.helpers import random_handle, random_str, random_tr_id
+from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.rpp.contact import Card
 
 def get_value_by_kind(components: list[dict], kind: str) -> str | None:
@@ -12,8 +12,6 @@ def get_value_by_kind(components: list[dict], kind: str) -> str | None:
     return None
 
 def contact_create(card: Card) -> Epp:
-#name: str, org: str, addr: dict[str, str], email: str, phone: str
-
 
     epp_request = Epp(
         command=CommandType(

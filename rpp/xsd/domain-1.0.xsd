@@ -63,6 +63,7 @@
     <simpleType name="pUnitType">
         <restriction base="token">
             <enumeration value="y"/>
+            <enumeration value="m"/>
         </restriction>
     </simpleType>
 

@@ -102,6 +102,7 @@ class MNameType:
 
 class PUnitType(Enum):
     Y = "y"
+    M = "m"
 
 
 @dataclass
