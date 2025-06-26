@@ -1,0 +1,70 @@
+{
+    "@type": "Card",
+    "version": "1.0",
+    "uid": "74b64df3-2d60-56b4-9df3-8594886f4456",
+    "name": {
+        "full": "Joe User",
+        "components": [
+            {
+                "kind": "surname",
+                "value": "User"
+            },
+            {
+                "kind": "given",
+                "value": "Joe"
+            }
+        ]
+    },
+    "organizations": {
+        "org": {
+            "name": "Org Example"
+        }
+    },
+    "addresses": {
+        "addr": {
+            "components": [
+                {
+                    "kind": "name",
+                    "value": "Main Street 1"
+                },
+                {
+                    "kind": "locality",
+                    "value": "Ludwigshafen am Rhein"
+                },
+                {
+                    "kind": "region",
+                    "value": "Rhineland-Palatinate"
+                },
+                {
+                    "kind": "postcode",
+                    "value": "67067"
+                },
+                {
+                    "kind": "country",
+                    "value": "Germany"
+                }
+            ],
+            "countryCode": "DE",
+            "coordinates": "geo:49.477409, 8.445180"
+        },
+        "addresses-1": {
+            "full": "Somewhere Street 1 Mutterstadt 67112 Germany",
+            "contexts": {
+                "private": true
+            }
+        }
+    },
+    "phones": {
+        "voice": {
+            "features": {
+                "voice": true
+            },
+            "number": "+31.621263322"
+        }
+    },
+    "emails": {
+        "email": {
+            "address": "joe.user@example.com"
+        }
+    }
+}

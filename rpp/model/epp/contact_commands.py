@@ -1,0 +1,44 @@
+from rpp.model.epp.epp_1_0 import CommandType, Epp, ReadWriteType, ExtAnyType
+from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
+from rpp.model.epp.contact_1_0 import Create, PostalInfoType, AuthInfoType, AddrType, E164Type
+from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, Ext, CreateType
+from rpp.model.epp.helpers import random_handle, random_str, random_tr_id
+from rpp.model.rpp.contact import Card
+
+def get_value_by_kind(components: list[dict], kind: str) -> str | None:
+    for comp in components:
+        if comp.kind == kind:
+            return comp.value
+    return None
+
+def contact_create(card: Card) -> Epp:
+#name: str, org: str, addr: dict[str, str], email: str, phone: str
+
+
+    epp_request = Epp(
+        command=CommandType(
+            create=ReadWriteType(other_element=Create(id=card.uid[:8],
+                                                      postal_info=[PostalInfoType(type_value="loc",
+                                                          name=card.name.full,
+                                                          org=card.organizations.org.name,
+                                                          addr=AddrType(
+                                                              street=get_value_by_kind(card.addresses.root['addr'].components, "name"),
+                                                              city=get_value_by_kind(card.addresses.root['addr'].components, "locality"),
+                                                              sp=get_value_by_kind(card.addresses.root['addr'].components, "region"),
+                                                              pc=get_value_by_kind(card.addresses.root['addr'].components, "postcode"),
+                                                              cc=card.addresses.root['addr'].countryCode
+                                                          )
+                                                      )],
+                                                      email=card.emails.root['email'].address,
+                                                      voice=E164Type(value=card.phones.root['voice'].number),
+                                                      auth_info=AuthInfoType(pw=PwAuthInfoType(value=random_str(8))),
+                                                      )
+        ),
+        cl_trid=random_tr_id(),
+        extension=ExtAnyType(
+            other_element=[Ext(create=CreateType(contact=ContactType(legal_form='PERSOON')))])
+        )
+        
+    )
+    
+    return epp_request
