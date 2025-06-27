@@ -22,7 +22,7 @@ def do_create(domain: DomainCreateRequest, conn: EppClient = Depends(get_connect
     return conn.send_command(epp_request)
 
 @router.get("/{domain_name}", response_model=DomainInfoResponse, response_model_exclude_none=True)
-def do_domain_info(domain_name: str, conn: EppClient = Depends(get_connection)):
+def do_info(domain_name: str, conn: EppClient = Depends(get_connection)):
     logger.info(f"Fetching info for domain: {domain_name}")
 
     epp_request = domain_info(domain=domain_name)

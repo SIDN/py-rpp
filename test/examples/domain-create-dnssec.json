@@ -26,7 +26,7 @@
         }
     ],
     "authInfo": "foobar",
-    "secDNS_keyData": {
+    "dnssec_keyData": {
         "flags": "257",
         "protocol": "3",
         "alg": "8",

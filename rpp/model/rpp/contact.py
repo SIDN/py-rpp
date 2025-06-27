@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Dict, Optional
 from pydantic import BaseModel, Field, RootModel
 
@@ -7,13 +8,13 @@ class NameComponent(BaseModel):
 
 class Name(BaseModel):
     full: str
-    components: List[NameComponent]
+    components: Optional[List[NameComponent]] = None
 
 class Organization(BaseModel):
     name: str
 
-class Organizations(BaseModel):
-    org: Organization
+# class Organizations(BaseModel):
+#     org: Organization
 
 class AddressComponent(BaseModel):
     kind: str
@@ -46,90 +47,23 @@ class Email(BaseModel):
 class Emails(RootModel[Dict[str, Email]]):
     pass
 
+class EventModel(BaseModel):
+    name: str
+    date: datetime
+
 class Card(BaseModel):
-    type_: str = Field(..., alias='@type')
-    version: str
-    uid: str
+    type_: Optional[str] = Field(default="Card", alias='@type')
+    version: Optional[str] = "1.0"
+    uid: Optional[str] = None
+    roid: Optional[str] = None
+    id: Optional[str] = None
+    status: Optional[List[str]] = None
     name: Name
-    organizations: Organizations
+    organizations: Dict[str, Organization] = None
     addresses: Addresses
-    phones: Phones
-    emails: Emails
+    phones: Optional[Phones] = None
+    emails: Optional[Emails] = None
+    events: Dict[str, EventModel]
+    authInfo: Optional[str] = None
 
     
-# {
-#     "@type": "Card",
-#     "version": "1.0",
-#     "uid": "74b64df3-2d60-56b4-9df3-8594886f4456",
-#     "name": {
-#         "full": "Joe User",
-#         "components": [
-#             {
-#                 "kind": "surname",
-#                 "value": "User"
-#             },
-#             {
-#                 "kind": "given",
-#                 "value": "Joe"
-#             }
-#         ]
-#     },
-#     "organizations": {
-#         "org": {
-#             "name": "Org Example"
-#         }
-#     },
-#     "addresses": {
-#         "addr": {
-#             "components": [
-#                 {
-#                     "kind": "name",
-#                     "value": "Main Street 1"
-#                 },
-#                 {
-#                     "kind": "locality",
-#                     "value": "Ludwigshafen am Rhein"
-#                 },
-#                 {
-#                     "kind": "region",
-#                     "value": "Rhineland-Palatinate"
-#                 },
-#                 {
-#                     "kind": "postcode",
-#                     "value": "67067"
-#                 },
-#                 {
-#                     "kind": "country",
-#                     "value": "Germany"
-#                 }
-#             ],
-#             "countryCode": "DE",
-#             "coordinates": "geo:49.477409, 8.445180"
-#         },
-#         "addresses-1": {
-#             "full": "Somewhere Street 1 Mutterstadt 67112 Germany",
-#             "contexts": {
-#                 "private": true
-#             }
-#         }
-#     },
-#     "phones": {
-#         "voice": {
-#             "features": {
-#                 "voice": true
-#             },
-#             "number": "tel:+49-1522-3433333"
-#         },
-#         "fax": {
-#             "features": {
-#                 "fax": true
-#             },
-#             "number": "tel:+49-30-901820"
-#         }
-#     },
-#     "emails": {
-#         "email": {
-#             "address": "joe.user@example.com"
-#         }
-#     }
-# }

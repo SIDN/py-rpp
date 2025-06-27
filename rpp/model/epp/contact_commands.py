@@ -1,6 +1,6 @@
 from rpp.model.epp.epp_1_0 import CommandType, Epp, ReadWriteType, ExtAnyType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
-from rpp.model.epp.contact_1_0 import Create, PostalInfoType, AuthInfoType, AddrType, E164Type
+from rpp.model.epp.contact_1_0 import AuthIdtype, Create, Info, PostalInfoType, AuthInfoType, AddrType, E164Type
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, Ext, CreateType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.rpp.contact import Card
@@ -39,4 +39,17 @@ def contact_create(card: Card) -> Epp:
         
     )
     
+    return epp_request
+
+
+def contact_info(contact_handle: str) -> Epp:
+
+    epp_request = Epp(
+        command=CommandType(
+            info=ReadWriteType(
+                other_element=Info(id=contact_handle)
+            )
+        )
+    )
+
     return epp_request

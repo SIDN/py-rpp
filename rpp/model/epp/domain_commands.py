@@ -34,15 +34,18 @@ def domain_create(req: DomainCreateRequest) -> Epp:
             pw=PwAuthInfoType(value=req.authInfo)
         )
 
-    # secDNS_keyData
+    # dnssec.keyData
     secdns_create = None
-    if req.secDNS_keyData:
-        key_data = KeyDataType(
-            flags=int(req.secDNS_keyData.flags),
-            protocol=int(req.secDNS_keyData.protocol),
-            alg=int(req.secDNS_keyData.alg),
-            pub_key=req.secDNS_keyData.pubKey
-        )
+    if req.dnssec and req.dnssec.keyData:
+        secdns_create = []
+        for key in req.dnssec.keyData:
+            key_data = KeyDataType(
+                flags=int(key.flags),
+                protocol=int(key.protocol),
+                alg=int(key.alg),
+                pub_key=key.pubKey
+            )
+        
         secdns_create = SecdnsCreateType(
             key_data=[key_data]
         )

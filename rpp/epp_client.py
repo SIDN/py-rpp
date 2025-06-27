@@ -50,6 +50,8 @@ class EppClient:
         #login_response = parser.from_string(epp_response, EppType)
         
         #print(f"Response 2 from EPP server: {login_response}")
+        if epp_response.response.result[0].code.value != 1000:
+            raise RuntimeError(f"Login failed: {epp_response.response.result[0].msg.value}")
 
         self.logged_in = True
         return epp_response

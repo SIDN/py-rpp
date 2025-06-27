@@ -1,4 +1,5 @@
-from typing import List, Optional
+from datetime import datetime
+from typing import Dict, List, Optional, Union
 from pydantic import BaseModel
 from rpp.model.rpp.contact import Card
 
@@ -15,9 +16,9 @@ class ContactModel(BaseModel):
     value: str
 
 class SecDNSKeyDataModel(BaseModel):
-    flags: str
-    protocol: str
-    alg: str
+    flags: int
+    protocol: int
+    alg: int
     pubKey: str
 
 class DSDataModel(BaseModel):
@@ -30,13 +31,28 @@ class DNSSECModel(BaseModel):
     delegationSigned: bool
     dsData: List[DSDataModel]
 
+class DsOrKeyType(BaseModel):
+    keyData: Optional[List[SecDNSKeyDataModel]] = None
+    dsData: Optional[List[DSDataModel]] = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.keyData is not None and self.dsData is not None:
+            raise ValueError("Only one of keyData or dsData can be set.")
+        if self.keyData is None and self.dsData is None:
+            raise ValueError("One of keyData or dsData must be set.")
+        
 class AddressListModel(BaseModel):
     v4: Optional[List[str]] = []
     v6: Optional[List[str]] = []
 
 class NameserverModel(BaseModel):
+    linked: bool = False
     name: str
-    address: Optional[AddressListModel]
+
+class EventModel(BaseModel):
+    name: Optional[str] = None
+    date:  datetime
 
 class DomainCreateRequest(BaseModel):
     name: str
@@ -46,11 +62,18 @@ class DomainCreateRequest(BaseModel):
     contact: List[ContactModel]
     authInfo: Optional[str] = None
     clTRID: Optional[str] = None
-    secDNS_keyData: Optional[SecDNSKeyDataModel] = None
+    dnssec: Optional[DsOrKeyType] = None
 
 class DomainInfoResponse(BaseModel):
     name: str
     registrant: str
-    dnssec: Optional[DNSSECModel] = None
+    roid: str
+    status: Optional[List[str]] = None
+    dnssec: Optional[DsOrKeyType] = None
     contacts: List[ContactModel]
-    nameservers: List[NameserverModel]
+    nameservers: Optional[List[NameserverModel]] = None
+    registrar: str
+    events: Dict[str, EventModel]
+    expires: Optional[datetime] = None
+    authInfo: Optional[str] = None
+
