@@ -1,7 +1,7 @@
 from typing import List, Dict
-from rpp.model.rpp.contact import Card, EventModel, Name, AddressComponent, Organization, Address
+from rpp.model.rpp.contact import Card, ContactInfoResponse, EventModel, Name, AddressComponent, Organization, Address
 
-def to_contact_info(epp_response):
+def to_contact_info(epp_response) -> ContactInfoResponse:
     """
     Converteer EPP contact info XML response naar een Card.
     """
@@ -43,24 +43,27 @@ def to_contact_info(epp_response):
         if hasattr(res_data, "cr_id"):
             events["Create"] = EventModel(name=res_data.cr_id, date=str(res_data.cr_date))
 
-        if hasattr(res_data, "up_id"):
+        if hasattr(res_data, "up_id") and res_data.up_id is not None:
             events["Update"] = EventModel(name=res_data.up_id, date=str(res_data.up_date))
 
-        if hasattr(res_data, "tr_id"):
+        if hasattr(res_data, "tr_id") and res_data.tr_id is not None:
             events["Transfer"] = EventModel(date=str(res_data.tr_date))
         
         authInfo = None
         if hasattr(res_data, "auth_info") and res_data.auth_info is not None:
             authInfo = res_data.auth_info.pw.value
 
-    return Card(
-        type_="Card",
+    card = Card(
         id=res_data.id,
         roid=res_data.roid,
-        status=[s.s.value for s in res_data.status],
         name=name,
         organizations=organizations,
         addresses=addresses,
+    )
+
+    return ContactInfoResponse(
+        card=card,
+        status=[s.s.value for s in res_data.status],
         events=events,
         authInfo=authInfo
     )

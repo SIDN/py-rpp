@@ -1,4 +1,8 @@
 import base64
+
+from fastapi import Response
+from rpp.model.epp.epp_1_0 import Epp
+from rpp.model.epp.domain_1_0 import ChkData
 from rpp.model.rpp.domain import (
     DomainInfoResponse,
     EventModel,
@@ -7,11 +11,11 @@ from rpp.model.rpp.domain import (
     DNSSECModel,
     DSDataModel,
     SecDNSKeyDataModel,
-    DsOrKeyType    
+    DsOrKeyType
 )
 
 
-def to_domain_info(epp_response):
+def to_domain_info(epp_response: Epp) -> DomainInfoResponse:
      # --- Map EPP response to DomainInfoResponse ---
     res_data = epp_response.response.res_data.other_element[0]
 
@@ -88,3 +92,31 @@ def to_domain_info(epp_response):
         authInfo=authInfo
     )
     return domain_info_response
+
+
+def to_domain_check(epp_response: Epp, response: Response):
+    """
+    Convert EPP response to a domain check response.
+    
+    :param epp_response: The EPP response object.
+    :return: headers with result of the domain check.
+    """
+    if epp_response.response.result[0].code.value == 1000:
+        check_data: ChkData = epp_response.response.res_data.other_element[0]
+        for check in check_data.cd:
+            if check.name.avail == True:
+                response.headers["RPP-Check-Avail"] = "true"
+            else:
+                response.headers["RPP-Check-Avail"] = "false"
+
+        response.status_code = 200
+
+    else:
+        response.status_code = 500
+
+
+def to_domain_delete(epp_response: Epp, response: Response):
+    if epp_response.response.result[0].code.value == 2303:
+         response.status_code = 404
+    elif epp_response.response.result[0].code.value != 1000:
+         response.status_code = 400

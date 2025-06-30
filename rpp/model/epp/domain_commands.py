@@ -1,5 +1,5 @@
 from rpp.model.epp.epp_1_0 import CommandType, Epp, ReadWriteType, ExtAnyType
-from rpp.model.epp.domain_1_0 import AuthInfoType, ContactAttrType, ContactType, Create, Info, InfoNameType, NsType, PUnitType, PeriodType
+from rpp.model.epp.domain_1_0 import AuthInfoType, Check, ContactAttrType, ContactType, Create, Delete, Info, InfoNameType, MNameType, NsType, PUnitType, PeriodType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.sec_dns_1_1 import KeyDataType, Create as SecdnsCreateType
 from rpp.model.rpp.domain import DomainCreateRequest
@@ -82,6 +82,42 @@ def domain_info(domain: str) -> Epp:
         command=CommandType(
             info=ReadWriteType(
                 other_element=Info(name=InfoNameType(value=domain))
+            )
+        )
+    )
+
+    return epp_request
+
+def domain_check(domain: str) -> Epp:
+    """
+    Create a domain check request object for the given domain.
+
+    :param domain: The domain name to create the DomainCheckType for.
+    :return: An Epp object with the specified domain.
+    """
+
+    epp_request = Epp(
+        command=CommandType(
+            check=ReadWriteType(
+                other_element=Check(name=[domain])
+            )
+        )
+    )
+
+    return epp_request
+
+def domain_delete(domain: str) -> Epp:
+    """
+    Create a domain delete request object for the given domain.
+
+    :param domain: The domain name to create the DomainDeleteType for.
+    :return: An Epp object with the specified domain.
+    """
+
+    epp_request = Epp(
+        command=CommandType(
+            delete=ReadWriteType(
+                other_element=Delete(name=domain)
             )
         )
     )

@@ -3,12 +3,12 @@ from fastapi import APIRouter, Depends, Response
 from rpp.epp_connection_pool import get_connection
 from rpp.model.config import Config
 from rpp.epp_client import EppClient
-from rpp.model.epp.domain_commands import domain_info, domain_create
+from rpp.model.epp.domain_commands import domain_check, domain_delete, domain_info, domain_create
 from rpp.model.rpp.contact import Card
 from fastapi import APIRouter
 
 from rpp.model.rpp.domain import DomainCreateRequest, DomainInfoResponse, NameserverModel, ContactModel
-from rpp.model.rpp.domain_converter import to_domain_info
+from rpp.model.rpp.domain_converter import to_domain_check, to_domain_delete, to_domain_info
 
 
 logger = logging.getLogger('uvicorn.error')
@@ -29,3 +29,36 @@ def do_info(domain_name: str, conn: EppClient = Depends(get_connection)):
     epp_response = conn.send_command(epp_request)
 
     return to_domain_info(epp_response)
+
+@router.head("/{domain_name}")
+def do_check(domain_name: str, response: Response, conn: EppClient = Depends(get_connection)):
+    logger.info(f"Check domain: {domain_name}")
+    
+    epp_request = domain_check(domain=domain_name)
+    epp_response = conn.send_command(epp_request)
+
+    return to_domain_check(epp_response, response)
+
+
+@router.delete("/{domain_name}", status_code=204)
+def do_delete(domain_name: str, response: Response, conn: EppClient = Depends(get_connection)):
+    logger.info(f"Delete domain: {domain_name}")
+    
+    epp_request = domain_delete(domain=domain_name)
+    epp_response = conn.send_command(epp_request)
+
+    to_domain_delete(epp_response, response)
+
+
+@router.patch("/{domain_name}")
+def do_update(domain_name: str, response: Response, conn: EppClient = Depends(get_connection)):
+    pass
+
+
+@router.post("/{domain_name}/renewals")
+def do_renew(domain_name: str, response: Response, conn: EppClient = Depends(get_connection)):
+    pass
+
+@router.post("/{domain_name}/transfers")
+def do_transfer(domain_name: str, response: Response, conn: EppClient = Depends(get_connection)):
+    pass

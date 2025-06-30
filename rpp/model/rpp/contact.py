@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Dict, Optional
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel, with_config
 
 class NameComponent(BaseModel):
     kind: str
@@ -12,9 +12,6 @@ class Name(BaseModel):
 
 class Organization(BaseModel):
     name: str
-
-# class Organizations(BaseModel):
-#     org: Organization
 
 class AddressComponent(BaseModel):
     kind: str
@@ -52,18 +49,32 @@ class EventModel(BaseModel):
     date: datetime
 
 class Card(BaseModel):
+    model_config = ConfigDict(
+            populate_by_alias=True,
+            populate_by_name=True
+      )
+
     type_: Optional[str] = Field(default="Card", alias='@type')
     version: Optional[str] = "1.0"
     uid: Optional[str] = None
-    roid: Optional[str] = None
-    id: Optional[str] = None
-    status: Optional[List[str]] = None
     name: Name
     organizations: Dict[str, Organization] = None
     addresses: Addresses
     phones: Optional[Phones] = None
     emails: Optional[Emails] = None
-    events: Dict[str, EventModel]
-    authInfo: Optional[str] = None
+    roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
+    id: Optional[str] = Field(default=None, alias='rpp.ietf.org:id')
 
-    
+
+class ContactCreateRequest(BaseModel):
+    card: Card 
+    authInfo: Optional[str] = None
+    clTrId: Optional[str] = None
+
+
+class ContactInfoResponse(BaseModel):
+    card: Card 
+    status: Optional[List[str]] = None
+    authInfo: Optional[str] = None
+    clTrId: Optional[str] = None
+    events: Optional[Dict[str, EventModel]] = None
