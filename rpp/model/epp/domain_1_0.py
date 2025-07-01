@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
+
 from xsdata.models.datatype import XmlDate, XmlDateTime
+
 from rpp.model.epp.epp_1_0 import TrIdtype
 from rpp.model.epp.eppcom_1_0 import (
     ExtAuthInfoType,

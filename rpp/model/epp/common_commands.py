@@ -1,14 +1,15 @@
-from rpp.model.epp.epp_1_0 import (
-    LoginType,
-    CommandType,
-    Epp,
-    LoginSvcType,
-    CredsOptionsType,
-    ReadWriteType,
-    ExtUritype
-)
-from rpp.model.epp.domain_1_0 import Info, InfoNameType
 import secrets
+
+from rpp.model.epp.domain_1_0 import Info, InfoNameType
+from rpp.model.epp.epp_1_0 import (
+    CommandType,
+    CredsOptionsType,
+    Epp,
+    ExtUritype,
+    LoginSvcType,
+    LoginType,
+    ReadWriteType,
+)
 
 
 def login(
@@ -17,11 +18,13 @@ def login(
     version="1.0",
     lang="en",
     obj_uri=["urn:ietf:params:xml:ns:domain-1.0"],
-    ext_uri=[]
+    ext_uri=[],
 ) -> Epp:
     login_options = CredsOptionsType(version=version, lang=lang)
 
-    login_svc = LoginSvcType(obj_uri=obj_uri, svc_extension=ExtUritype(ext_uri=ext_uri))
+    login_svc = LoginSvcType(
+        obj_uri=obj_uri, svc_extension=ExtUritype(ext_uri=ext_uri)
+    )
 
     login = LoginType(
         cl_id=cl_id, pw=pw, options=login_options, svcs=login_svc

@@ -10,7 +10,7 @@ from rpp.model.epp.contact_commands import contact_create
 from rpp.epp_connection_pool import ConnectionPool
 from contextlib import asynccontextmanager
 from rpp.epp_connection_pool import get_connection, invalidate_connection
-from rpp.model.rpp.common import ServerInfoModel
+from rpp.model.rpp.common_converter import to_greeting_model
 
 
 logger = logging.getLogger('uvicorn.error')
@@ -43,17 +43,9 @@ app.include_router(hosts.router, prefix="/hosts", tags=["hosts"])
 
 @app.get("/")
 def do_root(conn: EppClient = Depends(get_connection)):
-    now_utc = datetime.now(timezone.utc)
-    now_utc_iso = now_utc.isoformat()
+    return to_greeting_model(conn.greeting)
 
-    info = ServerInfoModel(
-        server="rpp.example.nl",
-        extensions=["estension1", "extensions2"],
-        currentTime=now_utc_iso,
-        messages=["server is running", "welcome to the RPP API"],
-        supportedTlds=["nl"]
-    )
-    return info
+
 
 @app.get("/logout")
 def do_conn_logout(response: Response, conn: EppClient = Depends(invalidate_connection)):

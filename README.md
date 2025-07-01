@@ -3,10 +3,13 @@
 ## Generate models from RPP XSD
 
 ```sh
+. ./.venv/bin/activate
+
 xsdata generate xsd/epp-1.0.xsd --package rpp.model.epp
 xsdata generate xsd/domain-1.0.xsd --package rpp.model.epp
 xsdata generate xsd/contact-1.0.xsd --package rpp.model.epp
 xsdata generate xsd/secDNS-1.1.xsd --package rpp.model.epp
+xsdata generate xsd/rgp-1.0.xsd --package rpp.model.epp
 ```
 
 ## Running test server

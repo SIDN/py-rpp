@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Optional
+
 from xsdata.models.datatype import XmlDateTime
+
 from rpp.model.epp.domain_1_0 import PeriodType
 from rpp.model.epp.epp_1_0 import ResponseType as Epp10ResponseType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType

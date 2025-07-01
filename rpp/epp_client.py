@@ -3,7 +3,7 @@ import ssl
 import struct
 import logging
 from rpp.model.config import Config
-from rpp.model.epp.epp_1_0 import EppType, Epp
+from rpp.model.epp.epp_1_0 import EppType, Epp, GreetingType
 from rpp.model.epp.common_commands import login, logout
 from xsdata.formats.dataclass.parsers import XmlParser
 from xsdata.formats.dataclass.context import XmlContext
@@ -29,12 +29,13 @@ class EppClient:
 
         self.connected = False
         self.logged_in = False
+        self.greeting: GreetingType = None
 
     def login(self, cfg: Config):
 
         if not self.connected:
             self.connect()
-            self.connected = True
+            #self.connected = True
 
         epp_request = login(cl_id=cfg.epp_client_id, pw=cfg.epp_password, version="1.0", lang="en",
                              obj_uri=['urn:ietf:params:xml:ns:domain-1.0',
@@ -73,7 +74,7 @@ class EppClient:
 
         return epp_response
 
-    def connect(self):
+    def connect(self) -> GreetingType:
         sock = socket.create_connection((self.host, self.port), timeout=self.timeout)
         # Receive 4-byte length prefix
         self.tls_sock = self.context.wrap_socket(sock, server_hostname=self.host)
@@ -84,7 +85,18 @@ class EppClient:
         response_length = struct.unpack(">I", header)[0] - 4
         response_data = self._recv_exact(self.tls_sock, response_length)
         self.connected = True
-        return response_data.decode("utf-8", errors="replace")
+
+        response_str = response_data.decode('utf-8')
+        epp_response = parser.from_string(response_str, Epp)
+        logger.info(f"Received greeting from EPP server: {serializer.render(epp_response)}")
+        
+
+        #epp_response = parser.from_string(response_str, Epp)
+        #logger.debug(f"Response XML object: {serializer.render(epp_response)}")
+
+        self.greeting = epp_response.greeting
+        return self.greeting
+        #return response_data.decode("utf-8", errors="replace")
 
 
     def send_command(self, epp_request: Epp) -> Epp:
