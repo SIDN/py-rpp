@@ -1,0 +1,20 @@
+rpp_epp_host:
+rpp_epp_client_id:
+rpp_epp_password:
+
+rpp_epp_objects:
+  - "urn:ietf:params:xml:ns:contact-1.0"
+  - "urn:ietf:params:xml:ns:host-1.0"
+  - "urn:ietf:params:xml:ns:domain-1.0"
+  - "http://rxsd.domain-registry.nl/sidn-reseller-1.0"
+
+rpp_epp_extensions:
+  - "http://rxsd.domain-registry.nl/sidn-ext-epp-1.0"
+  - "urn:ietf:params:xml:ns:secDNS-1.1"
+  - "http://rxsd.domain-registry.nl/sidn-ext-epp-registry-contacts-delete-1.0"
+  - "http://rxsd.domain-registry.nl/sidn-reseller-1.0"
+
+# optional settings
+rpp_epp_port: 700
+rpp_epp_use_tls: true
+rpp_epp_timeout: 5

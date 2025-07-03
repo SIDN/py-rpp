@@ -21,10 +21,10 @@ parser_context = XmlContext()
 parser = XmlParser(context=parser_context, config=parser_config)
 
 class EppClient:
-    def __init__(self, host: str, port: int = 700, timeout: float = 10.0):
-        self.host = host
-        self.port = port
-        self.timeout = timeout
+    def __init__(self, cfg: Config):
+        self.host = cfg.rpp_epp_host
+        self.port = cfg.rpp_epp_port
+        self.timeout = cfg.rpp_epp_timeout
         self.context = ssl.create_default_context()
 
         self.connected = False
@@ -35,22 +35,14 @@ class EppClient:
 
         if not self.connected:
             self.connect()
-            #self.connected = True
 
-        epp_request = login(cl_id=cfg.epp_client_id, pw=cfg.epp_password, version="1.0", lang="en",
-                             obj_uri=['urn:ietf:params:xml:ns:domain-1.0',
-                                      'urn:ietf:params:xml:ns:contact-1.0'],
-                             ext_uri=['http://rxsd.domain-registry.nl/sidn-ext-epp-1.0',
-                                      'urn:ietf:params:xml:ns:secDNS-1.1']
+        epp_request = login(cl_id=cfg.rpp_epp_client_id, pw=cfg.rpp_epp_password, version="1.0", lang="en",
+                             obj_uri=cfg.rpp_epp_objects,
+                             ext_uri=cfg.rpp_epp_extensions
                             )
-        # xml_output = serializer.render(epp_request)
-        # print(f"login xml: {xml_output}")
 
         epp_response = self.send_command(epp_request)
-        #print(f"Response 1 from EPP server: {epp_response}")
-        #login_response = parser.from_string(epp_response, EppType)
-        
-        #print(f"Response 2 from EPP server: {login_response}")
+
         if epp_response.response.result[0].code.value != 1000:
             raise RuntimeError(f"Login failed: {epp_response.response.result[0].msg.value}")
 
@@ -60,12 +52,7 @@ class EppClient:
     def logout(self):
     
         epp_request = logout(trId="tr12345")
-        # xml_output = serializer.render(epp_request)
-        # print(f"logout xml: {xml_output}")
-
         epp_response = self.send_command(epp_request)
-        #print(f"Response from EPP server: {response}")
-        #response = parser.from_string(response, EppType)
 
         self.logged_in = False
         self.connected = False
@@ -89,14 +76,9 @@ class EppClient:
         response_str = response_data.decode('utf-8')
         epp_response = parser.from_string(response_str, Epp)
         logger.info(f"Received greeting from EPP server: {serializer.render(epp_response)}")
-        
-
-        #epp_response = parser.from_string(response_str, Epp)
-        #logger.debug(f"Response XML object: {serializer.render(epp_response)}")
 
         self.greeting = epp_response.greeting
         return self.greeting
-        #return response_data.decode("utf-8", errors="replace")
 
 
     def send_command(self, epp_request: Epp) -> Epp:

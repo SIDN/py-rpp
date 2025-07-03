@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import List, Dict, Optional
-from pydantic import BaseModel, ConfigDict, Field, RootModel, with_config
+from pydantic import BaseModel, ConfigDict, Field, RootModel, with_config, field_validator, ValidationError
+
+from rpp.model.rpp.common import BaseRequestModel
 
 class NameComponent(BaseModel):
     kind: str
@@ -53,28 +55,40 @@ class Card(BaseModel):
             populate_by_alias=True,
             populate_by_name=True
       )
-
     type_: Optional[str] = Field(default="Card", alias='@type')
-    version: Optional[str] = "1.0"
-    uid: Optional[str] = None
+    version: Optional[str] = Field(default="2.0" )
+    roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
+    id: str = Field( alias='rpp.ietf.org:id')
     name: Name
     organizations: Dict[str, Organization] = None
     addresses: Addresses
     phones: Optional[Phones] = None
     emails: Optional[Emails] = None
-    roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
-    id: Optional[str] = Field(default=None, alias='rpp.ietf.org:id')
+    
+
+    @field_validator('version')
+    @classmethod
+    def version_must_be_2_0(cls, v):
+        if v is not None and str(v) != "2.0":
+            raise ValueError('version must be "2.0"')
+        return v
 
 
-class ContactCreateRequest(BaseModel):
+class TransactionModel(BaseModel):
+    clientId: str
+    serverId: Optional[str] = None
+
+class ContactCreateRequest(BaseRequestModel):
     card: Card 
     authInfo: Optional[str] = None
-    clTrId: Optional[str] = None
 
+class ContactInfoRequest(BaseRequestModel):
+    authInfo: Optional[str] = None
+    #transaction: TransactionModel
 
 class ContactInfoResponse(BaseModel):
     card: Card 
     status: Optional[List[str]] = None
     authInfo: Optional[str] = None
-    clTrId: Optional[str] = None
+    transaction: TransactionModel
     events: Optional[Dict[str, EventModel]] = None

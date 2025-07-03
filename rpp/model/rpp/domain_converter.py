@@ -2,8 +2,9 @@ import base64
 
 from fastapi import Response
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.epp.domain_1_0 import ChkData
+from rpp.model.epp.domain_1_0 import CheckType, ChkData, ChkDataType
 from rpp.model.rpp.common import ErrorModel
+from rpp.model.rpp.common_converter import is_ok_response
 from rpp.model.rpp.domain import (
     DomainInfoResponse,
     EventModel,
@@ -98,13 +99,19 @@ def to_domain_info(epp_response: Epp, response: Response) -> DomainInfoResponse 
     return domain_info_response
 
 
-def to_domain_check(epp_response: Epp, response: Response):
-    """
-    Convert EPP response to a domain check response.
+def to_domain_check(epp_response: Epp):
+
+    ok, epp_status, message = is_ok_response(epp_response)
+
+    if not ok:
+         return False, epp_status, message
     
-    :param epp_response: The EPP response object.
-    :return: headers with result of the domain check.
-    """
+    check_data: ChkDataType = epp_response.response.res_data.other_element[0]
+    cd: CheckType = check_data.cd[0]
+    
+    return epp_status, cd.name.avail, cd.reason.value if cd.reason else None
+
+
     if epp_response.response.result[0].code.value == 1000:
         check_data: ChkData = epp_response.response.res_data.other_element[0]
         for check in check_data.cd:

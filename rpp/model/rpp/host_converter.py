@@ -1,11 +1,57 @@
-from rpp.model.rpp.host import HostModel, HostEventModel, HostAddr
+from fastapi import Response
+from rpp.model.epp.epp_1_0 import Epp
+from rpp.model.epp.host_1_0 import CheckType, ChkData, ChkDataType, CreDataType
+from rpp.model.rpp.common import BaseResponseModel, ResultModel, TrIDModel
+from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
+from rpp.model.rpp.host import HostCheckResModel, HostCreateResDataModel, HostInfoResponseModel, HostEventModel, HostAddr
 from typing import Dict
 
-def to_host_info(epp_response):
-    """Converteer EPP host info XML response naar een HostModel."""
+def to_host_create(epp_response: Epp) -> BaseResponseModel:
+    
+    # first_result = epp_response.response.result[0]
+    # result = ResultModel(code=first_result.code.value, message=first_result.msg.value,
+    #             lang=first_result.msg.lang if first_result.msg.lang else None)
+    
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+         return to_base_response(epp_response)
+    
+    # if first_result.code.value != 1000:
+    #     return to_base_response(epp_response)
+        # return BaseResponseModel(
+        #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+        #     svTRID=epp_response.response.tr_id.sv_trid),
+        #     result=[result])
 
-    # Typical EPP host info response structure:
-    # epp_response.response.res_data.other_element[0] is the host:infData
+    epp_host_res: CreDataType = epp_response.response.res_data.other_element[0];
+   
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+        svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=HostCreateResDataModel(name=epp_host_res.name,
+            createDate=str(epp_host_res.cr_date) if epp_host_res.cr_date else None)
+    )
+
+def to_host_delete(epp_response: Epp) -> BaseResponseModel:
+    return to_base_response(epp_response)
+    # results: List[ResultModel] = []
+    # for res in epp_response.response.result:
+    #     results.append(ResultModel(code=res.code.value, message=res.msg.value,
+    #             lang=res.msg.lang if res.msg.lang else None))
+
+    # return BaseResponseModel(
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #     svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=results)
+
+
+def to_host_info(epp_response):
+
+    epp_status = epp_response.response.result[0].code.value
+    if epp_status != 1000:
+        return to_base_response(epp_response)
+    
     res_data = epp_response.response.res_data.other_element[0]
 
     # Status
@@ -33,7 +79,7 @@ def to_host_info(epp_response):
         v6=v6 if v6 else None
     )
 
-    return HostModel(
+    return HostInfoResponseModel(
         name=res_data.name,
         roid=res_data.roid,
         status=status,
@@ -41,3 +87,46 @@ def to_host_info(epp_response):
         events=events,
         addresses=addresses
     )
+
+def to_host_check(epp_response: Epp) -> tuple[int, str, str]:
+
+    # epp_status = epp_response.response.result[0].code.value
+    # if epp_status != 1000:
+    #     return to_base_response(epp_response)
+    ok, epp_status, message = is_ok_response(epp_response)
+
+    #response.headers["RPP-code"] = str(epp_status)
+
+    if not ok:
+         #return to_base_response(epp_response)
+         return False, epp_status, message
+    
+    check_data: ChkDataType = epp_response.response.res_data.other_element[0]
+    cd: CheckType = check_data.cd[0]
+    
+    return epp_status, cd.name.avail, cd.reason.value if cd.reason else None
+
+    # if cd.name.avail == True:
+    #     response.headers["RPP-Check-Avail"] = "true"
+    # else:
+    #   response.headers["RPP-Check-Avail"] = "false"
+    #   if cd.reason:
+    #     response.headers["RPP-Check-Reason"] = cd.reason.value
+
+
+    # checkResponse = HostCheckResModel(
+    #     name=cd.name.value,
+    #     available=cd.name.avail,
+    #     reason=cd.reason.value if cd.reason else None,
+    #     lang=cd.reason.lang if cd.reason else None
+    # )
+
+    # return BaseResponseModel(
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #     svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=checkResponse
+    # )
+
+def to_host_update(epp_response: Epp) -> BaseResponseModel:
+    return to_base_response(epp_response)

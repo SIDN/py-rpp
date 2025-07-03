@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 from pydantic import BaseModel
-from rpp.model.rpp.contact import Card
+from rpp.model.rpp.common import BaseRequestModel
+from rpp.model.rpp.entity import Card
 
 class PeriodModel(BaseModel):
     unit: str
@@ -54,15 +55,20 @@ class EventModel(BaseModel):
     name: Optional[str] = None
     date:  datetime
 
-class DomainCreateRequest(BaseModel):
+class DomainCreateRequest(BaseRequestModel):
     name: str
     period: Optional[PeriodModel] = None
     ns: Optional[List[NsItemModel]] = []
     registrant: str
     contact: List[ContactModel]
     authInfo: Optional[str] = None
-    clTRID: Optional[str] = None
     dnssec: Optional[DsOrKeyType] = None
+
+class DomainInfoRequest(BaseRequestModel):
+    authInfo: str
+
+class DomainCheckRequest(BaseRequestModel):
+    name: str
 
 class DomainInfoResponse(BaseModel):
     name: str

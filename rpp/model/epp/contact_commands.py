@@ -11,7 +11,7 @@ from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, CreateType, Ext
-from rpp.model.rpp.contact import Card, ContactCreateRequest
+from rpp.model.rpp.entity import Card, ContactCreateRequest
 
 
 def get_value_by_kind(components: list[dict], kind: str) -> str | None:
@@ -26,7 +26,7 @@ def contact_create(request: ContactCreateRequest) -> Epp:
         command=CommandType(
             create=ReadWriteType(
                 other_element=Create(
-                    id=request.card.uid[:8],
+                    id=request.card.id,
                     postal_info=[
                         PostalInfoType(
                             type_value="loc",

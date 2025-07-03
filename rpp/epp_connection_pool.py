@@ -34,7 +34,7 @@ class ConnectionPool:
         with self._lock:
             if session_id not in self._connection_cache:
                 logger.debug(f"Creating new EPP connection for session_id: {session_id}")
-                client = EppClient(host=self.cfg.epp_host, port=self.cfg.epp_port, timeout=self.cfg.epp_timeout)
+                client = EppClient(self.cfg)
                 client.login(self.cfg)
                 response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=3600)
                 self._connection_cache[session_id] = client

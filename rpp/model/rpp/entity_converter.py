@@ -1,12 +1,8 @@
 from typing import List, Dict
-from rpp.model.rpp.contact import Card, ContactInfoResponse, EventModel, Name, AddressComponent, Organization, Address
+from rpp.model.rpp.entity import Card, ContactInfoResponse, EventModel, Name, AddressComponent, Organization, Address
 
 def to_contact_info(epp_response) -> ContactInfoResponse:
-    """
-    Converteer EPP contact info XML response naar een Card.
-    """
-    # Typical EPP contact info response structure:
-    # epp_response.response.res_data.other_element[0] is the contact:infData
+
     res_data = epp_response.response.res_data.other_element[0]
 
     # Use Name model for the name property

@@ -1,7 +1,7 @@
 
 from typing import List
-from rpp.model.epp.epp_1_0 import DcpStatementType, GreetingType
-from rpp.model.rpp.common import DcpModel, DcpStatementModel, GreetingModel, SvcMenuModel
+from rpp.model.epp.epp_1_0 import DcpStatementType, Epp, GreetingType
+from rpp.model.rpp.common import BaseResponseModel, DcpModel, DcpStatementModel, GreetingModel, ResultModel, SvcMenuModel, TrIDModel
 
 
 def get_set_properties_of_dcp_statement(item_to_check, name: str) -> list[str]:
@@ -48,3 +48,37 @@ def to_greeting_model(greeting: GreetingType) -> GreetingModel:
         services=services,
         dcp=dcp
     )
+
+def to_base_response(epp_response: Epp) -> BaseResponseModel:
+    
+    results: List[ResultModel] = []
+    for res in epp_response.response.result:
+        results.append(ResultModel(code=res.code.value, message=res.msg.value,
+                lang=res.msg.lang if res.msg.lang else None))
+
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+        svTRID=epp_response.response.tr_id.sv_trid),
+        result=results)
+
+
+def is_ok_response(epp_response: Epp) -> tuple[bool, str, str]:
+
+    for res in epp_response.response.result:
+        if res.code.value == 1000:
+            return True, res.code.value, res.msg.value
+        else:
+            return False, res.code.value, res.msg.value
+
+
+def to_result_list(epp_response: Epp) -> List[ResultModel]:
+    results: List[ResultModel] = []
+    for res in epp_response.response.result:
+        results.append(ResultModel(code=res.code.value, message=res.msg.value,
+                lang=res.msg.lang if res.msg.lang else None))
+    
+    return results
+    # first_result = epp_response.response.result[0]
+    # result = ResultModel(code=first_result.code.value, message=first_result.msg.value,
+    #             lang=first_result.msg.lang if first_result.msg.lang else None)
+

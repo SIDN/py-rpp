@@ -1,13 +1,29 @@
 import os
+from typing import List, Optional
 import yaml
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 class Config(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix='rpp_')
 
-    epp_host: str
-    epp_port: int = 700
-    epp_use_tls: bool = True
-    epp_timeout: float = 5.0
-    epp_client_id: str
-    epp_password: str
+    rpp_epp_host: str
+    rpp_epp_port: Optional[int] = 700
+    rpp_epp_use_tls: Optional[bool] = True
+    rpp_epp_timeout: Optional[float] = 5.0
+    rpp_epp_client_id: str
+    rpp_epp_password: str
+    rpp_epp_objects: List[str] = [
+        'urn:ietf:params:xml:ns:domain-1.0',
+        'urn:ietf:params:xml:ns:contact-1.0',
+        'urn:ietf:params:xml:ns:host-1.0',
+    ]
+
+    rpp_epp_extensions: Optional[List[str]] = None
+
+    def __init__(self, **kwargs):
+        if not kwargs:
+            config_path = os.getenv("RPP_CONFIG_FILE", "config.yaml")
+            with open(config_path) as f:
+                data = yaml.safe_load(f)
+            super().__init__(**data)
+        else:
+            super().__init__(**kwargs)
