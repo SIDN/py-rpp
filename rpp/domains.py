@@ -7,15 +7,20 @@ from rpp.epp_connection_pool import get_connection
 from rpp.model.config import Config
 from rpp.epp_client import EppClient
 from rpp.model.epp.domain_commands import domain_check, domain_delete, domain_info, domain_create
+from rpp.model.rpp.common_converter import is_ok_code
 from rpp.model.rpp.entity import Card
 from fastapi import APIRouter
 
 from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainInfoRequest, DomainInfoResponse, NameserverModel, ContactModel
 from rpp.model.rpp.domain_converter import to_domain_check, to_domain_delete, to_domain_info
-
+from fastapi import APIRouter
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 logger = logging.getLogger('uvicorn.error')
-router = APIRouter()
+security = HTTPBasic()
+
+router = APIRouter(dependencies=[Depends(security)])
+
 
 @router.post("/")
 def do_create(domain: DomainCreateRequest, conn: EppClient = Depends(get_connection)):
@@ -73,10 +78,11 @@ def do_check(domain_name: str, response: Response,
     epp_response = conn.send_command(epp_request)
 
     #return to_domain_check(epp_response, response)
-    epp_status, avail, reason = to_domain_check(epp_response)
+    avail, epp_status, reason = to_domain_check(epp_response)
 
     add_status_header(response, str(epp_status))
-    add_check_header(response, str(epp_status), avail, reason)
+    if is_ok_code(epp_status):
+        add_check_header(response, avail, reason)
 
 @router.delete("/{domain_name}", status_code=204)
 def do_delete(domain_name: str, response: Response, conn: EppClient = Depends(get_connection)):

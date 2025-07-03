@@ -1,6 +1,6 @@
 rpp_epp_host:
-rpp_epp_client_id:
-rpp_epp_password:
+#rpp_epp_client_id:
+#rpp_epp_password:
 
 rpp_epp_objects:
   - "urn:ietf:params:xml:ns:contact-1.0"

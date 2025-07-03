@@ -1,4 +1,7 @@
 from typing import List, Dict
+from rpp.model.epp.contact_1_0 import CheckType, ChkDataType
+from rpp.model.epp.epp_1_0 import Epp
+from rpp.model.rpp.common_converter import is_ok_response
 from rpp.model.rpp.entity import Card, ContactInfoResponse, EventModel, Name, AddressComponent, Organization, Address
 
 def to_contact_info(epp_response) -> ContactInfoResponse:
@@ -63,3 +66,14 @@ def to_contact_info(epp_response) -> ContactInfoResponse:
         events=events,
         authInfo=authInfo
     )
+
+def to_contact_check(epp_response: Epp) -> tuple[bool, int, str]:
+
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+         return None, epp_status, message
+    
+    check_data: ChkDataType = epp_response.response.res_data.other_element[0]
+    cd: CheckType = check_data.cd[0]
+
+    return cd.id.avail, epp_status, cd.reason.value if cd.reason else None

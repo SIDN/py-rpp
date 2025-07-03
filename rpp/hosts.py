@@ -9,11 +9,15 @@ from rpp.model.epp.host_commands import host_check, host_create, host_delete, ho
 from fastapi import APIRouter
 
 from rpp.model.rpp.common import BaseResponseModel
+from rpp.model.rpp.common_converter import is_ok_code
 from rpp.model.rpp.host import HostCheckRequest, HostCheckResModel, HostCreateRequest, HostDeleteRequest, HostInfoRequest, HostInfoResponseModel, HostUpdateRequest
 from rpp.model.rpp.host_converter import to_host_check, to_host_create, to_host_delete, to_host_info, to_host_update
 logger = logging.getLogger('uvicorn.error')
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
-router = APIRouter()
+security = HTTPBasic()
+
+router = APIRouter(dependencies=[Depends(security)])
 
 
 @router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True)
@@ -49,10 +53,11 @@ def do_info(host: str,
     epp_request = host_check(rpp_request)
     epp_response = conn.send_command(epp_request)
 
-    epp_status, avail, reason = to_host_check(epp_response)
+    avail, epp_status, reason = to_host_check(epp_response)
 
-    add_status_header(response, str(epp_status))
-    add_check_header(response, str(epp_status), avail, reason)
+    add_status_header(response, epp_status)
+    if is_ok_code(epp_status):
+         add_check_header(response, avail, reason)
 
 @router.delete("/{host}", response_model=BaseResponseModel, response_model_exclude_none=True)
 def do_delete(host: str, conn: EppClient = Depends(get_connection),

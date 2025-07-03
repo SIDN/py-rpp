@@ -99,17 +99,17 @@ def to_domain_info(epp_response: Epp, response: Response) -> DomainInfoResponse 
     return domain_info_response
 
 
-def to_domain_check(epp_response: Epp):
+def to_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
 
     ok, epp_status, message = is_ok_response(epp_response)
 
     if not ok:
-         return False, epp_status, message
+        return None, epp_status, message
     
     check_data: ChkDataType = epp_response.response.res_data.other_element[0]
     cd: CheckType = check_data.cd[0]
-    
-    return epp_status, cd.name.avail, cd.reason.value if cd.reason else None
+
+    return cd.name.avail, epp_status, cd.reason.value if cd.reason else None
 
 
     if epp_response.response.result[0].code.value == 1000:

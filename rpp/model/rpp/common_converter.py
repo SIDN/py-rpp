@@ -70,6 +70,8 @@ def is_ok_response(epp_response: Epp) -> tuple[bool, str, str]:
         else:
             return False, res.code.value, res.msg.value
 
+def is_ok_code(code: int) -> bool:
+    return code == 1000
 
 def to_result_list(epp_response: Epp) -> List[ResultModel]:
     results: List[ResultModel] = []

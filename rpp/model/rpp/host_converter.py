@@ -88,31 +88,16 @@ def to_host_info(epp_response):
         addresses=addresses
     )
 
-def to_host_check(epp_response: Epp) -> tuple[int, str, str]:
+def to_host_check(epp_response: Epp) -> tuple[bool, int, str]:
 
-    # epp_status = epp_response.response.result[0].code.value
-    # if epp_status != 1000:
-    #     return to_base_response(epp_response)
     ok, epp_status, message = is_ok_response(epp_response)
-
-    #response.headers["RPP-code"] = str(epp_status)
-
     if not ok:
-         #return to_base_response(epp_response)
-         return False, epp_status, message
+         return None, epp_status, message
     
     check_data: ChkDataType = epp_response.response.res_data.other_element[0]
     cd: CheckType = check_data.cd[0]
-    
-    return epp_status, cd.name.avail, cd.reason.value if cd.reason else None
 
-    # if cd.name.avail == True:
-    #     response.headers["RPP-Check-Avail"] = "true"
-    # else:
-    #   response.headers["RPP-Check-Avail"] = "false"
-    #   if cd.reason:
-    #     response.headers["RPP-Check-Reason"] = cd.reason.value
-
+    return cd.name.avail, epp_status, cd.reason.value if cd.reason else None
 
     # checkResponse = HostCheckResModel(
     #     name=cd.name.value,

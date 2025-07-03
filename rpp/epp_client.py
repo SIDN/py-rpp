@@ -31,12 +31,12 @@ class EppClient:
         self.logged_in = False
         self.greeting: GreetingType = None
 
-    def login(self, cfg: Config):
+    def login(self, cfg: Config, username: str, password: str) -> Epp:
 
         if not self.connected:
             self.connect()
 
-        epp_request = login(cl_id=cfg.rpp_epp_client_id, pw=cfg.rpp_epp_password, version="1.0", lang="en",
+        epp_request = login(cl_id=username, pw=password, version="1.0", lang="en",
                              obj_uri=cfg.rpp_epp_objects,
                              ext_uri=cfg.rpp_epp_extensions
                             )

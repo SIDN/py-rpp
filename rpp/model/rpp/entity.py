@@ -86,6 +86,9 @@ class ContactInfoRequest(BaseRequestModel):
     authInfo: Optional[str] = None
     #transaction: TransactionModel
 
+class ContactCheckRequest(BaseRequestModel):
+    name: str
+
 class ContactInfoResponse(BaseModel):
     card: Card 
     status: Optional[List[str]] = None

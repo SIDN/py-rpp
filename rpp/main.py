@@ -23,9 +23,13 @@ async def lifespan(app: FastAPI):
     logger.info("Creating EPP connection pool")
     app.state.pool = await create_connection_pool()
     yield
-    
 
-app = FastAPI(lifespan=lifespan)
+# def store_credentials(request: Request, credentials: HTTPBasicCredentials = Depends(security)):
+#     request.state.credentials = credentials    
+
+app = FastAPI(
+    lifespan=lifespan
+)
 
 @app.exception_handler(Exception)
 async def unicorn_exception_handler(request: Request, exc: Exception):
@@ -53,4 +57,6 @@ def do_conn_logout(response: Response, conn: EppClient = Depends(invalidate_conn
     
     response.delete_cookie(key="session_id")
     return conn.logout()
+
+
 

@@ -9,8 +9,8 @@ class Config(BaseSettings):
     rpp_epp_port: Optional[int] = 700
     rpp_epp_use_tls: Optional[bool] = True
     rpp_epp_timeout: Optional[float] = 5.0
-    rpp_epp_client_id: str
-    rpp_epp_password: str
+    #rpp_epp_client_id: str
+    #rpp_epp_password: str
     rpp_epp_objects: List[str] = [
         'urn:ietf:params:xml:ns:domain-1.0',
         'urn:ietf:params:xml:ns:contact-1.0',

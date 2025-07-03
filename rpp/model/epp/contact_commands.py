@@ -2,6 +2,7 @@ from rpp.model.epp.contact_1_0 import (
     AddrType,
     AuthIdtype,
     AuthInfoType,
+    Check,
     Create,
     E164Type,
     Info,
@@ -11,7 +12,7 @@ from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, CreateType, Ext
-from rpp.model.rpp.entity import Card, ContactCreateRequest
+from rpp.model.rpp.entity import Card, ContactCheckRequest, ContactCreateRequest
 
 
 def get_value_by_kind(components: list[dict], kind: str) -> str | None:
@@ -92,6 +93,19 @@ def contact_info(contact_handle: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(other_element=Info(id=contact_handle))
+        )
+    )
+
+    return epp_request
+
+
+def contact_check(request: ContactCheckRequest) -> Epp:
+    epp_request = Epp(
+        command=CommandType(
+            check=ReadWriteType(
+                other_element=Check(id=[request.name])
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
         )
     )
 
