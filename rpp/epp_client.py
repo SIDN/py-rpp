@@ -2,6 +2,7 @@ import socket
 import ssl
 import struct
 import logging
+from rpp.common import EppException
 from rpp.model.config import Config
 from rpp.model.epp.epp_1_0 import EppType, Epp, GreetingType
 from rpp.model.epp.common_commands import login, logout
@@ -10,6 +11,9 @@ from xsdata.formats.dataclass.context import XmlContext
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 from xsdata.formats.dataclass.parsers.config import ParserConfig
+
+from rpp.model.epp.helpers import random_tr_id
+from rpp.model.rpp.common_converter import is_ok_response, to_base_response
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -31,7 +35,7 @@ class EppClient:
         self.logged_in = False
         self.greeting: GreetingType = None
 
-    def login(self, cfg: Config, username: str, password: str) -> Epp:
+    def login(self, cfg: Config, username: str, password: str) -> bool:
 
         if not self.connected:
             self.connect()
@@ -42,22 +46,35 @@ class EppClient:
                             )
 
         epp_response = self.send_command(epp_request)
+        ok, epp_status, message = is_ok_response(epp_response)
+        if ok:
+            #logger.info(f"Login successful for client: {username}")
+            self.logged_in = True
+            return True #, to_base_response(epp_response)
+            #raise RuntimeError(f"Login failed: {epp_response.response.result[0].msg.value}")
+        else:
+            #logger.info(f"Login failed for client: {username}, error: {message}, code: {epp_status}")
+            #return False, to_base_response(epp_response)
+            raise EppException(status_code=403, epp_response=epp_response)
+        
+        #self.logged_in = True
+        #return epp_response
 
-        if epp_response.response.result[0].code.value != 1000:
-            raise RuntimeError(f"Login failed: {epp_response.response.result[0].msg.value}")
-
-        self.logged_in = True
-        return epp_response
-    
-    def logout(self):
-    
-        epp_request = logout(trId="tr12345")
-        epp_response = self.send_command(epp_request)
-
+    def logout(self, client_trid: str = None) -> Epp:
         self.logged_in = False
         self.connected = False
-
-        self.tls_sock.close()
+    
+        try:
+            epp_request = logout(trId=client_trid if client_trid else random_tr_id())
+            epp_response = self.send_command(epp_request)
+            ok, epp_status, message = is_ok_response(epp_response)
+            if ok:
+                logger.info("Logout successful")
+            else:
+                logger.error(f"Logout failed: {message}, code: {epp_status}")
+        finally:
+            self.tls_sock.close()
+            self.tls_sock = None
 
         return epp_response
 

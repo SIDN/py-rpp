@@ -27,9 +27,9 @@ class GreetingModel(BaseModel):
 
 # Error
 
-class ErrorModel(BaseModel):
-    code: int
-    message: Optional[str] = None
+# class ErrorModel(BaseModel):
+#     code: int
+#     message: Optional[str] = None
 
 # Request
 

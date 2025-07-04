@@ -64,8 +64,14 @@ class DomainCreateRequest(BaseRequestModel):
     authInfo: Optional[str] = None
     dnssec: Optional[DsOrKeyType] = None
 
+class DomainCreateResponse(BaseModel):
+    name: str
+    creDate: datetime
+    exDate: Optional[datetime] = None
+
 class DomainInfoRequest(BaseRequestModel):
-    authInfo: str
+    name: str
+    authInfo: Optional[str] = None
 
 class DomainCheckRequest(BaseRequestModel):
     name: str

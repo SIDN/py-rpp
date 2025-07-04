@@ -57,7 +57,6 @@ class Card(BaseModel):
       )
     type_: Optional[str] = Field(default="Card", alias='@type')
     version: Optional[str] = Field(default="2.0" )
-    roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
     id: str = Field( alias='rpp.ietf.org:id')
     name: Name
     organizations: Dict[str, Organization] = None
@@ -74,24 +73,34 @@ class Card(BaseModel):
         return v
 
 
-class TransactionModel(BaseModel):
-    clientId: str
-    serverId: Optional[str] = None
+# class TransactionModel(BaseModel):
+#     clientId: str
+#     serverId: Optional[str] = None
 
 class ContactCreateRequest(BaseRequestModel):
     card: Card 
     authInfo: Optional[str] = None
 
+class ContactCreateResponseModel(BaseModel):
+    id: Optional[str] = None
+    createDate: Optional[datetime] = None
+
+
 class ContactInfoRequest(BaseRequestModel):
+    id: str
     authInfo: Optional[str] = None
     #transaction: TransactionModel
 
 class ContactCheckRequest(BaseRequestModel):
     name: str
 
+class ContactDeleteRequest(BaseRequestModel):
+    name: str
+
 class ContactInfoResponse(BaseModel):
+    roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
     card: Card 
     status: Optional[List[str]] = None
     authInfo: Optional[str] = None
-    transaction: TransactionModel
+    #transaction: TransactionModel
     events: Optional[Dict[str, EventModel]] = None

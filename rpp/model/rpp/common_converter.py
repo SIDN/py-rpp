@@ -61,17 +61,24 @@ def to_base_response(epp_response: Epp) -> BaseResponseModel:
         svTRID=epp_response.response.tr_id.sv_trid),
         result=results)
 
-
-def is_ok_response(epp_response: Epp) -> tuple[bool, str, str]:
+def get_status_from_response(epp_response: Epp) -> int | None:
 
     for res in epp_response.response.result:
-        if res.code.value == 1000:
+        return res.code.value
+
+    return None
+
+
+def is_ok_response(epp_response: Epp) -> tuple[bool, int, str]:
+
+    for res in epp_response.response.result:
+        if is_ok_code(res.code.value ):
             return True, res.code.value, res.msg.value
         else:
             return False, res.code.value, res.msg.value
 
 def is_ok_code(code: int) -> bool:
-    return code == 1000
+    return code >= 1000 and code < 2000
 
 def to_result_list(epp_response: Epp) -> List[ResultModel]:
     results: List[ResultModel] = []

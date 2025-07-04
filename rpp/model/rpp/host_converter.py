@@ -33,7 +33,14 @@ def to_host_create(epp_response: Epp) -> BaseResponseModel:
             createDate=str(epp_host_res.cr_date) if epp_host_res.cr_date else None)
     )
 
-def to_host_delete(epp_response: Epp) -> BaseResponseModel:
+def to_host_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+
+    if epp_status == 2303:
+         response.status_code = 404
+    elif epp_status != 1000:
+         response.status_code = 400
+
     return to_base_response(epp_response)
     # results: List[ResultModel] = []
     # for res in epp_response.response.result:
@@ -46,10 +53,10 @@ def to_host_delete(epp_response: Epp) -> BaseResponseModel:
     #     result=results)
 
 
-def to_host_info(epp_response):
+def to_host_info(epp_response) -> HostInfoResponseModel | BaseResponseModel:
 
-    epp_status = epp_response.response.result[0].code.value
-    if epp_status != 1000:
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
         return to_base_response(epp_response)
     
     res_data = epp_response.response.res_data.other_element[0]
@@ -66,6 +73,7 @@ def to_host_info(epp_response):
         events["Update"] = HostEventModel(name=res_data.up_id, date=str(res_data.up_date))
 
     # Addresses
+    addresses = None
     v4 = []
     v6 = []
     if hasattr(res_data, "addr"):
@@ -74,18 +82,26 @@ def to_host_info(epp_response):
                 v4.append(addr.value)
             elif addr.ip.value == "v6":
                 v6.append(addr.value)
-    addresses = HostAddr(
-        v4=v4 if v4 else None,
-        v6=v6 if v6 else None
-    )
+    if v4 or v6:
+        addresses = HostAddr(
+            v4=v4 if v4 else None,
+            v6=v6 if v6 else None
+        )
 
-    return HostInfoResponseModel(
+    infData = HostInfoResponseModel(
         name=res_data.name,
         roid=res_data.roid,
         status=status,
         registrar=getattr(res_data, "cl_id", ""),
         events=events,
         addresses=addresses
+    )
+
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+        svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=infData
     )
 
 def to_host_check(epp_response: Epp) -> tuple[bool, int, str]:

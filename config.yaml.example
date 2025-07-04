@@ -18,3 +18,5 @@ rpp_epp_extensions:
 rpp_epp_port: 700
 rpp_epp_use_tls: true
 rpp_epp_timeout: 5
+
+rpp_epp_connection_cache: true

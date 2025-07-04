@@ -4,6 +4,7 @@ from rpp.model.epp.contact_1_0 import (
     AuthInfoType,
     Check,
     Create,
+    Delete,
     E164Type,
     Info,
     PostalInfoType,
@@ -12,7 +13,7 @@ from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, CreateType, Ext
-from rpp.model.rpp.entity import Card, ContactCheckRequest, ContactCreateRequest
+from rpp.model.rpp.entity import Card, ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest
 
 
 def get_value_by_kind(components: list[dict], kind: str) -> str | None:
@@ -73,7 +74,7 @@ def contact_create(request: ContactCreateRequest) -> Epp:
                     ),
                 )
             ),
-            cl_trid=request.clTrId or random_tr_id(),
+            cl_trid=request.clTRID or random_tr_id(),
             extension=ExtAnyType(
                 other_element=[
                     Ext(
@@ -89,10 +90,11 @@ def contact_create(request: ContactCreateRequest) -> Epp:
     return epp_request
 
 
-def contact_info(contact_handle: str) -> Epp:
+def contact_info(request: ContactInfoRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
-            info=ReadWriteType(other_element=Info(id=contact_handle))
+            info=ReadWriteType(other_element=Info(id=request.id)),
+            cl_trid=request.clTRID or random_tr_id()
         )
     )
 
@@ -104,6 +106,18 @@ def contact_check(request: ContactCheckRequest) -> Epp:
         command=CommandType(
             check=ReadWriteType(
                 other_element=Check(id=[request.name])
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
+        )
+    )
+
+    return epp_request
+
+def contact_delete(request: ContactDeleteRequest) -> Epp:
+    epp_request = Epp(
+        command=CommandType(
+            delete=ReadWriteType(
+                other_element=Delete(id=request.name)
             ),
             cl_trid=request.clTRID or random_tr_id(),
         )

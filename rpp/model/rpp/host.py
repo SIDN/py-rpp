@@ -18,7 +18,7 @@ class HostInfoResponseModel(BaseModel):
     status: List[str]
     registrar: str
     events: Dict[str, HostEventModel]
-    addresses: HostAddr
+    addresses: Optional[HostAddr] = None
 
 class HostCreateRequest(BaseRequestModel):
     name: str
@@ -51,14 +51,14 @@ class HostCreateResDataModel(BaseModel):
     name: Optional[str] = None
     createDate: Optional[datetime] = None
 
-class HostCreateResponseModel(BaseResponseModel):
-    name: Optional[str] = None
-    createDate: Optional[datetime] = None
-    # roid: str
-    # status: List[str]
-    # registrar: str
-    # events: Dict[str, HostEventModel]
-    # addresses: HostAddr
+# class HostCreateResponseModel(BaseModel):
+#     name: Optional[str] = None
+#     createDate: Optional[datetime] = None
+#     roid: str
+#     status: List[str]
+#     registrar: str
+#     events: Dict[str, HostEventModel]
+#     addresses: HostAddr
 
 class HostCheckResModel(BaseModel):
     name: str

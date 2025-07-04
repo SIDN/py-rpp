@@ -9,7 +9,7 @@ from rpp.model.epp.host_commands import host_check, host_create, host_delete, ho
 from fastapi import APIRouter
 
 from rpp.model.rpp.common import BaseResponseModel
-from rpp.model.rpp.common_converter import is_ok_code
+from rpp.model.rpp.common_converter import get_status_from_response, is_ok_code
 from rpp.model.rpp.host import HostCheckRequest, HostCheckResModel, HostCreateRequest, HostDeleteRequest, HostInfoRequest, HostInfoResponseModel, HostUpdateRequest
 from rpp.model.rpp.host_converter import to_host_check, to_host_create, to_host_delete, to_host_info, to_host_update
 logger = logging.getLogger('uvicorn.error')
@@ -21,17 +21,23 @@ router = APIRouter(dependencies=[Depends(security)])
 
 
 @router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True)
-def do_create(host: HostCreateRequest, conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
-    logger.info(f"Create host: {host}")
+def do_create(create_request: HostCreateRequest,
+              response: Response,
+              conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
+    logger.info(f"Create host: {create_request.name}")
 
-    epp_request = host_create(host)
+    epp_request = host_create(create_request)
     epp_response = conn.send_command(epp_request)
+
+    add_status_header(response, get_status_from_response(epp_response))
     return to_host_create(epp_response)
 
 
-@router.get("/{host}", response_model=HostInfoResponseModel, response_model_exclude_none=True)
-def do_info(host: str, conn: EppClient = Depends(get_connection),
-            rpp_cl_trid: Annotated[str | None, Header()] = None) -> HostInfoResponseModel:
+@router.get("/{host}", response_model_exclude_none=True)
+def do_info(host: str,
+            response: Response,
+            conn: EppClient = Depends(get_connection),
+            rpp_cl_trid: Annotated[str | None, Header()] = None) -> BaseResponseModel:
 
     logger.info(f"Info for host: {host}")
 
@@ -39,6 +45,7 @@ def do_info(host: str, conn: EppClient = Depends(get_connection),
     epp_request = host_info(rpp_request)
     epp_response = conn.send_command(epp_request)
 
+    add_status_header(response, get_status_from_response(epp_response))
     return to_host_info(epp_response)
 
 @router.head("/{host}")
@@ -59,9 +66,11 @@ def do_info(host: str,
     if is_ok_code(epp_status):
          add_check_header(response, avail, reason)
 
-@router.delete("/{host}", response_model=BaseResponseModel, response_model_exclude_none=True)
-def do_delete(host: str, conn: EppClient = Depends(get_connection),
-            rpp_cl_trid: Annotated[str | None, Header()] = None) -> BaseResponseModel:
+@router.delete("/{host}", response_model_exclude_none=True, status_code=204)
+def do_delete(host: str,
+            response: Response,
+            conn: EppClient = Depends(get_connection),
+            rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
 
     logger.info(f"Delete host: {host}")
 
@@ -69,12 +78,15 @@ def do_delete(host: str, conn: EppClient = Depends(get_connection),
     epp_request = host_delete(rpp_request)
     epp_response = conn.send_command(epp_request)
 
-    return to_host_delete(epp_response)
+    add_status_header(response, get_status_from_response(epp_response))
+    # delete has no response body, so we just set the status code
+    to_host_delete(epp_response)
 
 @router.put("/{host}", response_model=BaseResponseModel, response_model_exclude_none=True)
 def do_update(host: str,
-              request: HostUpdateRequest,
-              conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
+            response: Response,
+            request: HostUpdateRequest,
+            conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
     logger.info(f"Update host: {host}")
     logger.info(f"Update request: {request}")
@@ -82,4 +94,5 @@ def do_update(host: str,
     epp_request = host_update(request)
     epp_response = conn.send_command(epp_request)
 
+    add_status_header(response, get_status_from_response(epp_response))
     return to_host_update(epp_response)

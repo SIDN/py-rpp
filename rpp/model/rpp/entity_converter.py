@@ -1,10 +1,17 @@
 from typing import List, Dict
+
+from fastapi import Response
 from rpp.model.epp.contact_1_0 import CheckType, ChkDataType
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.rpp.common_converter import is_ok_response
-from rpp.model.rpp.entity import Card, ContactInfoResponse, EventModel, Name, AddressComponent, Organization, Address
+from rpp.model.rpp.common import BaseResponseModel, TrIDModel
+from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
+from rpp.model.rpp.entity import Card, ContactCreateResponseModel, ContactInfoResponse, EventModel, Name, AddressComponent, Organization, Address
 
-def to_contact_info(epp_response) -> ContactInfoResponse:
+def to_contact_info(epp_response) -> BaseResponseModel:
+
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        return to_base_response(epp_response)
 
     res_data = epp_response.response.res_data.other_element[0]
 
@@ -60,11 +67,18 @@ def to_contact_info(epp_response) -> ContactInfoResponse:
         addresses=addresses,
     )
 
-    return ContactInfoResponse(
+    infData = ContactInfoResponse(
         card=card,
         status=[s.s.value for s in res_data.status],
         events=events,
         authInfo=authInfo
+    )
+
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+        svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=infData
     )
 
 def to_contact_check(epp_response: Epp) -> tuple[bool, int, str]:
@@ -77,3 +91,31 @@ def to_contact_check(epp_response: Epp) -> tuple[bool, int, str]:
     cd: CheckType = check_data.cd[0]
 
     return cd.id.avail, epp_status, cd.reason.value if cd.reason else None
+
+def to_contact_create(epp_response) -> BaseResponseModel:
+
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        return to_base_response(epp_response)
+
+    res_data = epp_response.response.res_data.other_element[0]
+
+    resData = ContactCreateResponseModel(
+        id=res_data.id,
+        createDate=str(res_data.cr_date) if hasattr(res_data, "cr_date") else None)
+    
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+                                svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=resData)
+
+def to_contact_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+
+    if epp_status == 2303:
+         response.status_code = 404
+    elif epp_status != 1000:
+         response.status_code = 400
+
+    return to_base_response(epp_response)

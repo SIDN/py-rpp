@@ -2,10 +2,11 @@ import base64
 
 from fastapi import Response
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.epp.domain_1_0 import CheckType, ChkData, ChkDataType
-from rpp.model.rpp.common import ErrorModel
-from rpp.model.rpp.common_converter import is_ok_response
+from rpp.model.epp.domain_1_0 import CheckType, ChkData, ChkDataType, CreDataType
+from rpp.model.rpp.common import BaseResponseModel, TrIDModel
+from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
 from rpp.model.rpp.domain import (
+    DomainCreateResponse,
     DomainInfoResponse,
     EventModel,
     NameserverModel,
@@ -17,10 +18,14 @@ from rpp.model.rpp.domain import (
 )
 
 
-def to_domain_info(epp_response: Epp, response: Response) -> DomainInfoResponse | ErrorModel:
-    if epp_response.response.result[0].code.value == 2303:
-        response.status_code = 404
-        return ErrorModel(code=2303, message="Domain not found")
+def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
+
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        if epp_status == 2303:
+            response.status_code = 404
+            
+        return to_base_response(epp_response)
 
     res_data = epp_response.response.res_data.other_element[0]
 
@@ -83,7 +88,7 @@ def to_domain_info(epp_response: Epp, response: Response) -> DomainInfoResponse 
     if hasattr(res_data, "auth_info") and res_data.auth_info is not None:
         authInfo = res_data.auth_info.pw.value
 
-    domain_info_response = DomainInfoResponse(
+    infData = DomainInfoResponse(
         name=res_data.name,
         registrant=res_data.registrant,
         contacts=contacts,
@@ -96,7 +101,13 @@ def to_domain_info(epp_response: Epp, response: Response) -> DomainInfoResponse 
         expires=expires,
         authInfo=authInfo
     )
-    return domain_info_response
+   
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+        svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=infData
+    )
 
 
 def to_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
@@ -127,7 +138,32 @@ def to_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
 
 
 def to_domain_delete(epp_response: Epp, response: Response):
-    if epp_response.response.result[0].code.value == 2303:
+    ok, epp_status, message = is_ok_response(epp_response)
+
+    if epp_status == 2303:
          response.status_code = 404
-    elif epp_response.response.result[0].code.value != 1000:
+    elif epp_status != 1000:
          response.status_code = 400
+
+    return to_base_response(epp_response)
+
+
+def to_domain_create(epp_response: Epp) -> BaseResponseModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        return to_base_response(epp_response)
+
+    res_data: CreDataType = epp_response.response.res_data.other_element[0]
+
+    resData = DomainCreateResponse(
+        name=res_data.name,
+        creDate=res_data.cr_date.to_datetime(),
+        exDate=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
+    )
+
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+                       svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=resData
+    )

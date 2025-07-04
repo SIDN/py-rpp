@@ -18,7 +18,7 @@ from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sec_dns_1_1 import Create as SecdnsCreateType
 from rpp.model.epp.sec_dns_1_1 import KeyDataType
-from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest
+from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainInfoRequest
 
 
 def domain_create(req: DomainCreateRequest) -> Epp:
@@ -83,19 +83,15 @@ def domain_create(req: DomainCreateRequest) -> Epp:
     )
 
 
-def domain_info(domain: str, auth: Optional[str] = None) -> Epp:
-    """
-    Create a domain info request object for the given domain.
+def domain_info(request: DomainInfoRequest) -> Epp:
 
-    :param domain: The domain name to create the DomainInfoType for.
-    :return: An Epp object with the specified domain.
-    """
-
+    auth_info = AuthInfoType(pw=PwAuthInfoType(value=request.authInfo)) if request.authInfo else None
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
-                other_element=Info(name=InfoNameType(value=domain))
-            )
+                other_element=Info(name=InfoNameType(value=request.name), auth_info=auth_info)
+            ),
+            cl_trid=request.clTRID or random_tr_id()
         )
     )
 

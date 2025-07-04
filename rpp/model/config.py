@@ -18,6 +18,7 @@ class Config(BaseSettings):
     ]
 
     rpp_epp_extensions: Optional[List[str]] = None
+    rpp_epp_connection_cache: Optional[bool] = False
 
     def __init__(self, **kwargs):
         if not kwargs:
