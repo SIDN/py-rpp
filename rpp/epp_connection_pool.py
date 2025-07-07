@@ -1,15 +1,15 @@
 from typing import Dict
 import threading
 import secrets
-from rpp.common import EppException
+from rpp.common import EppException, epp_to_rpp_code
+from rpp.model.rpp.common_converter import get_status_from_response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from rpp.epp_client import EppClient
-from fastapi import Cookie, Depends, HTTPException, Response
+from fastapi import Cookie, Depends, Response
 from rpp.model.config import Config
 import logging
 from fastapi import Request, Cookie, Cookie, Response
 
-from rpp.model.rpp.common_converter import is_ok_code
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -21,8 +21,8 @@ def get_connection(request: Request, response: Response,
     
     return request.app.state.pool.get_connection(request, response, session_id, credentials)
 
-def invalidate_connection(request: Request):
-    return request.app.state.pool.invalidate_connection()
+# def invalidate_connection(request: Request):
+#     return request.app.state.pool.invalidate_connection()
 
 class ConnectionPool:
     """
@@ -59,23 +59,23 @@ class ConnectionPool:
                 return self._connection_cache[session_id]
             except KeyError as e:
                 return None
-            
-        
-    # def remove_connection_from_cache(self, session_id: str) -> EppClient:
-    #     with self._lock:
-    #         return self._connection_cache[session_id]
-    
+                
     def __init__(self, cfg: Config):
         self._connection_cache: Dict[str, EppClient] = {}
         self._lock = threading.Lock()
         self.cfg = cfg
 
-    def invalidate_connection(self, session_id: str = Cookie(None)):
+    def invalidate_connection(self, session_id: str):
         logger.debug(f"Invalidate EPP connection for session_id: {session_id}")
         with self._lock:
             conn = self._connection_cache.pop(session_id, None)
             if conn is not None:
-                conn.logout()
+                ok, epp_response, message = conn.logout()
+                if not ok:
+                    logger.error(f"Logout failed for session_id {session_id}: {message}")
+                    epp_status: int = get_status_from_response(epp_response)
+                    raise EppException(epp_to_rpp_code(epp_status), epp_response, {"Rpp-Epp-Code": str(epp_status)})
+                    #raise HTTPException(400, detail="Logout failed")
 
     def get_connection(self, request: Request, response: Response, session_id: str = Cookie(None),
                        credentials: HTTPBasicCredentials = None,
@@ -84,7 +84,9 @@ class ConnectionPool:
         if session_id is None:
             if credentials is None:
                 logger.error("No credentials provided for EPP connection")
-                raise HTTPException(status_code=401, detail="Unauthorized")
+                raise EppException(status_code=401, headers = {"Rpp-Epp-Code": str(epp_status)})
+                #raise HTTPException(status_code=401, detail="Unauthorized")
+            
             
             session_id = secrets.token_urlsafe(32)
 
@@ -92,12 +94,8 @@ class ConnectionPool:
         if conn is None:
             logger.info(f"Creating new EPP connection for client: {credentials.username}")
             conn = EppClient(self.cfg)
-            #epp_result = conn.login(self.cfg, credentials.username, credentials.password)
-            #if is_ok_code(epp_result):
-            #ok, msg = 
-            if conn.login(self.cfg, credentials.username, credentials.password):
-                #logger.info(f"Login successful for client: {credentials.username}")
-                #if self.cfg.rpp_epp_connection_cache:
+            login_ok, epp_result, msg = conn.login(self.cfg, credentials.username, credentials.password)
+            if login_ok:
                 # Store the connection in the cache
                 logger.debug(f"Storing EPP connection in cache for session_id: {session_id}")
                 self.add_connection_to_cache(session_id, conn)
@@ -109,16 +107,10 @@ class ConnectionPool:
                     # connection will be closed after request
                     response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=3600)
 
-            
-            #else:
-                #logger.error(f"Login failed for client: {credentials.username}, error: {epp_result.response.result[0].msg.value}")
-            #    raise EppException(status_code=403, epp_response=msg)
 
-        # Check if the session_id exists in the cache
-        #conn = get_connection_from_cache(session_id)
-
-        if not conn.logged_in:
-            raise HTTPException(status_code=403, detail="Not logged in")
+            elif not conn.logged_in:
+                epp_status: int = get_status_from_response(epp_result)
+                raise EppException(epp_to_rpp_code(epp_status), epp_result, {"Rpp-Epp-Code": str(epp_status)})
 
         return conn
         
@@ -128,4 +120,4 @@ class ConnectionPool:
                 if client.logged_in:
                     client.logout()
             self._connection_cache.clear()
-            logger.debug("All EPP connections closed and cache cleared.")   
+            logger.debug("All EPP connections closed and cache cleared.")

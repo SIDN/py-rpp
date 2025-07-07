@@ -1,6 +1,3 @@
-import secrets
-
-from rpp.model.epp.domain_1_0 import Info, InfoNameType
 from rpp.model.epp.epp_1_0 import (
     CommandType,
     CredsOptionsType,
@@ -8,7 +5,6 @@ from rpp.model.epp.epp_1_0 import (
     ExtUritype,
     LoginSvcType,
     LoginType,
-    ReadWriteType,
 )
 
 

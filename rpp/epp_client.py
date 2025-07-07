@@ -1,3 +1,4 @@
+import re
 import socket
 import ssl
 import struct
@@ -35,7 +36,7 @@ class EppClient:
         self.logged_in = False
         self.greeting: GreetingType = None
 
-    def login(self, cfg: Config, username: str, password: str) -> bool:
+    def login(self, cfg: Config, username: str, password: str) -> tuple[bool, Epp, str]:
 
         if not self.connected:
             self.connect()
@@ -45,38 +46,27 @@ class EppClient:
                              ext_uri=cfg.rpp_epp_extensions
                             )
 
-        epp_response = self.send_command(epp_request)
+        epp_response = self.send_command(epp_request, login=True)
         ok, epp_status, message = is_ok_response(epp_response)
         if ok:
-            #logger.info(f"Login successful for client: {username}")
             self.logged_in = True
-            return True #, to_base_response(epp_response)
-            #raise RuntimeError(f"Login failed: {epp_response.response.result[0].msg.value}")
-        else:
-            #logger.info(f"Login failed for client: {username}, error: {message}, code: {epp_status}")
-            #return False, to_base_response(epp_response)
-            raise EppException(status_code=403, epp_response=epp_response)
-        
-        #self.logged_in = True
-        #return epp_response
+            return True, epp_response, message 
+        return False, epp_response, message
 
-    def logout(self, client_trid: str = None) -> Epp:
+    def logout(self, client_trid: str = None) -> tuple[bool, Epp, str]:
         self.logged_in = False
         self.connected = False
-    
+
+        ok, message, epp_response = None, None, None
         try:
             epp_request = logout(trId=client_trid if client_trid else random_tr_id())
             epp_response = self.send_command(epp_request)
             ok, epp_status, message = is_ok_response(epp_response)
-            if ok:
-                logger.info("Logout successful")
-            else:
-                logger.error(f"Logout failed: {message}, code: {epp_status}")
         finally:
             self.tls_sock.close()
             self.tls_sock = None
 
-        return epp_response
+        return ok, epp_response, message
 
     def connect(self) -> GreetingType:
         sock = socket.create_connection((self.host, self.port), timeout=self.timeout)
@@ -98,9 +88,13 @@ class EppClient:
         return self.greeting
 
 
-    def send_command(self, epp_request: Epp) -> Epp:
+    def send_command(self, epp_request: Epp, login: bool =False) -> Epp:
         xml_payload = serializer.render(epp_request)
-        print(f"send xml: {xml_payload}")
+        if login:
+            masked_xml_payload = re.sub(r"(<.*:pw>)(.*?)(</.*:pw>)", r"\1********\3", xml_payload, flags=re.DOTALL)
+            logger.info(f"send EPP request: {masked_xml_payload}")
+        else:
+            logger.info(f"send EPP request: {xml_payload}")
 
         payload_bytes = xml_payload.encode("utf-8")
         total_length = len(payload_bytes) + 4
@@ -115,10 +109,10 @@ class EppClient:
         
         response_length = struct.unpack(">I", header)[0] - 4
         response_data = self._recv_exact(self.tls_sock, response_length)
-        print(f"Response from EPP server: {response_data.decode('utf-8')}")
+        #logger.info(f"Response from EPP server: {response_data.decode('utf-8')}")
                 
-        response_str = response_data.decode("utf-8")
-        epp_response = parser.from_string(response_str, Epp)
+        #response_str = response_data.decode("utf-8")
+        epp_response = parser.from_string(response_data.decode("utf-8"), Epp)
         logger.debug(f"Response XML object: {serializer.render(epp_response)}")
         return epp_response
       

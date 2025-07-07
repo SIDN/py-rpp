@@ -82,7 +82,6 @@ def to_contact_info(epp_response) -> BaseResponseModel:
     )
 
 def to_contact_check(epp_response: Epp) -> tuple[bool, int, str]:
-
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
          return None, epp_status, message
@@ -93,7 +92,6 @@ def to_contact_check(epp_response: Epp) -> tuple[bool, int, str]:
     return cd.id.avail, epp_status, cd.reason.value if cd.reason else None
 
 def to_contact_create(epp_response) -> BaseResponseModel:
-
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
         return to_base_response(epp_response)
@@ -111,11 +109,7 @@ def to_contact_create(epp_response) -> BaseResponseModel:
         resData=resData)
 
 def to_contact_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
-    ok, epp_status, message = is_ok_response(epp_response)
+    return to_base_response(epp_response)
 
-    if epp_status == 2303:
-         response.status_code = 404
-    elif epp_status != 1000:
-         response.status_code = 400
-
+def to_contact_update(epp_response: Epp, response: Response) -> BaseResponseModel:
     return to_base_response(epp_response)

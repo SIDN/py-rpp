@@ -1,0 +1,9 @@
+{
+    "id": "MAK005715-X2627",
+    "clTRID": "X12345",
+    "add": {
+        "status": [
+            "clientDeleteProhibited"
+        ]
+    }
+}

@@ -2,7 +2,7 @@
     "name": "mwtest123.nl",
     "period": {
         "unit": "y",
-        "text": "1"
+        "value": 1
     },
     "ns": [
         {

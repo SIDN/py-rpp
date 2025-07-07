@@ -1,0 +1,9 @@
+{
+    "name": "maarten-12.nl",
+    "currentExpiry": "2025-08-01",
+    "period": {
+        "unit": "m",
+        "value": 3
+    },
+    "clTRID": "12345"
+}

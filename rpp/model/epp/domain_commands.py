@@ -1,24 +1,29 @@
-from typing import Optional
+from xsdata.models.datatype import XmlDate
 from rpp.model.epp.domain_1_0 import (
+    AddRemType,
+    AuthInfoChgType,
     AuthInfoType,
     Check,
+    ChgType,
     ContactAttrType,
     ContactType,
     Create,
     Delete,
     Info,
     InfoNameType,
-    MNameType,
     NsType,
     PeriodType,
     PUnitType,
+    Renew,
+    Transfer,
+    Update,
 )
-from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType
+from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType, TransferOpType, TransferType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sec_dns_1_1 import Create as SecdnsCreateType
 from rpp.model.epp.sec_dns_1_1 import KeyDataType
-from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainInfoRequest
+from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainInfoRequest, DomainRenewRequest, DomainTransferRequest, DomainUpdateRequest
 
 
 def domain_create(req: DomainCreateRequest) -> Epp:
@@ -26,7 +31,7 @@ def domain_create(req: DomainCreateRequest) -> Epp:
     period = None
     if req.period:
         period = PeriodType(
-            value=int(req.period.text), unit=PUnitType(req.period.unit)
+            value=int(req.period.value), unit=PUnitType(req.period.unit)
         )
     # NS
     ns = None
@@ -78,7 +83,7 @@ def domain_create(req: DomainCreateRequest) -> Epp:
             extension=ExtAnyType(
                 other_element=[secdns_create] if secdns_create else []
             ),
-            cl_trid=req.clTRID or random_tr_id(8),
+            cl_trid=req.clTRID or random_tr_id(),
         )
     )
 
@@ -103,7 +108,7 @@ def domain_check(request: DomainCheckRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
             check=ReadWriteType(other_element=Check(name=[request.name])),
-            cl_trid=request.clTRID or random_tr_id(8),
+            cl_trid=request.clTRID or random_tr_id(),
         )
     )
 
@@ -121,6 +126,111 @@ def domain_delete(domain: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
             delete=ReadWriteType(other_element=Delete(name=domain))
+        )
+    )
+
+    return epp_request
+
+def domain_update(request: DomainUpdateRequest) -> Epp:
+
+    add = None
+    rem = None
+    chg = ChgType(registrant=request.change.registrant, 
+                  auth_info=AuthInfoChgType(pw=PwAuthInfoType(value=request.change.authInfo))) if request.change else None
+
+    if request.add is not None:
+      add = AddRemType(
+                ns=NsType(
+                    host_obj=[n for n in request.add.ns]
+                ),
+                contact=[ContactType(
+                    value=c.value,
+                    type_value=ContactAttrType(c.type) if c.type else None
+                ) for c in request.add.contact],
+                status=request.add.status
+            )
+    if request.remove is not None:
+      rem = AddRemType(
+                ns=NsType(
+                    host_obj=[n for n in request.remove.ns]
+                ),
+                contact=[ContactType(
+                    value=c.value,
+                    type_value=ContactAttrType(c.type) if c.type else None
+                ) for c in request.remove.contact],
+                status=request.remove.status
+            )
+
+
+    epp_request = Epp(
+        command=CommandType(
+            update=ReadWriteType(
+                other_element=Update(
+                    name=request.name,
+                    add=add,
+                    rem=rem,
+                    chg=chg
+                )
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
+        )
+    )
+
+    return epp_request
+
+def domain_renew(request: DomainRenewRequest) -> Epp:
+    period = None
+    if request.period:
+        period = PeriodType(value=request.period.value, unit=PUnitType(request.period.unit))
+
+    epp_request = Epp(
+        command=CommandType(
+            renew=ReadWriteType(
+                other_element=Renew(
+                    name=request.name,
+                    cur_exp_date=XmlDate.from_date(request.currentExpiry),
+                    period=period
+                )
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
+        )
+    )
+
+    return epp_request
+
+def domain_transfer(request: DomainTransferRequest, op: TransferOpType) -> Epp:
+    epp_request = Epp(
+        command=CommandType(
+            transfer=TransferType(
+                op=op,
+                other_element=Transfer(
+                    name=request.name,
+                    period=PeriodType(
+                        value=request.period.value, unit=PUnitType(request.period.unit)
+                    ) if request.period else None,
+                    auth_info=AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None,
+                )
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
+        )
+    )
+
+    return epp_request
+
+def domain_transfer_query(request: DomainTransferRequest) -> Epp:
+    epp_request = Epp(
+        command=CommandType(
+            transfer=TransferType(
+                op=TransferOpType.QUERY,
+                other_element=Transfer(
+                    name=request.name,
+                    period=PeriodType(
+                        value=request.period.value, unit=PUnitType(request.period.unit)
+                    ) if request.period else None,
+                    auth_info=AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None,
+                )
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
         )
     )
 

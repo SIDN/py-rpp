@@ -2,16 +2,16 @@ import base64
 
 from fastapi import Response
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.epp.domain_1_0 import CheckType, ChkData, ChkDataType, CreDataType
-from rpp.model.rpp.common import BaseResponseModel, TrIDModel
+from rpp.model.epp.domain_1_0 import CheckType, ChkDataType, CreDataType, RenDataType, TrnDataType
+from rpp.model.rpp.common import BaseResponseModel, TrIDModel, TransferResponse
 from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
 from rpp.model.rpp.domain import (
     DomainCreateResponse,
     DomainInfoResponse,
+    DomainRenewResponse,
     EventModel,
     NameserverModel,
     ContactModel,
-    DNSSECModel,
     DSDataModel,
     SecDNSKeyDataModel,
     DsOrKeyType
@@ -22,9 +22,6 @@ def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
 
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
-        if epp_status == 2303:
-            response.status_code = 404
-            
         return to_base_response(epp_response)
 
     res_data = epp_response.response.res_data.other_element[0]
@@ -113,7 +110,6 @@ def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
 def to_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
 
     ok, epp_status, message = is_ok_response(epp_response)
-
     if not ok:
         return None, epp_status, message
     
@@ -122,29 +118,7 @@ def to_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
 
     return cd.name.avail, epp_status, cd.reason.value if cd.reason else None
 
-
-    if epp_response.response.result[0].code.value == 1000:
-        check_data: ChkData = epp_response.response.res_data.other_element[0]
-        for check in check_data.cd:
-            if check.name.avail == True:
-                response.headers["RPP-Check-Avail"] = "true"
-            else:
-                response.headers["RPP-Check-Avail"] = "false"
-
-        response.status_code = 200
-
-    else:
-        response.status_code = 500
-
-
-def to_domain_delete(epp_response: Epp, response: Response):
-    ok, epp_status, message = is_ok_response(epp_response)
-
-    if epp_status == 2303:
-         response.status_code = 404
-    elif epp_status != 1000:
-         response.status_code = 400
-
+def to_domain_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
     return to_base_response(epp_response)
 
 
@@ -158,6 +132,52 @@ def to_domain_create(epp_response: Epp) -> BaseResponseModel:
     resData = DomainCreateResponse(
         name=res_data.name,
         creDate=res_data.cr_date.to_datetime(),
+        exDate=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
+    )
+
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+                       svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=resData
+    )
+
+def to_domain_update(epp_response: Epp, response: Response) -> BaseResponseModel:
+    return to_base_response(epp_response)
+
+def to_domain_renew(epp_response: Epp, response: Response) -> BaseResponseModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        return to_base_response(epp_response)
+
+    res_data: RenDataType = epp_response.response.res_data.other_element[0]
+
+    resData = DomainRenewResponse(
+        name=res_data.name,
+        expDate=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
+    )
+
+    return BaseResponseModel(
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+                       svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=resData
+    )
+
+def to_domain_transfer(epp_response: Epp, response: Response) -> BaseResponseModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok or not hasattr(epp_response.response.res_data, "other_element"):
+        return to_base_response(epp_response)
+
+    res_data: TrnDataType = epp_response.response.res_data.other_element[0]
+
+    resData = TransferResponse(
+        name=res_data.name,
+        trStatus=res_data.tr_status,
+        reId=res_data.re_id,
+        reDate=res_data.re_date.to_datetime() if hasattr(res_data, "re_date") and res_data.re_date is not None else None,
+        acID=res_data.ac_id,
+        acDate=res_data.ac_date.to_datetime() if hasattr(res_data, "ac_date") and res_data.ac_date is not None else None,
         exDate=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
     )
 

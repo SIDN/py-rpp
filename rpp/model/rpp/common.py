@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional, Any
 from pydantic import BaseModel
 
@@ -25,13 +26,11 @@ class GreetingModel(BaseModel):
     services: SvcMenuModel
     dcp: DcpModel
 
-# Error
-
-# class ErrorModel(BaseModel):
-#     code: int
-#     message: Optional[str] = None
-
 # Request
+
+class AuthInfoModel(BaseModel):
+    value: str
+    roid: Optional[str] = None
 
 class BaseRequestModel(BaseModel):
     clTRID: Optional[str] = None
@@ -42,9 +41,11 @@ class TrIDModel(BaseModel):
     clTRID: Optional[str] = None
     svTRID: Optional[str] = None
 
-class messageQueueModel(BaseModel):
+class MessageQueueModel(BaseModel):
     count: int
     id: Optional[str] = None
+    qDate: datetime = None
+    message: str = None
 
 class ResultModel(BaseModel):
     code: int
@@ -56,9 +57,16 @@ class ResultModel(BaseModel):
 class BaseResponseModel(BaseModel):
     result: List[ResultModel]
     trID: TrIDModel
-    messages: Optional[messageQueueModel] = None
+    messages: Optional[MessageQueueModel] = None
     resData: Optional[Any] = None  
     extension: Optional[Any] = None 
     
-    
+class TransferResponse(BaseModel):
+    name: str
+    trStatus: str
+    reId: str
+    reDate: datetime
+    acID: str
+    acDate: datetime
+    exDate: Optional[datetime] = None 
 

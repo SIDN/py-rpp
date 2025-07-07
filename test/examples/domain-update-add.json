@@ -1,0 +1,16 @@
+{
+    "name": "maarten-12.nl",
+    "clTRID": "HOSTCREATE-10IP",
+    "add": {
+        "ns": [
+            "xxx-2.com",
+            "xxx-3.com"
+        ],
+        "contact": [
+            {
+                "type": "tech",
+                "value": "MAK005715-X2627"
+            }
+        ]
+    }
+}

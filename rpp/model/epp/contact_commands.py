@@ -1,19 +1,24 @@
 from rpp.model.epp.contact_1_0 import (
+    AddRemType,
     AddrType,
-    AuthIdtype,
     AuthInfoType,
     Check,
+    ChgPostalInfoType,
+    ChgType,
     Create,
     Delete,
     E164Type,
     Info,
     PostalInfoType,
+    StatusType,
+    StatusValueType,
+    Update,
 )
 from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, CreateType, Ext
-from rpp.model.rpp.entity import Card, ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest
+from rpp.model.rpp.entity import Card, ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest, ContactUpdateRequest
 
 
 def get_value_by_kind(components: list[dict], kind: str) -> str | None:
@@ -30,40 +35,7 @@ def contact_create(request: ContactCreateRequest) -> Epp:
                 other_element=Create(
                     id=request.card.id,
                     postal_info=[
-                        PostalInfoType(
-                            type_value="loc",
-                            name=request.card.name.full,
-                            org=request.card.organizations["org"].name,
-                            addr=AddrType(
-                                street=get_value_by_kind(
-                                    request.card.addresses.root[
-                                        "addr"
-                                    ].components,
-                                    "name",
-                                ),
-                                city=get_value_by_kind(
-                                    request.card.addresses.root[
-                                        "addr"
-                                    ].components,
-                                    "locality",
-                                ),
-                                sp=get_value_by_kind(
-                                    request.card.addresses.root[
-                                        "addr"
-                                    ].components,
-                                    "region",
-                                ),
-                                pc=get_value_by_kind(
-                                    request.card.addresses.root[
-                                        "addr"
-                                    ].components,
-                                    "postcode",
-                                ),
-                                cc=request.card.addresses.root[
-                                    "addr"
-                                ].countryCode,
-                            ),
-                        )
+                        card_to_postal_info(request.card)
                     ],
                     email=request.card.emails.root["email"].address,
                     voice=E164Type(
@@ -88,6 +60,42 @@ def contact_create(request: ContactCreateRequest) -> Epp:
     )
 
     return epp_request
+
+def card_to_postal_info(card : Card) -> PostalInfoType:
+    return PostalInfoType(
+            type_value="loc",
+            name=card.name.full,
+            org=card.organizations["org"].name,
+            addr=AddrType(
+                street=get_value_by_kind(
+                    card.addresses.root[
+                        "addr"
+                    ].components,
+                    "name",
+                ),
+                city=get_value_by_kind(
+                    card.addresses.root[
+                        "addr"
+                    ].components,
+                    "locality",
+                ),
+                sp=get_value_by_kind(
+                    card.addresses.root[
+                        "addr"
+                    ].components,
+                    "region",
+                ),
+                pc=get_value_by_kind(
+                    card.addresses.root[
+                        "addr"
+                    ].components,
+                    "postcode",
+                ),
+                cc=card.addresses.root[
+                    "addr"
+                ].countryCode,
+            ),
+        )
 
 
 def contact_info(request: ContactInfoRequest) -> Epp:
@@ -124,3 +132,81 @@ def contact_delete(request: ContactDeleteRequest) -> Epp:
     )
 
     return epp_request
+
+def card_to_chg_postal_info(card: Card) -> ChgPostalInfoType:
+    return ChgPostalInfoType(
+        type_value="int" if card.int_ else "loc",
+        name=card.name.full,
+        org=card.organizations["org"].name if "org" in card.organizations else None,
+        addr=AddrType(
+            street=get_value_by_kind(
+                card.addresses.root["addr"].components, "name"
+            ),
+            city=get_value_by_kind(
+                card.addresses.root["addr"].components, "locality"
+            ),
+            sp=get_value_by_kind(
+                card.addresses.root["addr"].components, "region"
+            ),
+            pc=get_value_by_kind(
+                card.addresses.root["addr"].components, "postcode"
+            ),
+            cc=card.addresses.root["addr"].countryCode,
+        ),
+    )
+
+def get_email_from_contact_change(request: ContactUpdateRequest) -> str:
+
+    for card in request.change.contact:
+        if hasattr(card, "emails") and "email" in card.emails.root:
+            return card.emails.root["email"].address
+
+def get_voice_from_contact_change(request: ContactUpdateRequest) -> str:
+
+    for card in request.change.contact:
+        if hasattr(card, "phones") and "voice" in card.phones.root:
+            return card.phones.root["voice"].number
+
+
+def contact_update(request: ContactUpdateRequest) -> Epp:
+    add = None
+    rem = None
+    chg = None
+
+    if request.change is not None:
+        chg = ChgType(postal_info=[card_to_chg_postal_info(c) for c in request.change.contact],
+                        voice=E164Type(value=get_voice_from_contact_change(request)),
+                        email=get_email_from_contact_change(request),
+                        auth_info=AuthInfoType(
+                            pw=PwAuthInfoType(value=request.change.authInfo)
+                        ) if request.change.authInfo else None
+        )
+     
+
+    if request.add is not None:
+      add = AddRemType(
+                status=[StatusType(s=StatusValueType(c)) for c in request.add.status]
+            )
+      
+    if request.remove is not None:
+      rem = AddRemType(
+                status=[StatusType(s=StatusValueType(c)) for c in request.remove.status]
+            )
+
+
+    epp_request = Epp(
+        command=CommandType(
+            update=ReadWriteType(
+                other_element=Update(
+                    id=request.id,
+                    add=add,
+                    rem=rem,
+                    chg=chg
+                )
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
+        )
+    )
+
+    return epp_request
+

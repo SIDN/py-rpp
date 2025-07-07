@@ -63,6 +63,8 @@ class Card(BaseModel):
     addresses: Addresses
     phones: Optional[Phones] = None
     emails: Optional[Emails] = None
+    # if internationalized, use the 'int_' field = True
+    int_: Optional[bool] = False
     
 
     @field_validator('version')
@@ -71,11 +73,6 @@ class Card(BaseModel):
         if v is not None and str(v) != "2.0":
             raise ValueError('version must be "2.0"')
         return v
-
-
-# class TransactionModel(BaseModel):
-#     clientId: str
-#     serverId: Optional[str] = None
 
 class ContactCreateRequest(BaseRequestModel):
     card: Card 
@@ -102,5 +99,17 @@ class ContactInfoResponse(BaseModel):
     card: Card 
     status: Optional[List[str]] = None
     authInfo: Optional[str] = None
-    #transaction: TransactionModel
     events: Optional[Dict[str, EventModel]] = None
+
+class ContactUpdateAddOrRemove(BaseModel):
+    status: List[str]
+
+class ContactUpdateChange(BaseModel):
+    contact: List[Card] 
+    authInfo: str
+
+class ContactUpdateRequest(BaseRequestModel):
+    id: str
+    add: Optional[ContactUpdateAddOrRemove] = None
+    remove: Optional[ContactUpdateAddOrRemove] = None
+    change: Optional[ContactUpdateChange] = None

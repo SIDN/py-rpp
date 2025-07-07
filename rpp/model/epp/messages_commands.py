@@ -5,24 +5,24 @@ from rpp.model.epp.epp_1_0 import (
     PollOpType,
     PollType
 )
-from rpp.model.rpp.message import MessageRequest
+from rpp.model.epp.helpers import random_tr_id
 
 
-def get_messages(request: MessageRequest)-> Epp:
+def get_messages(clTRID: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
             poll=PollType(op=PollOpType.REQ),
-            cl_trid=request.clTRID if request.clTRID else None
+            cl_trid=clTRID or random_tr_id(),
         )
     )
 
     return epp_request
 
-def ack_message(request: MessageRequest)-> Epp:
+def ack_message(clTRID: str, msg_id: int) -> Epp:
     epp_request = Epp(
         command=CommandType(
-            poll=PollType(op=PollOpType.ACK, msg_id=request.id),
-            cl_trid=request.clTRID
+            poll=PollType(op=PollOpType.ACK, msg_id=msg_id),
+            cl_trid=clTRID or random_tr_id(),
         )
     )
 

@@ -1,0 +1,80 @@
+{
+    "id": "MAK005715-X2627",
+    "clTRID": "X12345",
+    "change": {
+        "authInfo": "test",
+        "contact": [
+            {
+                "int_": true,
+                "@type": "Card",
+                "version": "2.0",
+                "rpp.ietf.org:id": "test123",
+                "name": {
+                    "full": "Maarten Wulliak 2",
+                    "components": [
+                        {
+                            "kind": "surname",
+                            "value": "Maarten"
+                        },
+                        {
+                            "kind": "given",
+                            "value": "Wullink"
+                        }
+                    ]
+                },
+                "organizations": {
+                    "org": {
+                        "name": "Org Example"
+                    }
+                },
+                "addresses": {
+                    "addr": {
+                        "components": [
+                            {
+                                "kind": "name",
+                                "value": "Main Street 1"
+                            },
+                            {
+                                "kind": "locality",
+                                "value": "Ludwigshafen am Rhein"
+                            },
+                            {
+                                "kind": "region",
+                                "value": "Rhineland-Palatinate"
+                            },
+                            {
+                                "kind": "postcode",
+                                "value": "67067"
+                            },
+                            {
+                                "kind": "country",
+                                "value": "Germany"
+                            }
+                        ],
+                        "countryCode": "DE",
+                        "coordinates": "geo:49.477409, 8.445180"
+                    },
+                    "addresses-1": {
+                        "full": "Somewhere Street 1 Mutterstadt 67112 Germany",
+                        "contexts": {
+                            "private": true
+                        }
+                    }
+                },
+                "phones": {
+                    "voice": {
+                        "features": {
+                            "voice": true
+                        },
+                        "number": "+31.621263322"
+                    }
+                },
+                "emails": {
+                    "email": {
+                        "address": "joe.user@example.com"
+                    }
+                }
+            }
+        ]
+    }
+}

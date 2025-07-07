@@ -1,0 +1,16 @@
+{
+    "name": "maarten-12.nl",
+    "clTRID": "HOSTCREATE-10IP",
+    "remove": {
+        "ns": [
+            "mwtest-2.com",
+            "mwtest-1.com"
+        ],
+        "contact": [
+            {
+                "type": "tech",
+                "value": "MAK005712-X2627"
+            }
+        ]
+    }
+}

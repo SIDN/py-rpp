@@ -1,6 +1,6 @@
 
 from typing import List
-from rpp.model.epp.epp_1_0 import DcpStatementType, Epp, GreetingType
+from rpp.model.epp.epp_1_0 import Epp, GreetingType
 from rpp.model.rpp.common import BaseResponseModel, DcpModel, DcpStatementModel, GreetingModel, ResultModel, SvcMenuModel, TrIDModel
 
 
@@ -62,9 +62,9 @@ def to_base_response(epp_response: Epp) -> BaseResponseModel:
         result=results)
 
 def get_status_from_response(epp_response: Epp) -> int | None:
-
-    for res in epp_response.response.result:
-        return res.code.value
+    # Check if the response has a result and return the first result code
+    if len(epp_response.response.result) > 0:
+        return epp_response.response.result[0].code.value
 
     return None
 
@@ -87,7 +87,3 @@ def to_result_list(epp_response: Epp) -> List[ResultModel]:
                 lang=res.msg.lang if res.msg.lang else None))
     
     return results
-    # first_result = epp_response.response.result[0]
-    # result = ResultModel(code=first_result.code.value, message=first_result.msg.value,
-    #             lang=first_result.msg.lang if first_result.msg.lang else None)
-

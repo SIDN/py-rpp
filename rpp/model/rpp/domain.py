@@ -1,12 +1,12 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Dict, List, Optional, Union
 from pydantic import BaseModel
-from rpp.model.rpp.common import BaseRequestModel
+from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel
 from rpp.model.rpp.entity import Card
 
 class PeriodModel(BaseModel):
     unit: str
-    text: str
+    value: int
 
 class NsItemModel(BaseModel):
     type: str
@@ -89,3 +89,43 @@ class DomainInfoResponse(BaseModel):
     expires: Optional[datetime] = None
     authInfo: Optional[str] = None
 
+class DomainUpdateAddOrRemove(BaseModel):
+    ns: Optional[List[str]] = None
+    contact: Optional[List[ContactModel]] = None
+    status: Optional[List[str]] = None
+
+class DomainUpdateChange(BaseModel):
+    registrant: str
+    authInfo: str
+
+class DomainUpdateRequest(BaseRequestModel):
+    name: str
+    add: Optional[DomainUpdateAddOrRemove] = None
+    remove: Optional[DomainUpdateAddOrRemove] = None
+    change: Optional[DomainUpdateChange] = None
+
+class DomainRenewRequest(BaseRequestModel):
+    name: str
+    currentExpiry: Optional[date] = None
+    period: Optional[PeriodModel] = None
+
+class DomainRenewResponse(BaseModel):
+    name: str
+    expDate: Optional[datetime] = None
+
+class DomainDeleteRequest(BaseRequestModel):
+    name: str
+
+class DomainTransferRequest(BaseRequestModel):
+    name: str
+    period: Optional[PeriodModel] = None
+    authInfo: AuthInfoModel
+
+# class DomainTransferResponse(BaseModel):
+#     name: str
+#     trStatus: str
+#     reId: str
+#     reDate: datetime
+#     acID: str
+#     acDate: datetime
+#     exDate: Optional[datetime] = None
