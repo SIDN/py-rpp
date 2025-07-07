@@ -12,13 +12,14 @@ from rpp.model.epp.contact_1_0 import (
     PostalInfoType,
     StatusType,
     StatusValueType,
+    Transfer,
     Update,
 )
-from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType
+from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType, TransferType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, CreateType, Ext
-from rpp.model.rpp.entity import Card, ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest, ContactUpdateRequest
+from rpp.model.rpp.entity import Card, ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest, ContactTransferRequest, ContactUpdateRequest
 
 
 def get_value_by_kind(components: list[dict], kind: str) -> str | None:
@@ -210,3 +211,18 @@ def contact_update(request: ContactUpdateRequest) -> Epp:
 
     return epp_request
 
+def contact_transfer(request: ContactTransferRequest, op: str) -> Epp:
+    epp_request = Epp(
+        command=CommandType(
+            transfer=TransferType(
+                op=op,
+                other_element=Transfer(
+                    id=request.id,
+                    auth_info=AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None,
+                )
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
+        )
+    )
+
+    return epp_request

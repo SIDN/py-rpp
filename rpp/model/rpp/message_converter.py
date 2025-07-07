@@ -1,11 +1,12 @@
 
 import logging
 from rpp.model.epp.domain_1_0 import TrnData as DomainTrnData
-from rpp.model.epp.contact_1_0 import TrnData as ContactTrnData
+from rpp.model.epp.contact_1_0 import TrnData
 from rpp.model.epp.epp_1_0 import Epp
 from rpp.model.epp.sidn_ext_epp_1_0 import PollData
-from rpp.model.rpp.common import BaseResponseModel, DcpModel, DcpStatementModel, GreetingModel, MessageQueueModel, SvcMenuModel, TrIDModel, TransferResponse
+from rpp.model.rpp.common import BaseResponseModel, MessageQueueModel, TrIDModel
 from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
+from rpp.model.rpp.domain import TransferResponse
 
 logger = logging.getLogger('uvicorn.error')
 

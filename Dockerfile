@@ -1,5 +1,5 @@
 # Use official Python image
-FROM python:3.14-slim
+FROM python:3.13.5-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -24,4 +24,4 @@ COPY . .
 EXPOSE 8000
 
 # Start FastAPI app with uvicorn
-CMD ["uvicorn", "rpp.main:app", "--host", "0.0.0.0", "--
+CMD ["uvicorn", "rpp.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

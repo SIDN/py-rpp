@@ -1,16 +1,10 @@
-version: "3.9"
-
 services:
   rpp-app:
-    build: .
     container_name: py-rpp
+    image: sidnlabs/py-rpp:latest
     ports:
       - "8000:8000"
     environment:
       - RPP_CONFIG_FILE=/app/config.yaml
     volumes:
       - ./config.yaml:/app/config.yaml:ro
-    # Optionally mount your app code for development:
-    # - ./:/app
-    # If you want auto-reload in development, add:
-    # command: uvicorn rpp.main:app --host 0.0.0.0 --port 8000 --reload

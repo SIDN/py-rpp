@@ -26,7 +26,9 @@ class GreetingModel(BaseModel):
     services: SvcMenuModel
     dcp: DcpModel
 
-# Request
+class PeriodModel(BaseModel):
+    unit: str
+    value: int
 
 class AuthInfoModel(BaseModel):
     value: str
@@ -61,12 +63,12 @@ class BaseResponseModel(BaseModel):
     resData: Optional[Any] = None  
     extension: Optional[Any] = None 
     
-class TransferResponse(BaseModel):
-    name: str
-    trStatus: str
-    reId: str
-    reDate: datetime
-    acID: str
-    acDate: datetime
-    exDate: Optional[datetime] = None 
+# class TransferResponse(BaseModel):
+#     name: str
+#     trStatus: str
+#     reId: str
+#     reDate: datetime
+#     acID: str
+#     acDate: datetime
+#     exDate: Optional[datetime] = None 
 

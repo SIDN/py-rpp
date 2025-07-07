@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Dict, Optional
 from pydantic import BaseModel, ConfigDict, Field, RootModel, with_config, field_validator, ValidationError
 
-from rpp.model.rpp.common import BaseRequestModel
+from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel
 
 class NameComponent(BaseModel):
     kind: str
@@ -113,3 +113,16 @@ class ContactUpdateRequest(BaseRequestModel):
     add: Optional[ContactUpdateAddOrRemove] = None
     remove: Optional[ContactUpdateAddOrRemove] = None
     change: Optional[ContactUpdateChange] = None
+
+class ContactTransferRequest(BaseRequestModel):
+    id: str
+    authInfo: AuthInfoModel
+
+class TransferResponse(BaseModel):
+    id: str
+    trStatus: str
+    reId: str
+    reDate: datetime
+    acID: str
+    acDate: datetime
+    exDate: Optional[datetime] = None 

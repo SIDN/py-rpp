@@ -61,26 +61,11 @@ async def cleanup_after_request(request: Request, call_next):
     
     return response
 
-app.include_router(entities.router, prefix="/entities", tags=["entities"])
-app.include_router(domains.router, prefix="/domains", tags=["domains"])
-app.include_router(hosts.router, prefix="/hosts", tags=["hosts"])
-app.include_router(messages.router, prefix="/messages", tags=["messages"])
+app.include_router(entities.router, prefix="/entities", tags=["Entities"])
+app.include_router(domains.router, prefix="/domains", tags=["Domains"])
+app.include_router(hosts.router, prefix="/hosts", tags=["Hosts"])
+app.include_router(messages.router, prefix="/messages", tags=["Messages"])
 
-@app.get("/")
+@app.get("/", tags=["Service"], summary="Service Discovery", description="Returns a description of features supported by the service.")
 def do_root(conn: EppClient = Depends(get_connection)):
     return to_greeting_model(conn.greeting)
-
-
-# @app.get("/logout")
-# def do_conn_logout(response: Response, 
-#                    rpp_cl_trid: Annotated[str | None, Header()] = None,
-#                    conn: EppClient = Depends(invalidate_connection)) -> None:
-
-#     if conn is None:
-#         raise HTTPException(status_code=403, detail="No session cookie or connection found")
-    
-#     response.delete_cookie(key="session_id")
-#     conn.logout()
-
-
-

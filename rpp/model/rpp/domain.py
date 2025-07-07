@@ -1,12 +1,11 @@
 from datetime import date, datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 from pydantic import BaseModel
-from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel
-from rpp.model.rpp.entity import Card
+from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel
 
-class PeriodModel(BaseModel):
-    unit: str
-    value: int
+# class PeriodModel(BaseModel):
+#     unit: str
+#     value: int
 
 class NsItemModel(BaseModel):
     type: str
@@ -121,11 +120,11 @@ class DomainTransferRequest(BaseRequestModel):
     period: Optional[PeriodModel] = None
     authInfo: AuthInfoModel
 
-# class DomainTransferResponse(BaseModel):
-#     name: str
-#     trStatus: str
-#     reId: str
-#     reDate: datetime
-#     acID: str
-#     acDate: datetime
-#     exDate: Optional[datetime] = None
+class TransferResponse(BaseModel):
+    name: str
+    trStatus: str
+    reId: str
+    reDate: datetime
+    acID: str
+    acDate: datetime
+    exDate: Optional[datetime] = None 

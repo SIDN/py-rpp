@@ -47,9 +47,6 @@ def epp_to_rpp_code(code: int) -> int:
         # unknown error
         return 500
 
-
-
-
 def add_check_header(response: Response, avail: bool, reason: Optional[str] = None):
     if avail == True:
         response.headers["RPP-Check-Avail"] = "true"
@@ -57,7 +54,6 @@ def add_check_header(response: Response, avail: bool, reason: Optional[str] = No
       response.headers["RPP-Check-Avail"] = "false"
       if reason:
         response.headers["RPP-Check-Reason"] = reason
-
 
 class EppException(HTTPException):
     def __init__(self, status_code: int = 500, epp_response: Epp = None, headers: Optional[dict] = None):

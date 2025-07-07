@@ -3,7 +3,7 @@ import base64
 from fastapi import Response
 from rpp.model.epp.epp_1_0 import Epp
 from rpp.model.epp.domain_1_0 import CheckType, ChkDataType, CreDataType, RenDataType, TrnDataType
-from rpp.model.rpp.common import BaseResponseModel, TrIDModel, TransferResponse
+from rpp.model.rpp.common import BaseResponseModel, TrIDModel
 from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
 from rpp.model.rpp.domain import (
     DomainCreateResponse,
@@ -14,7 +14,8 @@ from rpp.model.rpp.domain import (
     ContactModel,
     DSDataModel,
     SecDNSKeyDataModel,
-    DsOrKeyType
+    DsOrKeyType,
+    TransferResponse
 )
 
 

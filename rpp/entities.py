@@ -1,17 +1,19 @@
 import logging
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Header, Request, Cookie, Cookie, Response
+from fastapi.params import Body
 from rpp.common import add_check_header, add_status_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.model.config import Config
 from rpp.epp_client import EppClient
 
 from rpp.model.epp.domain_commands import domain_info
-from rpp.model.epp.contact_commands import contact_check, contact_create, contact_delete, contact_info, contact_update
-from rpp.model.rpp.common import BaseResponseModel
+from rpp.model.epp.contact_commands import contact_check, contact_create, contact_delete, contact_info, contact_transfer, contact_update
+from rpp.model.epp.epp_1_0 import TransferOpType
+from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
 from rpp.model.rpp.common_converter import get_status_from_response, is_ok_code
-from rpp.model.rpp.entity import ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest, ContactInfoResponse, ContactUpdateRequest
-from rpp.model.rpp.entity_converter import to_contact_check, to_contact_create, to_contact_delete, to_contact_info, to_contact_update
+from rpp.model.rpp.entity import ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest, ContactInfoResponse, ContactTransferRequest, ContactUpdateRequest
+from rpp.model.rpp.entity_converter import to_contact_check, to_contact_create, to_contact_delete, to_contact_info, to_contact_transfer, to_contact_update
 from fastapi import APIRouter
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
@@ -89,7 +91,6 @@ def do_update(update_request: ContactUpdateRequest,
 
     logger.info(f"Update contact: {update_request.id}")
 
-
     epp_request = contact_update(update_request)
     epp_response = conn.send_command(epp_request)
 
@@ -101,3 +102,24 @@ def do_renew(entity_id: str, response: Response) -> None:
 
     logger.info(f"Renew entity: {entity_id}")
     update_response_from_code(response, 2101) # Not implemented
+
+@router.post("/{entity_id}/transfer", response_model_exclude_none=True)
+def do_start_transfer(entity_id: str, response: Response,
+            transfer_request: Optional[ContactTransferRequest]= Body(default=None),
+            rpp_cl_trid: Annotated[str | None, Header()] = None,
+            rpp_auth_info: Annotated[str | None, Header()] = None,
+            conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
+    logger.info(f"Start transfer for entity: {transfer_request.id}")
+
+    rpp_request = transfer_request
+    if rpp_request is None:
+        # No body was provided
+        logger.info("No transfer request body provided")
+        rpp_request = ContactTransferRequest(id=entity_id, clTRID=rpp_cl_trid,
+                                            authInfo=AuthInfoModel(value=rpp_auth_info) if rpp_auth_info else None)
+
+    epp_request = contact_transfer(rpp_request, op=TransferOpType.REQUEST)
+    epp_response = conn.send_command(epp_request)
+
+    update_response(response, epp_response)
+    return to_contact_transfer(epp_response, response)
