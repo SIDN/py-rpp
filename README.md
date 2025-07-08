@@ -2,6 +2,8 @@
 
 **py-rpp** is a Python-based RPP (RESTful Provisioning Protocol) to EPP (Extensible Provisioning Protocol) adapter intended for RPP-EPP compatibility testing. It converts RPP requests to EPP requests, and transforms EPP responses back into RPP responses. This allows systems using RPP to communicate seamlessly with EPP-based registries.
 
+Currently, py-rpp is tightly bound to the EPP data model. In future versions, this will change as we begin developing a dedicated RPP data model. This will improve flexibility and better reflect the RPP protocol
+
 ## How to Use
 
 You can run easily using Docker. Once running, you can use the RPP API by sending HTTP requests to the server (see the OpenAPI docs at `/docs`).  
@@ -10,6 +12,32 @@ You can run easily using Docker. Once running, you can use the RPP API by sendin
 - The API requires HTTP Basic Auth to log in, use your EPP server credentials.
 - Configure the connection details for your backend EPP server in the `config.yaml` file before
 - The EPP server MUST have support for TLS connections, as the RPP server will always use TLS to connect to the EPP server.
+
+**Example:**
+This example uses Curl, but any HTTP client can be used to interact with the RPP API. Make sure to replace `<username>` and `<password>` with your actual EPP credentials and make sure the contacts used in the request exist in the EPP server:
+
+```sh
+curl -X POST "http://localhost:8000/domains/" \
+  -u "<username>:<password>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "test-domain-mw-123.nl",
+    "authInfo": {
+        "value": "XYZ12345"
+    },
+    "registrant": "MAK005714-X2627",
+    "contact": [
+        {
+            "type": "admin",
+            "value": "MAK005713-X2627"
+        },
+        {
+            "type": "tech",
+            "value": "MAK005712-X2627"
+        }
+    ]
+}'
+```
 
 ## API Endpoints
 
