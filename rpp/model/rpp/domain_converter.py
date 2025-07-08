@@ -2,7 +2,7 @@ import base64
 
 from fastapi import Response
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.epp.domain_1_0 import CheckType, ChkDataType, CreDataType, RenDataType, TrnDataType
+from rpp.model.epp.domain_1_0 import CheckType, ChkDataType, CreDataType, InfData, RenDataType, TrnDataType
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel, TrIDModel
 from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
 from rpp.model.rpp.domain import (
@@ -25,10 +25,10 @@ def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
     if not ok:
         return to_base_response(epp_response)
 
-    res_data = epp_response.response.res_data.other_element[0]
+    res_data: InfData = epp_response.response.res_data.other_element[0]
 
     nameservers = []
-    if hasattr(res_data, "ns"):
+    if hasattr(res_data, "ns") and res_data.ns is not None:
         for ns in res_data.ns.host_obj:
             nameservers.append(NameserverModel(name=ns, linked=True))
 
@@ -85,10 +85,9 @@ def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
     authInfo = None
     if hasattr(res_data, "auth_info") and res_data.auth_info is not None:
         authInfo = AuthInfoModel(
-                value=res_data.auth_info.value,
-                roid=res_data.auth_info.roid
+                value=res_data.auth_info.pw.value,
+                roid=res_data.auth_info.pw.roid
             )
-
 
     infData = DomainInfoResponse(
         name=res_data.name,
@@ -105,6 +104,7 @@ def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
     )
    
     return BaseResponseModel(
+        type_="Domain",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
         svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),
@@ -141,6 +141,7 @@ def to_domain_create(epp_response: Epp) -> BaseResponseModel:
     )
 
     return BaseResponseModel(
+        type_="Domain",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
                        svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),
@@ -163,6 +164,7 @@ def to_domain_renew(epp_response: Epp, response: Response) -> BaseResponseModel:
     )
 
     return BaseResponseModel(
+        type_="Domain",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
                        svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),
@@ -187,6 +189,7 @@ def to_domain_transfer(epp_response: Epp, response: Response) -> BaseResponseMod
     )
 
     return BaseResponseModel(
+        type_="Domain",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
                        svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),

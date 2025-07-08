@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import Dict, List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel
 
 class NsItemModel(BaseModel):

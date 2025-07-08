@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 # Greeting
 
@@ -35,6 +35,7 @@ class AuthInfoModel(BaseModel):
     roid: Optional[str] = None
 
 class BaseRequestModel(BaseModel):
+    type_: Optional[str] = Field(default=None, alias='@type')   
     clTRID: Optional[str] = None
 
 # Response
@@ -57,6 +58,11 @@ class ResultModel(BaseModel):
     extValue: Optional[List[Any]] = None 
 
 class BaseResponseModel(BaseModel):
+    model_config = ConfigDict(
+            populate_by_alias=True,
+            populate_by_name=True
+      )
+    type_: Optional[str] = Field(default=None, alias='@type')
     result: List[ResultModel]
     trID: TrIDModel
     messages: Optional[MessageQueueModel] = None

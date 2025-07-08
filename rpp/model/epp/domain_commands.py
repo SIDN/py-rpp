@@ -150,7 +150,7 @@ def domain_update(request: DomainUpdateRequest) -> Epp:
                 contact=[ContactType(
                     value=c.value,
                     type_value=ContactAttrType(c.type) if c.type else None
-                ) for c in request.add.contact],
+                ) for c in request.add.contact] if request.add.contact else None,
                 status=request.add.status
             )
     if request.remove is not None:

@@ -77,6 +77,7 @@ def to_contact_info(epp_response) -> BaseResponseModel:
     )
 
     return BaseResponseModel(
+        type_="Entity",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
         svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),
@@ -105,6 +106,7 @@ def to_contact_create(epp_response) -> BaseResponseModel:
         createDate=str(res_data.cr_date) if hasattr(res_data, "cr_date") else None)
     
     return BaseResponseModel(
+        type_="Entity",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
                                 svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),
@@ -134,6 +136,7 @@ def to_contact_transfer(epp_response: Epp, response: Response) -> BaseResponseMo
     )
 
     return BaseResponseModel(
+        type_="Entity",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
                        svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),

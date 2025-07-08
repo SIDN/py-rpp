@@ -1,5 +1,8 @@
 # Use official Python image
-FROM python:3.13.5-slim
+FROM python:3.13.5-alpine
+
+# Update system packages to reduce vulnerabilities
+RUN apk update && apk upgrade && rm -rf /var/cache/apk/*
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -7,9 +10,6 @@ ENV PYTHONUNBUFFERED=1
 
 # Set work directory
 WORKDIR /app
-
-# Install system dependencies (if needed)
-# RUN apt-get update && apt-get install -y gcc libssl-dev && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
 COPY requirements.txt .

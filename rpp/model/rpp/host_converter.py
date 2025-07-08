@@ -14,6 +14,7 @@ def to_host_create(epp_response: Epp) -> BaseResponseModel:
     epp_host_res: CreDataType = epp_response.response.res_data.other_element[0];
    
     return BaseResponseModel(
+        type_="Host",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
         svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),
@@ -44,20 +45,18 @@ def to_host_info(epp_response) -> HostInfoResponseModel | BaseResponseModel:
         events["Update"] = HostEventModel(name=res_data.up_id, date=str(res_data.up_date))
 
     # Addresses
-    addresses = None
-    v4 = []
-    v6 = []
+    ips = { "v4": [], "v6": [] }
     if hasattr(res_data, "addr"):
         for addr in res_data.addr:
             if addr.ip.value == "v4":
-                v4.append(addr.value)
+                ips["v4"].append(addr.value)
             elif addr.ip.value == "v6":
-                v6.append(addr.value)
-    if v4 or v6:
-        addresses = HostAddr(
-            v4=v4 if v4 else None,
-            v6=v6 if v6 else None
-        )
+                ips["v6"].append(addr.value)
+
+    addresses = HostAddr(
+        v4=ips["v4"] if ips["v4"] else [],
+        v6=ips["v6"] if ips["v6"] else []
+    )
 
     infData = HostInfoResponseModel(
         name=res_data.name,
@@ -69,6 +68,7 @@ def to_host_info(epp_response) -> HostInfoResponseModel | BaseResponseModel:
     )
 
     return BaseResponseModel(
+        type_="Host",
         trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
         svTRID=epp_response.response.tr_id.sv_trid),
         result=to_result_list(epp_response),
