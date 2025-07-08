@@ -18,7 +18,7 @@ class HostInfoResponseModel(BaseModel):
     status: List[str]
     registrar: str
     events: Dict[str, HostEventModel]
-    addresses: Optional[HostAddr] = None
+    addr: Optional[HostAddr] = None
 
 class HostCreateRequest(BaseRequestModel):
     name: str

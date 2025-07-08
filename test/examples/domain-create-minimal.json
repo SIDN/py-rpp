@@ -1,0 +1,17 @@
+{
+    "name": "transfer-mw7.nl",
+    "authInfo": {
+        "value": "XYZ12345"
+    },
+    "registrant": "MAK005714-X2627",
+    "contact": [
+        {
+            "type": "admin",
+            "value": "MAK005713-X2627"
+        },
+        {
+            "type": "tech",
+            "value": "MAK005712-X2627"
+        }
+    ]
+}

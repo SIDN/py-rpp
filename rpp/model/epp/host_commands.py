@@ -1,4 +1,4 @@
-from rpp.model.epp.domain_1_0 import InfoNameType
+from rpp.model.epp.domain_1_0 import HostsType, InfoNameType
 from rpp.model.epp.epp_1_0 import CommandType, Epp, ReadWriteType
 from rpp.model.epp.helpers import random_tr_id
 from rpp.model.epp.host_1_0 import AddRemType, AddrType, Check, ChgType, Create, Delete, Info, IpType, MNameType, Update
@@ -36,7 +36,7 @@ def host_info(request: HostInfoRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
-                other_element=Info(name=InfoNameType(value=request.name))
+                other_element=Info(name=InfoNameType(value=request.name, hosts=HostsType.ALL))
             ),
             cl_trid=request.clTRID or random_tr_id(),
         )

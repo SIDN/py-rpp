@@ -65,7 +65,7 @@ def to_host_info(epp_response) -> HostInfoResponseModel | BaseResponseModel:
         status=status,
         registrar=getattr(res_data, "cl_id", ""),
         events=events,
-        addresses=addresses
+        addr=addresses
     )
 
     return BaseResponseModel(

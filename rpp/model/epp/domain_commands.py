@@ -81,8 +81,8 @@ def domain_create(req: DomainCreateRequest) -> Epp:
                 )
             ),
             extension=ExtAnyType(
-                other_element=[secdns_create] if secdns_create else []
-            ),
+                other_element=[secdns_create] 
+            )if secdns_create else None,
             cl_trid=req.clTRID or random_tr_id(),
         )
     )
