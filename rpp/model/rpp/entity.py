@@ -50,6 +50,10 @@ class EventModel(BaseModel):
     name: str
     date: datetime
 
+class SidnLegalForm(BaseModel):
+    name: str
+    number: str
+
 class Card(BaseModel):
     model_config = ConfigDict(
             populate_by_alias=True,
@@ -65,7 +69,7 @@ class Card(BaseModel):
     emails: Optional[Emails] = None
     # if internationalized, use the 'int_' field = True
     int_: Optional[bool] = False
-    
+    legalForm: Optional[SidnLegalForm] = Field(default=None, alias='rpp.ietf.org:legalForm')
 
     @field_validator('version')
     @classmethod

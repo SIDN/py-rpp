@@ -1,14 +1,23 @@
 # py-rpp
 
-**py-rpp** is a Python-based RPP to EPP adapter intended for RPP-EPP compatibility testing. It converts RPP (RESTful Provisioning Protocol) requests to EPP (Extensible Provisioning Protocol) requests, and transforms EPP responses back into RPP responses. This allows systems using RPP to communicate seamlessly with EPP-based registries.
+**py-rpp** is a Python-based RPP (RESTful Provisioning Protocol) to EPP (Extensible Provisioning Protocol) adapter intended for RPP-EPP compatibility testing. It converts RPP requests to EPP requests, and transforms EPP responses back into RPP responses. This allows systems using RPP to communicate seamlessly with EPP-based registries.
+
+## How to Use
+
+You can run easily using Docker. Once running, you can use the RPP API by sending HTTP requests to the server (see the OpenAPI docs at `/docs`).  
+**Note:** 
+
+- The API requires HTTP Basic Auth to log in, use your EPP server credentials.
+- Configure the connection details for your backend EPP server in the `config.yaml` file before
+- The EPP server MUST have support for TLS connections, as the RPP server will always use TLS to connect to the EPP server.
 
 ## API Endpoints
 
-See the [OpenAPI documentation](http://localhost:8000/docs) for a complete list of available endpoints.
+See the [OpenAPI documentation](http://localhost:8000/docs) for a complete list of available endpoints, requires server running on localhost.
 
 ## OpenAPI JSON Schema
 
-See the [OpenAPI JSON schema](http://localhost:8000/openapi.json) for the API specification.
+See the [OpenAPI JSON schema](http://localhost:8000/openapi.json) for the API specification, requires server running on localhost.
 
 ## Running with Docker
 

@@ -51,11 +51,11 @@ def contact_create(request: ContactCreateRequest) -> Epp:
                 other_element=[
                     Ext(
                         create=CreateType(
-                            contact=ContactType(legal_form="PERSOON")
+                            contact=ContactType(legal_form=request.card.legalForm.name, legal_form_reg_no=request.card.legalForm.number)
                         )
                     )
                 ]
-            ),
+            ) if request.card.legalForm else None,
         )
     )
 

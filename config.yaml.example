@@ -1,18 +1,30 @@
+# hostname of the backend EPP server to use
 rpp_epp_host:
 
 # optional settings
 rpp_epp_port: 700
+# only TLS = true is currently supported
 rpp_epp_use_tls: true
+# timeout (secs) for requests sent to EPP server
 rpp_epp_timeout: 5
 
+# By default, the RPP server does NOT cache the TCP connection to the EPP server.
+# This means for every request, a new EPP connection is created: login, send command, logout.
+# This is stateless and simple, but less performant.
+#
+# For better performance, you can enable connection caching by setting rpp_epp_connection_cache to true.
+# When enabled, the EPP connection is kept open and reused for multiple requests.
+# Note: Enabling caching makes the server stateful.
 rpp_epp_connection_cache: false
 
+#  EPP objects this EPP client must advertise to EPP server
 rpp_epp_objects:
   - "urn:ietf:params:xml:ns:contact-1.0"
   - "urn:ietf:params:xml:ns:host-1.0"
   - "urn:ietf:params:xml:ns:domain-1.0"
   - "http://rxsd.domain-registry.nl/sidn-reseller-1.0"
 
+#  EPP extensions this EPP client must advertise to EPP server
 rpp_epp_extensions:
   - "http://rxsd.domain-registry.nl/sidn-ext-epp-1.0"
   - "urn:ietf:params:xml:ns:secDNS-1.1"
