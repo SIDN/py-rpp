@@ -114,32 +114,40 @@ docker-compose down
 
 ## Development Setup
 
-### Generate models from RPP XSD
+To set up a development environment for py-rpp, follow these steps:
 
-This only needs to be done once, or when the XSD files change.
+- Clone the repository:
+
+```sh
+git clone https://github.com/SIDN/py-rpp.git
+cd py-rpp
+```
+
+- Create a virtual environment:
+
+```sh
+python3 -m venv .venv
+```
+
+- Activate the virtual environment:
 
 ```sh
 . ./.venv/bin/activate
-
-xsdata generate xsd/epp-1.0.xsd --package rpp.model.epp
-xsdata generate xsd/domain-1.0.xsd --package rpp.model.epp
-xsdata generate xsd/contact-1.0.xsd --package rpp.model.epp
-xsdata generate xsd/secDNS-1.1.xsd --package rpp.model.epp
-xsdata generate xsd/rgp-1.0.xsd --package rpp.model.epp
 ```
 
-### Running test server
-
-Activate the virtual environment and run the FastAPI server:
+- Install the required dependencies:
 
 ```sh
-. ./.venv/bin/activate
+pip install -r requirements.txt
 ```
 
-Set the configuration variables in `config.yaml`, a `config.yaml.example` is provided as a template.
+- Create a configuration file: `config.yaml`, a `config.yaml.example` is provided as a template.
+- Edit `config.yaml` to set the connection details for your EPP server.
 
-Then run the FastAPI server:
+- Start the server using FastAPI's development server:
 
 ```sh
 fastapi dev main.py
 ```
+
+- The server will be available at `http://localhost:8000`. You can access the OpenAPI documentation at `http://localhost:8000/docs`.
