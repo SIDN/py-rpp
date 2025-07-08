@@ -1,19 +1,22 @@
 {
-    "clTrId": "ABC-1234",
+    "clTRID": "ABC-1234",
+    "authInfo": {
+        "value": "XYZ12345"
+    },
     "card": {
         "@type": "Card",
         "version": "2.0",
         "rpp.ietf.org:id": "test123",
         "name": {
-            "full": "Joe User 3",
+            "full": "Maarten Wulliak",
             "components": [
                 {
                     "kind": "surname",
-                    "value": "User"
+                    "value": "Maarten"
                 },
                 {
                     "kind": "given",
-                    "value": "Joe"
+                    "value": "Wullink"
                 }
             ]
         },

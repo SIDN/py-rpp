@@ -15,7 +15,7 @@ from rpp.model.epp.contact_1_0 import (
     Transfer,
     Update,
 )
-from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType, TransferType
+from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType, TransferOpType, TransferType
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, CreateType, Ext
@@ -43,8 +43,7 @@ def contact_create(request: ContactCreateRequest) -> Epp:
                         value=request.card.phones.root["voice"].number
                     ),
                     auth_info=AuthInfoType(
-                        pw=PwAuthInfoType(value=random_str(8))
-                    ),
+                        pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None
                 )
             ),
             cl_trid=request.clTRID or random_tr_id(),
@@ -102,7 +101,8 @@ def card_to_postal_info(card : Card) -> PostalInfoType:
 def contact_info(request: ContactInfoRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
-            info=ReadWriteType(other_element=Info(id=request.id)),
+            info=ReadWriteType(other_element=Info(id=request.id, auth_info=AuthInfoType(
+                pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None )),
             cl_trid=request.clTRID or random_tr_id()
         )
     )
@@ -179,7 +179,7 @@ def contact_update(request: ContactUpdateRequest) -> Epp:
                         voice=E164Type(value=get_voice_from_contact_change(request)),
                         email=get_email_from_contact_change(request),
                         auth_info=AuthInfoType(
-                            pw=PwAuthInfoType(value=request.change.authInfo)
+                            pw=PwAuthInfoType(value=request.change.authInfo.value, roid=request.change.authInfo.roid)
                         ) if request.change.authInfo else None
         )
      
@@ -216,6 +216,22 @@ def contact_transfer(request: ContactTransferRequest, op: str) -> Epp:
         command=CommandType(
             transfer=TransferType(
                 op=op,
+                other_element=Transfer(
+                    id=request.id,
+                    auth_info=AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None,
+                )
+            ),
+            cl_trid=request.clTRID or random_tr_id(),
+        )
+    )
+
+    return epp_request
+
+def contact_transfer_query(request: ContactTransferRequest) -> Epp:
+    epp_request = Epp(
+        command=CommandType(
+            transfer=TransferType(
+                op=TransferOpType.QUERY,
                 other_element=Transfer(
                     id=request.id,
                     auth_info=AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None,

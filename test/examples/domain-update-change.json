@@ -3,6 +3,8 @@
     "clTRID": "HOSTCREATE-10IP",
     "change": {
         "registrant": "MAK005714-X2627",
-        "authInfo": "xyz1243"
+        "authInfo": {
+            "value": "XYZ12345"
+        }
     }
 }

@@ -63,12 +63,3 @@ class BaseResponseModel(BaseModel):
     resData: Optional[Any] = None  
     extension: Optional[Any] = None 
     
-# class TransferResponse(BaseModel):
-#     name: str
-#     trStatus: str
-#     reId: str
-#     reDate: datetime
-#     acID: str
-#     acDate: datetime
-#     exDate: Optional[datetime] = None 
-

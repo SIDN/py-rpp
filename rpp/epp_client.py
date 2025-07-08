@@ -18,7 +18,20 @@ from rpp.model.rpp.common_converter import is_ok_response, to_base_response
 
 logger = logging.getLogger('uvicorn.error')
 
-config = SerializerConfig(pretty_print=True)
+config = SerializerConfig(
+    pretty_print=True,
+)
+
+ns_map = {
+    "epp": "urn:ietf:params:xml:ns:epp-1.0",
+    "domain": "urn:ietf:params:xml:ns:domain-1.0",
+    "contact": "urn:ietf:params:xml:ns:contact-1.0",
+    "host": "urn:ietf:params:xml:ns:host-1.0",
+    "secDNS": "urn:ietf:params:xml:ns:secDNS-1.1",
+    "sidn-ext-epp": "urn:sidn:xml:epp:sidn-ext-epp-1.0",
+    "rgp": "urn:ietf:params:xml:ns:rgp-1.0",
+}
+
 serializer = XmlSerializer(config=config)
 
 parser_config = ParserConfig()
@@ -82,14 +95,14 @@ class EppClient:
 
         response_str = response_data.decode('utf-8')
         epp_response = parser.from_string(response_str, Epp)
-        logger.info(f"Received greeting from EPP server: {serializer.render(epp_response)}")
+        logger.info(f"Received greeting from EPP server: {serializer.render(epp_response, ns_map=ns_map)}")
 
         self.greeting = epp_response.greeting
         return self.greeting
 
 
     def send_command(self, epp_request: Epp, login: bool =False) -> Epp:
-        xml_payload = serializer.render(epp_request)
+        xml_payload = serializer.render(epp_request, ns_map=ns_map)
         if login:
             masked_xml_payload = re.sub(r"(<.*:pw>)(.*?)(</.*:pw>)", r"\1********\3", xml_payload, flags=re.DOTALL)
             logger.info(f"send EPP request: {masked_xml_payload}")
@@ -113,7 +126,7 @@ class EppClient:
                 
         #response_str = response_data.decode("utf-8")
         epp_response = parser.from_string(response_data.decode("utf-8"), Epp)
-        logger.debug(f"Response XML object: {serializer.render(epp_response)}")
+        logger.debug(f"Response XML object: {serializer.render(epp_response, ns_map=ns_map)}")
         return epp_response
       
         

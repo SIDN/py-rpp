@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import List, Dict, Optional
-from pydantic import BaseModel, ConfigDict, Field, RootModel, with_config, field_validator, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, RootModel, field_validator
 
-from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel
+from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel
 
 class NameComponent(BaseModel):
     kind: str
@@ -76,17 +76,15 @@ class Card(BaseModel):
 
 class ContactCreateRequest(BaseRequestModel):
     card: Card 
-    authInfo: Optional[str] = None
+    authInfo: Optional[AuthInfoModel] = None
 
 class ContactCreateResponseModel(BaseModel):
     id: Optional[str] = None
     createDate: Optional[datetime] = None
 
-
 class ContactInfoRequest(BaseRequestModel):
     id: str
-    authInfo: Optional[str] = None
-    #transaction: TransactionModel
+    authInfo: Optional[AuthInfoModel] = None
 
 class ContactCheckRequest(BaseRequestModel):
     name: str
@@ -98,7 +96,7 @@ class ContactInfoResponse(BaseModel):
     roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
     card: Card 
     status: Optional[List[str]] = None
-    authInfo: Optional[str] = None
+    authInfo: Optional[AuthInfoModel] = None
     events: Optional[Dict[str, EventModel]] = None
 
 class ContactUpdateAddOrRemove(BaseModel):
@@ -106,7 +104,7 @@ class ContactUpdateAddOrRemove(BaseModel):
 
 class ContactUpdateChange(BaseModel):
     contact: List[Card] 
-    authInfo: str
+    authInfo: AuthInfoModel
 
 class ContactUpdateRequest(BaseRequestModel):
     id: str
@@ -114,9 +112,13 @@ class ContactUpdateRequest(BaseRequestModel):
     remove: Optional[ContactUpdateAddOrRemove] = None
     change: Optional[ContactUpdateChange] = None
 
-class ContactTransferRequest(BaseRequestModel):
+class ContactStartTransferRequest(BaseRequestModel):
     id: str
     authInfo: AuthInfoModel
+
+class ContactTransferRequest(BaseRequestModel):
+    id: str
+    authInfo: Optional[AuthInfoModel] = None
 
 class TransferResponse(BaseModel):
     id: str

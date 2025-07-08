@@ -2,7 +2,9 @@
     "id": "MAK005715-X2627",
     "clTRID": "X12345",
     "change": {
-        "authInfo": "test",
+        "authInfo": {
+            "value": "XYZ12345"
+        },
         "contact": [
             {
                 "int_": true,

@@ -3,7 +3,7 @@ from typing import List, Dict
 from fastapi import Response
 from rpp.model.epp.contact_1_0 import CheckType, ChkDataType, TrnDataType
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.rpp.common import BaseResponseModel, TrIDModel
+from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel, TrIDModel
 from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
 from rpp.model.rpp.entity import Card, ContactCreateResponseModel, ContactInfoResponse, EventModel, Name, AddressComponent, Organization, Address, TransferResponse
 
@@ -57,7 +57,9 @@ def to_contact_info(epp_response) -> BaseResponseModel:
         
         authInfo = None
         if hasattr(res_data, "auth_info") and res_data.auth_info is not None:
-            authInfo = res_data.auth_info.pw.value
+            authInfo = AuthInfoModel(
+                    value=res_data.auth_info.pw.value,
+                    roid=res_data.auth_info.roid) 
 
     card = Card(
         id=res_data.id,
@@ -122,7 +124,7 @@ def to_contact_transfer(epp_response: Epp, response: Response) -> BaseResponseMo
     res_data: TrnDataType = epp_response.response.res_data.other_element[0]
 
     resData = TransferResponse(
-        name=res_data.name,
+        id=res_data.id,
         trStatus=res_data.tr_status,
         reId=res_data.re_id,
         reDate=res_data.re_date.to_datetime() if hasattr(res_data, "re_date") and res_data.re_date is not None else None,

@@ -3,10 +3,6 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel
 from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel
 
-# class PeriodModel(BaseModel):
-#     unit: str
-#     value: int
-
 class NsItemModel(BaseModel):
     type: str
     value: str
@@ -60,7 +56,7 @@ class DomainCreateRequest(BaseRequestModel):
     ns: Optional[List[NsItemModel]] = []
     registrant: str
     contact: List[ContactModel]
-    authInfo: Optional[str] = None
+    authInfo: Optional[AuthInfoModel] = None
     dnssec: Optional[DsOrKeyType] = None
 
 class DomainCreateResponse(BaseModel):
@@ -70,7 +66,7 @@ class DomainCreateResponse(BaseModel):
 
 class DomainInfoRequest(BaseRequestModel):
     name: str
-    authInfo: Optional[str] = None
+    authInfo: Optional[AuthInfoModel] = None
 
 class DomainCheckRequest(BaseRequestModel):
     name: str
@@ -86,7 +82,7 @@ class DomainInfoResponse(BaseModel):
     registrar: str
     events: Dict[str, EventModel]
     expires: Optional[datetime] = None
-    authInfo: Optional[str] = None
+    authInfo: Optional[AuthInfoModel] = None
 
 class DomainUpdateAddOrRemove(BaseModel):
     ns: Optional[List[str]] = None
@@ -95,7 +91,7 @@ class DomainUpdateAddOrRemove(BaseModel):
 
 class DomainUpdateChange(BaseModel):
     registrant: str
-    authInfo: str
+    authInfo: AuthInfoModel
 
 class DomainUpdateRequest(BaseRequestModel):
     name: str
@@ -115,10 +111,14 @@ class DomainRenewResponse(BaseModel):
 class DomainDeleteRequest(BaseRequestModel):
     name: str
 
-class DomainTransferRequest(BaseRequestModel):
+class DomainStartTransferRequest(BaseRequestModel):
     name: str
     period: Optional[PeriodModel] = None
     authInfo: AuthInfoModel
+
+class DomainTransferRequest(BaseRequestModel):
+    name: str
+    authInfo: Optional[AuthInfoModel] = None
 
 class TransferResponse(BaseModel):
     name: str

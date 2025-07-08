@@ -1,30 +1,42 @@
 {
-    "name": "mwtest123.nl",
+    "name": "transfer-mw4.nl",
     "period": {
         "unit": "y",
-        "value": 1
+        "value": "1"
+    },
+    "authInfo": {
+        "value": "XYZ12345"
     },
     "ns": [
         {
             "type": "host",
-            "value": "ns1.example.wul"
+            "value": "mwtest-2.com"
         },
         {
             "type": "host",
-            "value": "ns2.example.wul"
+            "value": "mwtest-1.com"
         }
     ],
-    "registrant": "JOR006789-X2627",
+    "registrant": "MAK005714-X2627",
     "contact": [
         {
             "type": "admin",
-            "value": "JOR006791-X2627"
+            "value": "MAK005713-X2627"
         },
         {
             "type": "tech",
-            "value": "JOR006792-X2627"
+            "value": "MAK005712-X2627"
         }
     ],
-    "authInfo": "foobar",
+    "dnssec": {
+        "keyData": [
+            {
+                "flags": "257",
+                "protocol": "3",
+                "alg": "8",
+                "pubKey": "AQPJ////4Q=="
+            }
+        ]
+    },
     "clTRID": "ABC-12345"
 }

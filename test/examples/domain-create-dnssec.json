@@ -1,5 +1,8 @@
 {
     "name": "mwtest-dnssec2.nl",
+    "authInfo": {
+        "value": "XYZ12345"
+    },
     "period": {
         "unit": "y",
         "text": "1"
@@ -25,7 +28,6 @@
             "value": "JOR006792-X2627"
         }
     ],
-    "authInfo": "foobar",
     "dnssec_keyData": {
         "flags": "257",
         "protocol": "3",

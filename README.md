@@ -1,8 +1,14 @@
 # py-rpp
 
+**py-rpp** is a Python-based RPP to EPP adapter intended for RPP-EPP compatibility testing. It converts RPP (RESTful Provisioning Protocol) requests to EPP (Extensible Provisioning Protocol) requests, and transforms EPP responses back into RPP responses. This allows systems using RPP to communicate seamlessly with EPP-based registries.
+
 ## API Endpoints
 
 See the [OpenAPI documentation](http://localhost:8000/docs) for a complete list of available endpoints.
+
+## OpenAPI JSON Schema
+
+See the [OpenAPI JSON schema](http://localhost:8000/openapi.json) for the API specification.
 
 ## Running with Docker
 
@@ -24,12 +30,17 @@ Start the container using Docker Compose:
 docker-compose up
 ```
 
-This will build (if needed) and start the `py-rpp` container, exposing the server on port 8001 (as configured in `docker-compose.yaml`).
+### Examples
+
+See the `examples` directory for example requests. You can use tools like `curl` or Postman to test the API endpoints.
+
+This will build (if needed) and start the `py-rpp` container, exposing the server on port 8000 (as configured in `docker-compose.yaml`).
 
 ### Configuration
 
-- The container uses `/app/config.yaml` for configuration, which is mounted from your local directory.
-- You can set environment variables in the `docker-compose.yaml` file or by editing `config.yaml`.
+The container uses `/app/config.yaml` for configuration, which is mounted from your local directory.
+You can set environment variables in the `docker-compose.yaml` file or by editing `config.yaml`.
+The `rpp_epp_host` variable should point to the EPP server you want to connect to.
 
 ### Stopping the server
 

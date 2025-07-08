@@ -19,7 +19,7 @@ security = HTTPBasic()
 router = APIRouter(dependencies=[Depends(security)])
 
 
-@router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True)
+@router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Create Host")
 def do_create(create_request: HostCreateRequest,
               response: Response,
               conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
@@ -32,7 +32,7 @@ def do_create(create_request: HostCreateRequest,
     return to_host_create(epp_response)
 
 
-@router.get("/{host}", response_model_exclude_none=True)
+@router.get("/{host}", response_model_exclude_none=True, summary="Get Host Info")
 def do_info(host: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -47,7 +47,7 @@ def do_info(host: str,
     update_response(response, epp_response)
     return to_host_info(epp_response)
 
-@router.head("/{host}")
+@router.head("/{host}", summary="Check Host Existence")
 def do_check(host: str, 
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -65,7 +65,7 @@ def do_check(host: str,
     if is_ok_code(epp_status):
          add_check_header(response, avail, reason)
 
-@router.delete("/{host}", response_model_exclude_none=True, status_code=204)
+@router.delete("/{host}", response_model_exclude_none=True, status_code=204, summary="Delete Host")
 def do_delete(host: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -81,7 +81,7 @@ def do_delete(host: str,
     # delete has no response body, so we just set the status code
     to_host_delete(epp_response)
 
-@router.patch("/{host}", response_model=BaseResponseModel, response_model_exclude_none=True)
+@router.patch("/{host}", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Update Host")
 def do_update(host: str,
             response: Response,
             request: HostUpdateRequest,
@@ -96,7 +96,7 @@ def do_update(host: str,
     update_response(response, epp_response)
     return to_host_update(epp_response)
 
-@router.post("/{host}/renewal", status_code=501)
+@router.post("/{host}/renewal", status_code=501, summary="Renew Host (Not Implemented)")
 def do_renew(host: str, response: Response) -> None:
 
     logger.info(f"Renew host: {host}")

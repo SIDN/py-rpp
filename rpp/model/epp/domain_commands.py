@@ -23,7 +23,7 @@ from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sec_dns_1_1 import Create as SecdnsCreateType
 from rpp.model.epp.sec_dns_1_1 import KeyDataType
-from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainInfoRequest, DomainRenewRequest, DomainTransferRequest, DomainUpdateRequest
+from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainInfoRequest, DomainRenewRequest, DomainStartTransferRequest, DomainTransferRequest, DomainUpdateRequest
 
 
 def domain_create(req: DomainCreateRequest) -> Epp:
@@ -52,7 +52,7 @@ def domain_create(req: DomainCreateRequest) -> Epp:
     # AuthInfo
     auth_info = None
     if req.authInfo:
-        auth_info = AuthInfoType(pw=PwAuthInfoType(value=req.authInfo))
+        auth_info = AuthInfoType(pw=PwAuthInfoType(value=req.authInfo.value, roid=req.authInfo.roid))
 
     # dnssec.keyData
     secdns_create = None
@@ -135,8 +135,12 @@ def domain_update(request: DomainUpdateRequest) -> Epp:
 
     add = None
     rem = None
-    chg = ChgType(registrant=request.change.registrant, 
-                  auth_info=AuthInfoChgType(pw=PwAuthInfoType(value=request.change.authInfo))) if request.change else None
+    chg = None
+
+    if request.change:
+       chg = ChgType(registrant=request.change.registrant, 
+                    auth_info=AuthInfoChgType(pw=PwAuthInfoType(value=request.change.authInfo.value,
+                                                                roid=request.change.authInfo.roid)) if request.change.authInfo else None) 
 
     if request.add is not None:
       add = AddRemType(
@@ -198,7 +202,7 @@ def domain_renew(request: DomainRenewRequest) -> Epp:
 
     return epp_request
 
-def domain_transfer(request: DomainTransferRequest, op: TransferOpType) -> Epp:
+def domain_transfer(request: DomainStartTransferRequest, op: TransferOpType) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
