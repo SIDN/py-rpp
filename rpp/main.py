@@ -1,4 +1,5 @@
 import logging
+import pprint
 from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
 from rpp import domains, entities, hosts, messages
@@ -14,7 +15,7 @@ from rpp.model.rpp.common_converter import to_base_response, to_greeting_model
 logger = logging.getLogger('uvicorn.error')
 
 cfg = Config()
-logger.info(f'Using config: {cfg}')
+logger.info(f'Using config:\n {pprint.pformat(cfg.model_dump())}')
 
 async def create_connection_pool():
     return ConnectionPool(cfg)

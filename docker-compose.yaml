@@ -1,7 +1,8 @@
 services:
   rpp-app:
+    build: .
     container_name: py-rpp
-    image: sidnlabs/py-rpp:latest
+    image: py-rpp:latest
     ports:
       - "8000:8000"
     environment:

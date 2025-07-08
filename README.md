@@ -81,12 +81,12 @@ You can build and run the RPP server using the provided `Dockerfile` and `docker
 From the project root directory, run:
 
 ```sh
-docker build -t sidnlabs/py-rpp:latest .
+docker build -t py-rpp:latest .
 ```
 
 ### Run with Docker Compose
 
-Start the container using Docker Compose:
+Start the container using Docker Compose (the container will be built automatically if it doesn't exist yet):
 
 ```sh
 docker-compose up
