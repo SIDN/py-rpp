@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response
-from fastapi.params import Header
+from fastapi.params import Body, Header
 from rpp.common import add_check_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
@@ -42,6 +42,19 @@ def do_info(host: str,
 
     rpp_request = HostInfoRequest(name=host, clTRID=rpp_cl_trid)
     epp_request = host_info(rpp_request)
+    epp_response = conn.send_command(epp_request)
+
+    update_response(response, epp_response)
+    return to_host_info(epp_response)
+
+@router.post("/{host}", response_model_exclude_none=True, summary="Get Host Info (message body)")
+def do_info_with_body(host: str, response: Response,
+             conn: EppClient = Depends(get_connection),
+             info_request: HostInfoRequest = Body(HostInfoRequest)) -> BaseResponseModel:
+
+    logger.info(f"Fetching info for host: {host}")
+
+    epp_request = host_info(info_request)
     epp_response = conn.send_command(epp_request)
 
     update_response(response, epp_response)

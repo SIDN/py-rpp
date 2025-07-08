@@ -50,6 +50,19 @@ def do_info(entity_id: str, response: Response,
     update_response(response, epp_response)
     return rpp_response
 
+@router.post("/{entity_id}", response_model_exclude_none=True, summary="Get Entity Info (message body)")
+def do_info_with_body(entity_id: str, response: Response,
+             conn: EppClient = Depends(get_connection),
+             info_request: ContactInfoRequest = Body(ContactInfoRequest)) -> BaseResponseModel:
+
+    logger.info(f"Fetching info for entity: {entity_id}")
+
+    epp_request = contact_info(info_request)
+    epp_response = conn.send_command(epp_request)
+
+    update_response(response, epp_response)
+    return to_contact_info(epp_response)
+
 @router.head("/{entity_id}", summary="Check Entity Existence")
 def do_check(entity_id: str, 
             response: Response,
