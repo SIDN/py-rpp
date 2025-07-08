@@ -16,6 +16,8 @@ You can run easily using Docker. Once running, you can use the RPP API by sendin
 **Example:**
 This example uses Curl, but any HTTP client can be used to interact with the RPP API. Make sure to replace `<username>` and `<password>` with your actual EPP credentials and make sure the contacts used in the request exist in the EPP server:
 
+Request to create a new domain using RPP:
+
 ```sh
 curl -X POST "http://localhost:8000/domains/" \
   -u "<username>:<password>" \
@@ -37,6 +39,29 @@ curl -X POST "http://localhost:8000/domains/" \
         }
     ]
 }'
+```
+
+Response:
+
+```json
+{
+    "@type": "Domain",
+    "result": [
+        {
+            "code": 1000,
+            "message": "The domain name has been registered.",
+            "lang": "en"
+        }
+    ],
+    "trID": {
+        "clTRID": "trfefd043199558da0",
+        "svTRID": "48554516"
+    },
+    "resData": {
+        "name": "test-domain-mw-123.nl",
+        "creDate": "2025-07-08T13:41:16Z"
+    }
+}
 ```
 
 ## API Endpoints
