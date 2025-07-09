@@ -37,7 +37,7 @@ async def epp_exception_handler(request: Request, exc: EppException):
     return JSONResponse(
         status_code=exc.status_code,
         content=to_base_response(exc.epp_response).model_dump(exclude_none=True) if exc.epp_response else None,
-        headers=exc.headers if hasattr(exc, 'headers') else None
+        headers=getattr(exc, "headers", None)
     )
 
 @app.exception_handler(Exception)
@@ -56,10 +56,16 @@ async def cleanup_after_request(request: Request, call_next):
         # Skip cleanup for redirect responses
         # redirects may be caused by client not using / at the end of the URL
         return response
-    if not cfg.rpp_epp_connection_cache and hasattr(request.app.state, "session_id") and request.app.state.session_id:
-        logger.info(f"Cleaning up connection for session_id: {request.app.state.session_id}")
+    state = getattr(request.app, "state", None)
+    if (
+        not cfg.rpp_epp_connection_cache
+        and state is not None
+        and hasattr(state, "session_id")
+        and state.session_id
+    ):
+        logger.info(f"Cleaning up connection for session_id: {state.session_id}")
         # not keeping connection in cache, close the connection for this session
-        request.app.state.pool.invalidate_connection(request.app.state.session_id)
+        await state.pool.invalidate_connection(state.session_id)
     
     return response
 

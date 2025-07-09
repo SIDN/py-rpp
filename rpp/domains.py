@@ -9,12 +9,10 @@ from rpp.model.epp.domain_commands import domain_check, domain_delete, domain_in
 from rpp.model.epp.epp_1_0 import TransferOpType
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
 from rpp.model.rpp.common_converter import is_ok_code
-from fastapi import APIRouter
+from fastapi.security import HTTPBasic
 
 from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainDeleteRequest, DomainInfoRequest, DomainRenewRequest, DomainStartTransferRequest, DomainTransferRequest, DomainUpdateRequest
 from rpp.model.rpp.domain_converter import to_domain_check, to_domain_create, to_domain_delete, to_domain_info, to_domain_renew, to_domain_transfer, to_domain_update
-from fastapi import APIRouter
-from fastapi.security import HTTPBasic
 
 logger = logging.getLogger('uvicorn.error')
 security = HTTPBasic()
@@ -24,54 +22,53 @@ router = APIRouter(dependencies=[Depends(security)])
 
 @router.post("/", description="Create a new domain", summary="Create Domain",
              response_model=BaseResponseModel, response_model_exclude_none=True)
-def do_create(create_request: DomainCreateRequest, 
+async def do_create(create_request: DomainCreateRequest, 
               response: Response,
               conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     logger.info(f"Create new domain: {create_request.name}")
 
     epp_request = domain_create(create_request)
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response, 201)  # 201 Created
     return to_domain_create(epp_response)
 
 @router.get("/{domain_name}", response_model_exclude_none=True, summary="Get Domain Info (no message body)")
-def do_info(domain_name: str, response: Response,
+async def do_info(domain_name: str, response: Response,
              conn: EppClient = Depends(get_connection),
              rpp_cl_trid: Annotated[str | None, Header()] = None) -> BaseResponseModel:
     
     logger.info(f"Fetching info for domain: {domain_name}")
 
     epp_request = domain_info(DomainInfoRequest(name=domain_name, clTRID=rpp_cl_trid))
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
     return to_domain_info(epp_response, response)
 
 @router.post("/{domain_name}", response_model_exclude_none=True, summary="Get Domain Info (message body)")
-def do_info_with_body(domain_name: str, response: Response,
+async def do_info_with_body(domain_name: str, response: Response,
              conn: EppClient = Depends(get_connection),
              info_request: DomainInfoRequest = Body(DomainInfoRequest)) -> BaseResponseModel:
     
     logger.info(f"Fetching info for domain: {domain_name}")
 
     epp_request = domain_info(info_request)
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
     return epp_response
 
 @router.head("/{domain_name}", summary="Check Domain Existence")
-def do_check(domain_name: str, response: Response,
+async def do_check(domain_name: str, response: Response,
              rpp_cl_trid: Annotated[str | None, Header()] = None,
              conn: EppClient = Depends(get_connection)):
     
     logger.info(f"Check domain: {domain_name}")
     
     epp_request = domain_check(DomainCheckRequest(name=domain_name, clTRID=rpp_cl_trid))
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
 
-    #return to_domain_check(epp_response, response)
     avail, epp_status, reason = to_domain_check(epp_response)
 
     update_response(response, epp_response)
@@ -79,52 +76,50 @@ def do_check(domain_name: str, response: Response,
         add_check_header(response, avail, reason)
 
 @router.delete("/{domain_name}", status_code=204, summary="Delete Domain")
-def do_delete(domain_name: str, response: Response,
+async def do_delete(domain_name: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             conn: EppClient = Depends(get_connection)):
     logger.info(f"Delete domain: {domain_name}")
     
     epp_request = domain_delete(DomainDeleteRequest(name=domain_name, clTRID=rpp_cl_trid))
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response, 204)  # 204 No Content
-    # delete has no response body, so we just set the status code
     to_domain_delete(epp_response, response)
 
 
 @router.patch("/{domain_name}", response_model_exclude_none=True, summary="Update Domain")
-def do_update(update_request: DomainUpdateRequest,
+async def do_update(update_request: DomainUpdateRequest,
             response: Response,
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
     logger.info(f"Update domain: {update_request.name}")
 
-
     epp_request = domain_update(update_request)
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
     return to_domain_update(epp_response, response)
 
 @router.post("/{domain_name}/renewal", summary="Renew Domain")
-def do_renew(renew_request: DomainRenewRequest, 
+async def do_renew(renew_request: DomainRenewRequest, 
              response: Response, conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
     logger.info(f"Renew domain: {renew_request.name}")
 
     epp_request = domain_renew(renew_request)
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
     return to_domain_renew(epp_response, response)
 
 @router.post("/{domain_name}/transfer", response_model_exclude_none=True, summary="Start Domain Transfer")
-def do_start_transfer(domain_name: str, response: Response,
+async def do_start_transfer(domain_name: str, response: Response,
             transfer_request: Optional[DomainStartTransferRequest]= Body(default=None),
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
-    logger.info(f"Start transfer for domain: {transfer_request.name}")
+    logger.info(f"Start transfer for domain: {transfer_request.name if transfer_request else domain_name}")
 
     rpp_request = transfer_request
     if rpp_request is None:
@@ -137,13 +132,13 @@ def do_start_transfer(domain_name: str, response: Response,
                                             authInfo=AuthInfoModel(value=rpp_auth_info) if rpp_auth_info else None)
 
     epp_request = domain_transfer(rpp_request, op=TransferOpType.REQUEST)
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
     return to_domain_transfer(epp_response, response)
 
 @router.get("/{domain_name}/transfer", summary="Query Transfer Status")
-def do_query_transfer(domain_name: str, response: Response,
+async def do_query_transfer(domain_name: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
@@ -154,53 +149,43 @@ def do_query_transfer(domain_name: str, response: Response,
                                                               clTRID=rpp_cl_trid, 
                                                               authInfo=AuthInfoModel(value=rpp_auth_info) if rpp_auth_info else None)
                                         )
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
     
     update_response(response, epp_response)
     return to_domain_transfer(epp_response, response)
 
 @router.post("/{domain_name}/transfer/rejection", summary="Reject Domain Transfer")
-def do_reject_transfer(domain_name: str, response: Response,
+async def do_reject_transfer(domain_name: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     
     logger.info(f"Reject transfer for domain: {domain_name}")
-    return do_stop_transfer(TransferOpType.REJECT, domain_name, response,
+    return await do_stop_transfer(TransferOpType.REJECT, domain_name, response,
             conn=conn, rpp_cl_trid=rpp_cl_trid, rpp_auth_info=rpp_auth_info)
 
 @router.post("/{domain_name}/transfer/cancellation", summary="Cancel Domain Transfer")
-def do_cancel_transfer(domain_name: str, response: Response,
+async def do_cancel_transfer(domain_name: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     
     logger.info(f"Cancel transfer for domain: {domain_name}")
-    return do_stop_transfer(TransferOpType.CANCEL, domain_name, response,
+    return await do_stop_transfer(TransferOpType.CANCEL, domain_name, response,
             conn=conn, rpp_cl_trid=rpp_cl_trid, rpp_auth_info=rpp_auth_info)
 
 @router.post("/{domain_name}/transfer/approval", summary="Approve Domain Transfer")
-def do_approve_transfer(domain_name: str, response: Response,
+async def do_approve_transfer(domain_name: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
             conn: EppClient = Depends(get_connection)):
 
     logger.info(f"Approve transfer for domain: {domain_name}")
 
-    return do_stop_transfer(TransferOpType.APPROVE, domain_name, response,
+    return await do_stop_transfer(TransferOpType.APPROVE, domain_name, response,
             conn=conn, rpp_cl_trid=rpp_cl_trid, rpp_auth_info=rpp_auth_info)
 
-    # rpp_request = DomainTransferRequest(name=domain_name,
-    #                                     clTRID=rpp_cl_trid,
-    #                                     authInfo=AuthInfoModel(value=rpp_auth_info) if rpp_auth_info else None)
-
-    # epp_request = domain_transfer(rpp_request, op=TransferOpType.APPROVE)
-    # epp_response = conn.send_command(epp_request)
-
-    # update_response(response, epp_response)
-    # return to_domain_transfer(epp_response, response)
-
-def do_stop_transfer(op: TransferOpType,
+async def do_stop_transfer(op: TransferOpType,
                     domain_name: str, response: Response,
                     conn: EppClient = None,
                     rpp_cl_trid: Annotated[str | None, Header()] = None,
@@ -208,27 +193,19 @@ def do_stop_transfer(op: TransferOpType,
                     ) -> BaseResponseModel:
 
     logger.info(f"Stop transfer for domain: {domain_name} with operation: {op}")
-    # find out if the requestor is the current sponsoring registrar
-    # if so, we reject the transfer request, otherwise we cancel it
-    # epp_request = domain_info(DomainInfoRequest(name=domain_name, clTRID=rpp_cl_trid))
-    # epp_response = conn.send_command(epp_request)
-    # op: TransferOpType = TransferOpType.REJECT
-    # if get_status_from_response(epp_response) == 2308:
-    #     # the current client is not the sponsoring registrar, so we cancel the transfer
-    #     op = TransferOpType.CANCEL
 
     epp_request = domain_transfer(DomainTransferRequest(name=domain_name,
                             clTRID=rpp_cl_trid,
                             authInfo=AuthInfoModel(value=rpp_auth_info) if rpp_auth_info else None
                             ), op=op)
-    epp_response = conn.send_command(epp_request)
+    epp_response = await conn.send_command(epp_request)
     
     update_response(response, epp_response)
     return to_domain_transfer(epp_response, response)
 
 
 @router.post("/{domain}/lock", status_code=501, summary="Lock Domain (Not Implemented)")
-def do_lock(domain: str, response: Response) -> None:
+async def do_lock(domain: str, response: Response) -> None:
 
     logger.info(f"Lock domain: {domain}")
     update_response_from_code(response, 2101) # Not implemented
