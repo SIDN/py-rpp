@@ -9,6 +9,7 @@ from rpp.epp_client import EppClient
 from rpp.epp_connection_pool import ConnectionPool
 from contextlib import asynccontextmanager
 from rpp.epp_connection_pool import get_connection
+from rpp.model.rpp.common import GreetingModel
 from rpp.model.rpp.common_converter import to_base_response, to_greeting_model
 
 
@@ -68,5 +69,5 @@ app.include_router(hosts.router, prefix="/hosts", tags=["Hosts"])
 app.include_router(messages.router, prefix="/messages", tags=["Messages"])
 
 @app.get("/", tags=["Service"], summary="Service Discovery", description="Returns a description of features supported by the service.")
-def do_root(conn: EppClient = Depends(get_connection)):
+async def do_root(conn: EppClient = Depends(get_connection)) -> GreetingModel:
     return to_greeting_model(conn.greeting)

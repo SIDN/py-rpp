@@ -7,11 +7,11 @@ from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from rpp.model.epp.domain_commands import domain_check, domain_delete, domain_info, domain_create, domain_renew, domain_transfer, domain_transfer_query, domain_update
 from rpp.model.epp.epp_1_0 import TransferOpType
-from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel, PeriodModel
-from rpp.model.rpp.common_converter import get_status_from_response, is_ok_code
+from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
+from rpp.model.rpp.common_converter import is_ok_code
 from fastapi import APIRouter
 
-from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainDeleteRequest, DomainInfoRequest, DomainInfoResponse, DomainRenewRequest, DomainStartTransferRequest, DomainTransferRequest, DomainUpdateRequest
+from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainDeleteRequest, DomainInfoRequest, DomainRenewRequest, DomainStartTransferRequest, DomainTransferRequest, DomainUpdateRequest
 from rpp.model.rpp.domain_converter import to_domain_check, to_domain_create, to_domain_delete, to_domain_info, to_domain_renew, to_domain_transfer, to_domain_update
 from fastapi import APIRouter
 from fastapi.security import HTTPBasic

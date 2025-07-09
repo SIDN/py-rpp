@@ -1,21 +1,19 @@
 import logging
 from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, Cookie, Cookie, Response
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response
 from fastapi.params import Body
-from rpp.common import add_check_header, add_status_header, update_response, update_response_from_code
+from rpp.common import add_check_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
-from rpp.model.config import Config
 from rpp.epp_client import EppClient
 
-from rpp.model.epp.domain_commands import domain_info
 from rpp.model.epp.contact_commands import contact_check, contact_create, contact_delete, contact_info, contact_transfer, contact_transfer_query, contact_update
 from rpp.model.epp.epp_1_0 import TransferOpType
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
-from rpp.model.rpp.common_converter import get_status_from_response, is_ok_code
-from rpp.model.rpp.entity import ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest, ContactInfoResponse, ContactStartTransferRequest, ContactTransferRequest, ContactUpdateRequest
+from rpp.model.rpp.common_converter import is_ok_code
+from rpp.model.rpp.entity import ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest, ContactStartTransferRequest, ContactTransferRequest, ContactUpdateRequest
 from rpp.model.rpp.entity_converter import to_contact_check, to_contact_create, to_contact_delete, to_contact_info, to_contact_transfer, to_contact_update
 from fastapi import APIRouter
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.security import HTTPBasic
 
 logger = logging.getLogger('uvicorn.error')
 security = HTTPBasic()

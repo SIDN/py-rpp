@@ -3,9 +3,8 @@ import socket
 import ssl
 import struct
 import logging
-from rpp.common import EppException
 from rpp.model.config import Config
-from rpp.model.epp.epp_1_0 import EppType, Epp, GreetingType
+from rpp.model.epp.epp_1_0 import Epp, GreetingType
 from rpp.model.epp.common_commands import login, logout
 from xsdata.formats.dataclass.parsers import XmlParser
 from xsdata.formats.dataclass.context import XmlContext
@@ -122,15 +121,11 @@ class EppClient:
         
         response_length = struct.unpack(">I", header)[0] - 4
         response_data = self._recv_exact(self.tls_sock, response_length)
-        #logger.info(f"Response from EPP server: {response_data.decode('utf-8')}")
-                
-        #response_str = response_data.decode("utf-8")
+
         epp_response = parser.from_string(response_data.decode("utf-8"), Epp)
         logger.debug(f"Response XML object: {serializer.render(epp_response, ns_map=ns_map)}")
         return epp_response
       
-        
-
     def _recv_exact(self, conn, num_bytes: int) -> bytes:
         """Receive exactly num_bytes or raise."""
         buf = b""

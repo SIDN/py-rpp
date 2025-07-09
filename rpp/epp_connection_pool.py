@@ -21,9 +21,6 @@ def get_connection(request: Request, response: Response,
     
     return request.app.state.pool.get_connection(request, response, session_id, credentials)
 
-# def invalidate_connection(request: Request):
-#     return request.app.state.pool.invalidate_connection()
-
 class ConnectionPool:
     """
     Manages a pool of EPP client connections, providing thread-safe caching, retrieval, and invalidation of connections
@@ -75,7 +72,6 @@ class ConnectionPool:
                     logger.error(f"Logout failed for session_id {session_id}: {message}")
                     epp_status: int = get_status_from_response(epp_response)
                     raise EppException(epp_to_rpp_code(epp_status), epp_response, {"Rpp-Epp-Code": str(epp_status)})
-                    #raise HTTPException(400, detail="Logout failed")
 
     def get_connection(self, request: Request, response: Response, session_id: str = Cookie(None),
                        credentials: HTTPBasicCredentials = None,
@@ -85,8 +81,6 @@ class ConnectionPool:
             if credentials is None:
                 logger.error("No credentials provided for EPP connection")
                 raise EppException(status_code=401, headers = {"Rpp-Epp-Code": str(epp_status)})
-                #raise HTTPException(status_code=401, detail="Unauthorized")
-            
             
             session_id = secrets.token_urlsafe(32)
 
