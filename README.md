@@ -7,7 +7,7 @@ Currently, py-rpp is tightly bound to the EPP data model. In future versions, th
 ## How to Use
 
 You can run easily using Docker. Once running, you can use the RPP API by sending HTTP requests to the server (see the OpenAPI docs at `/docs`).  
-**Note:** 
+**Note:**
 
 - The API requires HTTP Basic Auth to log in, use your EPP server credentials.
 - Configure the connection details for your backend EPP server in the `config.yaml` file before

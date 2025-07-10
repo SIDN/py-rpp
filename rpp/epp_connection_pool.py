@@ -10,8 +10,6 @@ from rpp.model.config import Config
 import logging
 from fastapi import Request
 
-import asyncio
-
 logger = logging.getLogger('uvicorn.error')
 
 security = HTTPBasic()

@@ -20,10 +20,10 @@ def get_set_properties_of_dcp_statement(item_to_check, name: str) -> list[str]:
 def to_greeting_model(greeting: GreetingType) -> GreetingModel:
 
     services = SvcMenuModel(
-        versions=[version.value for version in greeting.svc_menu.version],
-        languages=[lang for lang in greeting.svc_menu.lang],
-        objects=[obj for obj in greeting.svc_menu.obj_uri],
-        extensions=[ext for ext in greeting.svc_menu.svc_extension.ext_uri] if greeting.svc_menu.svc_extension else None
+        versions=[version.value for version in greeting.svc_menu.version] if greeting.svc_menu else None,
+        languages=[lang for lang in greeting.svc_menu.lang] if greeting.svc_menu else None,
+        objects=[obj for obj in greeting.svc_menu.obj_uri] if greeting.svc_menu else None,
+        extensions=[ext for ext in greeting.svc_menu.svc_extension.ext_uri] if greeting.svc_menu and greeting.svc_menu.svc_extension else None
     )
 
     

@@ -5,7 +5,7 @@ import ssl
 import asyncio
 from rpp.model.config import Config
 from rpp.model.epp.epp_1_0 import Epp, GreetingType
-from rpp.model.epp.common_commands import login, logout
+from rpp.model.epp.common_converter import login, logout
 from xsdata.formats.dataclass.parsers import XmlParser
 from xsdata.formats.dataclass.context import XmlContext
 from xsdata.formats.dataclass.serializers import XmlSerializer
@@ -84,7 +84,7 @@ class EppClient:
         return ok, epp_response, message
 
     async def connect(self) -> GreetingType:
-        loop = asyncio.get_running_loop()
+        #loop = asyncio.get_running_loop()
         ssl_context = self.context
         reader, writer = await asyncio.open_connection(
             self.host, self.port, ssl=ssl_context

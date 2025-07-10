@@ -1,16 +1,18 @@
 import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Header, Response
+from fastapi.security import HTTPBasic
 from rpp.common import update_response
 from rpp.epp_client import EppClient
 from rpp.epp_connection_pool import get_connection
-from rpp.model.epp.messages_commands import ack_message, get_messages
+from rpp.model.epp.messages_converter import ack_message, get_messages
 from rpp.model.rpp.common import BaseResponseModel
 from rpp.model.rpp.message_converter import to_ack_response, to_messages
 
 
 logger = logging.getLogger('uvicorn.error')
-router = APIRouter()
+security = HTTPBasic()
+router = APIRouter(dependencies=[Depends(security)])
 
 @router.get("/", response_model_exclude_none=True, summary="Get Messages")
 def do_get_messages(response: Response, conn: EppClient = Depends(get_connection),

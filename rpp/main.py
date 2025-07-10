@@ -36,7 +36,7 @@ async def epp_exception_handler(request: Request, exc: EppException):
     logger.error(f"EPPException: {exc.detail}")
     return JSONResponse(
         status_code=exc.status_code,
-        content=to_base_response(exc.epp_response).model_dump(exclude_none=True) if exc.epp_response else None,
+        content=to_base_response(exc.epp_response).model_dump(exclude_none=True) if exc.epp_response else {"error": str(exc.detail)},
         headers=getattr(exc, "headers", None)
     )
 
@@ -45,7 +45,7 @@ async def unicorn_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={"message": f"Oops! {exc.__class__.__name__} did something. There goes a rainbow..."},
-        headers=exc.headers if hasattr(exc, 'headers') else None
+        headers=getattr(exc, "headers", None)
     )
 
 @app.middleware("http")
@@ -65,7 +65,8 @@ async def cleanup_after_request(request: Request, call_next):
     ):
         logger.info(f"Cleaning up connection for session_id: {state.session_id}")
         # not keeping connection in cache, close the connection for this session
-        await state.pool.invalidate_connection(state.session_id)
+        if hasattr(state, "pool") and state.pool is not None:
+            await state.pool.invalidate_connection(state.session_id)
     
     return response
 

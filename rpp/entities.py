@@ -6,7 +6,7 @@ from rpp.common import add_check_header, update_response, update_response_from_c
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 
-from rpp.model.epp.contact_commands import contact_check, contact_create, contact_delete, contact_info, contact_transfer, contact_transfer_query, contact_update
+from rpp.model.epp.contact_converter import contact_check, contact_create, contact_delete, contact_info, contact_transfer, contact_transfer_query, contact_update
 from rpp.model.epp.epp_1_0 import TransferOpType
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
 from rpp.model.rpp.common_converter import is_ok_code

@@ -5,7 +5,7 @@ from fastapi.params import Body
 from rpp.common import add_check_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
-from rpp.model.epp.domain_commands import domain_check, domain_delete, domain_info, domain_create, domain_renew, domain_transfer, domain_transfer_query, domain_update
+from rpp.model.epp.domain_converter import domain_check, domain_delete, domain_info, domain_create, domain_renew, domain_transfer, domain_transfer_query, domain_update
 from rpp.model.epp.epp_1_0 import TransferOpType
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
 from rpp.model.rpp.common_converter import is_ok_code
