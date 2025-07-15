@@ -21,18 +21,7 @@ config = SerializerConfig(
     pretty_print=True,
 )
 
-ns_map = {
-    "epp": "urn:ietf:params:xml:ns:epp-1.0",
-    "domain": "urn:ietf:params:xml:ns:domain-1.0",
-    "contact": "urn:ietf:params:xml:ns:contact-1.0",
-    "host": "urn:ietf:params:xml:ns:host-1.0",
-    "secDNS": "urn:ietf:params:xml:ns:secDNS-1.1",
-    "sidn-ext-epp": "urn:sidn:xml:epp:sidn-ext-epp-1.0",
-    "rgp": "urn:ietf:params:xml:ns:rgp-1.0",
-}
-
 serializer = XmlSerializer(config=config)
-
 parser_config = ParserConfig()
 parser_context = XmlContext()
 parser = XmlParser(context=parser_context, config=parser_config)
@@ -42,12 +31,13 @@ class EppClient:
         self.host = cfg.rpp_epp_host
         self.port = cfg.rpp_epp_port
         self.timeout = cfg.rpp_epp_timeout
-        self.context = ssl.create_default_context()
+        self.context = ssl.create_default_context() if cfg.rpp_epp_use_tls else None
         self.connected = False
         self.logged_in = False
         self.greeting: GreetingType = None
         self.reader = None
         self.writer = None
+        self.ns_map = cfg.rpp_epp_ns_map
 
     async def login(self, cfg: Config, username: str, password: str) -> tuple[bool, Epp, str]:
         if not self.connected:
@@ -85,10 +75,15 @@ class EppClient:
 
     async def connect(self) -> GreetingType:
         #loop = asyncio.get_running_loop()
-        ssl_context = self.context
-        reader, writer = await asyncio.open_connection(
-            self.host, self.port, ssl=ssl_context
-        )
+        reader, writer = None, None
+        if self.context:
+            reader, writer = await asyncio.open_connection(
+                self.host, self.port, ssl=self.context
+            )
+        else:
+            reader, writer = await asyncio.open_connection(
+                self.host, self.port
+            )
         self.reader = reader
         self.writer = writer
 
@@ -103,13 +98,13 @@ class EppClient:
 
         response_str = response_data.decode('utf-8')
         epp_response = parser.from_string(response_str, Epp)
-        logger.info(f"Received greeting from EPP server: {serializer.render(epp_response, ns_map=ns_map)}")
+        logger.info(f"Received greeting from EPP server: {serializer.render(epp_response, ns_map=self.ns_map)}")
 
         self.greeting = epp_response.greeting
         return self.greeting
 
     async def send_command(self, epp_request: Epp, login: bool =False) -> Epp:
-        xml_payload = serializer.render(epp_request, ns_map=ns_map)
+        xml_payload = serializer.render(epp_request, ns_map=self.ns_map)
         if login:
             masked_xml_payload = re.sub(r"(<.*:pw>)(.*?)(</.*:pw>)", r"\1********\3", xml_payload, flags=re.DOTALL)
             logger.info(f"send EPP request: {masked_xml_payload}")
@@ -132,7 +127,7 @@ class EppClient:
         response_data = await self._recv_exact(response_length)
 
         epp_response = parser.from_string(response_data.decode("utf-8"), Epp)
-        logger.debug(f"Response XML object: {serializer.render(epp_response, ns_map=ns_map)}")
+        logger.debug(f"Response XML object: {serializer.render(epp_response, ns_map=self.ns_map)}")
         return epp_response
       
     async def _recv_exact(self, num_bytes: int) -> bytes:

@@ -19,6 +19,8 @@ class Config(BaseSettings):
     rpp_epp_extensions: Optional[List[str]] = None
     rpp_epp_connection_cache: Optional[bool] = False
 
+    rpp_epp_ns_map: Optional[dict[str, str]] = {}
+
     def __init__(self, **kwargs):
         if not kwargs:
             config_path = os.getenv("RPP_CONFIG_FILE", "config.yaml")

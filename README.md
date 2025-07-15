@@ -11,7 +11,6 @@ You can run easily using Docker. Once running, you can use the RPP API by sendin
 
 - The API requires HTTP Basic Auth to log in, use your EPP server credentials.
 - Configure the connection details for your backend EPP server in the `config.yaml` file before
-- The EPP server MUST have support for TLS connections, as the RPP server will always use TLS to connect to the EPP server.
 
 **Example:**
 This example uses Curl, but any HTTP client can be used to interact with the RPP API. Make sure to replace `<username>` and `<password>` with your actual EPP credentials and make sure the contacts used in the request exist in the EPP server:

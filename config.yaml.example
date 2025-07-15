@@ -3,7 +3,6 @@ rpp_epp_host:
 
 # optional settings
 rpp_epp_port: 700
-# only TLS = true is currently supported
 rpp_epp_use_tls: true
 # timeout (secs) for requests sent to EPP server
 rpp_epp_timeout: 5
@@ -31,3 +30,12 @@ rpp_epp_extensions:
   - "http://rxsd.domain-registry.nl/sidn-ext-epp-registry-contacts-delete-1.0"
   - "http://rxsd.domain-registry.nl/sidn-reseller-1.0"
 
+# used to map EPP namespaces to readable names
+rpp_epp_ns_map:
+  epp: "urn:ietf:params:xml:ns:epp-1.0"
+  domain: "urn:ietf:params:xml:ns:domain-1.0"
+  contact: "urn:ietf:params:xml:ns:contact-1.0"
+  host: "urn:ietf:params:xml:ns:host-1.0"
+  secDNS: "urn:ietf:params:xml:ns:secDNS-1.1"
+  sidn-ext-epp: "http://rxsd.domain-registry.nl/sidn-ext-epp-1.0"
+  rgp: "urn:ietf:params:xml:ns:rgp-1.0"
