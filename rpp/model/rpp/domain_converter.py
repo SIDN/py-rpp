@@ -15,7 +15,7 @@ from rpp.model.rpp.domain import (
     DSDataModel,
     SecDNSKeyDataModel,
     DsOrKeyType,
-    TransferResponse
+    DomainTransferResponse
 )
 
 
@@ -178,7 +178,7 @@ def to_domain_transfer(epp_response: Epp, response: Response) -> BaseResponseMod
 
     res_data: TrnDataType = epp_response.response.res_data.other_element[0]
 
-    resData = TransferResponse(
+    resData = DomainTransferResponse(
         name=res_data.name,
         trStatus=res_data.tr_status,
         reId=res_data.re_id,

@@ -19,7 +19,7 @@ from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType, T
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, CreateType, Ext
-from rpp.model.rpp.entity import Card, ContactCheckRequest, ContactCreateRequest, ContactDeleteRequest, ContactInfoRequest, ContactTransferRequest, ContactUpdateRequest
+from rpp.model.rpp.entity import Card, EntityCheckRequest, EntityCreateRequest, EntityDeleteRequest, EntityInfoRequest, EntityTransferRequest, EntityUpdateRequest
 
 
 def get_value_by_kind(components: list[dict], kind: str) -> str | None:
@@ -29,7 +29,7 @@ def get_value_by_kind(components: list[dict], kind: str) -> str | None:
     return None
 
 
-def contact_create(request: ContactCreateRequest) -> Epp:
+def contact_create(request: EntityCreateRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
             create=ReadWriteType(
@@ -98,7 +98,7 @@ def card_to_postal_info(card : Card) -> PostalInfoType:
         )
 
 
-def contact_info(request: ContactInfoRequest) -> Epp:
+def contact_info(request: EntityInfoRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(other_element=Info(id=request.id, auth_info=AuthInfoType(
@@ -110,7 +110,7 @@ def contact_info(request: ContactInfoRequest) -> Epp:
     return epp_request
 
 
-def contact_check(request: ContactCheckRequest) -> Epp:
+def contact_check(request: EntityCheckRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
             check=ReadWriteType(
@@ -122,7 +122,7 @@ def contact_check(request: ContactCheckRequest) -> Epp:
 
     return epp_request
 
-def contact_delete(request: ContactDeleteRequest) -> Epp:
+def contact_delete(request: EntityDeleteRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
             delete=ReadWriteType(
@@ -156,28 +156,28 @@ def card_to_chg_postal_info(card: Card) -> ChgPostalInfoType:
         ),
     )
 
-def get_email_from_contact_change(request: ContactUpdateRequest) -> str:
+def get_email_from_entity_change(request: EntityUpdateRequest) -> str:
 
     for card in request.change.contact:
         if hasattr(card, "emails") and "email" in card.emails.root:
             return card.emails.root["email"].address
 
-def get_voice_from_contact_change(request: ContactUpdateRequest) -> str:
+def get_voice_from_entity_change(request: EntityUpdateRequest) -> str:
 
     for card in request.change.contact:
         if hasattr(card, "phones") and "voice" in card.phones.root:
             return card.phones.root["voice"].number
 
 
-def contact_update(request: ContactUpdateRequest) -> Epp:
+def contact_update(request: EntityUpdateRequest) -> Epp:
     add = None
     rem = None
     chg = None
 
     if request.change is not None:
         chg = ChgType(postal_info=[card_to_chg_postal_info(c) for c in request.change.contact],
-                        voice=E164Type(value=get_voice_from_contact_change(request)),
-                        email=get_email_from_contact_change(request),
+                        voice=E164Type(value=get_voice_from_entity_change(request)),
+                        email=get_email_from_entity_change(request),
                         auth_info=AuthInfoType(
                             pw=PwAuthInfoType(value=request.change.authInfo.value, roid=request.change.authInfo.roid)
                         ) if request.change.authInfo else None
@@ -211,7 +211,7 @@ def contact_update(request: ContactUpdateRequest) -> Epp:
 
     return epp_request
 
-def contact_transfer(request: ContactTransferRequest, op: str) -> Epp:
+def contact_transfer(request: EntityTransferRequest, op: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
@@ -227,7 +227,7 @@ def contact_transfer(request: ContactTransferRequest, op: str) -> Epp:
 
     return epp_request
 
-def contact_transfer_query(request: ContactTransferRequest) -> Epp:
+def contact_transfer_query(request: EntityTransferRequest) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(

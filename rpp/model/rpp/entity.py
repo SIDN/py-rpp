@@ -78,53 +78,53 @@ class Card(BaseModel):
             raise ValueError('version must be "2.0"')
         return v
 
-class ContactCreateRequest(BaseRequestModel):
+class EntityCreateRequest(BaseRequestModel):
     card: Card 
     authInfo: Optional[AuthInfoModel] = None
 
-class ContactCreateResponseModel(BaseModel):
+class EntityCreateResponseModel(BaseModel):
     id: Optional[str] = None
     createDate: Optional[datetime] = None
 
-class ContactInfoRequest(BaseRequestModel):
+class EntityInfoRequest(BaseRequestModel):
     id: str
     authInfo: Optional[AuthInfoModel] = None
 
-class ContactCheckRequest(BaseRequestModel):
+class EntityCheckRequest(BaseRequestModel):
     name: str
 
-class ContactDeleteRequest(BaseRequestModel):
+class EntityDeleteRequest(BaseRequestModel):
     name: str
 
-class ContactInfoResponse(BaseModel):
+class EntityInfoResponse(BaseModel):
     roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
     card: Card 
     status: Optional[List[str]] = None
     authInfo: Optional[AuthInfoModel] = None
     events: Optional[Dict[str, EventModel]] = None
 
-class ContactUpdateAddOrRemove(BaseModel):
+class EntityUpdateAddOrRemove(BaseModel):
     status: List[str]
 
-class ContactUpdateChange(BaseModel):
+class EntityUpdateChange(BaseModel):
     contact: List[Card] 
     authInfo: AuthInfoModel
 
-class ContactUpdateRequest(BaseRequestModel):
+class EntityUpdateRequest(BaseRequestModel):
     id: str
-    add: Optional[ContactUpdateAddOrRemove] = None
-    remove: Optional[ContactUpdateAddOrRemove] = None
-    change: Optional[ContactUpdateChange] = None
+    add: Optional[EntityUpdateAddOrRemove] = None
+    remove: Optional[EntityUpdateAddOrRemove] = None
+    change: Optional[EntityUpdateChange] = None
 
-class ContactStartTransferRequest(BaseRequestModel):
+class EntityStartTransferRequest(BaseRequestModel):
     id: str
     authInfo: AuthInfoModel
 
-class ContactTransferRequest(BaseRequestModel):
+class EntityTransferRequest(BaseRequestModel):
     id: str
     authInfo: Optional[AuthInfoModel] = None
 
-class TransferResponse(BaseModel):
+class EntityTransferResponse(BaseModel):
     id: str
     trStatus: str
     reId: str

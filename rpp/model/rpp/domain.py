@@ -120,7 +120,7 @@ class DomainTransferRequest(BaseRequestModel):
     name: str
     authInfo: Optional[AuthInfoModel] = None
 
-class TransferResponse(BaseModel):
+class DomainTransferResponse(BaseModel):
     name: str
     trStatus: str
     reId: str

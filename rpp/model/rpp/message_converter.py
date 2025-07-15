@@ -6,7 +6,7 @@ from rpp.model.epp.epp_1_0 import Epp
 from rpp.model.epp.sidn_ext_epp_1_0 import PollData
 from rpp.model.rpp.common import BaseResponseModel, MessageQueueModel, TrIDModel
 from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
-from rpp.model.rpp.domain import TransferResponse
+from rpp.model.rpp.domain import DomainTransferResponse
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -39,7 +39,7 @@ def to_messages(epp_response: Epp) -> BaseResponseModel:
                 logger.info(f"Domain transfer data found in PollData")
                 resData: DomainTrnData = poll_data.data.res_data.other_element[0]
 
-                resData = TransferResponse(
+                resData = DomainTransferResponse(
                     name=resData.name,
                     trStatus=resData.tr_status,
                     reId=resData.re_id,

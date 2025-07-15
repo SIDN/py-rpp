@@ -5,9 +5,9 @@ from rpp.model.epp.contact_1_0 import CheckType, ChkDataType, TrnDataType
 from rpp.model.epp.epp_1_0 import Epp
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel, TrIDModel
 from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
-from rpp.model.rpp.entity import Card, ContactCreateResponseModel, ContactInfoResponse, EventModel, Name, AddressComponent, Organization, Address, TransferResponse
+from rpp.model.rpp.entity import Card, EntityCreateResponseModel, EntityInfoResponse, EventModel, Name, AddressComponent, Organization, Address, EntityTransferResponse
 
-def to_contact_info(epp_response) -> BaseResponseModel:
+def to_entity_info(epp_response) -> BaseResponseModel:
 
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
@@ -69,7 +69,7 @@ def to_contact_info(epp_response) -> BaseResponseModel:
         addresses=addresses,
     )
 
-    infData = ContactInfoResponse(
+    infData = EntityInfoResponse(
         card=card,
         status=[s.s.value for s in res_data.status],
         events=events,
@@ -84,7 +84,7 @@ def to_contact_info(epp_response) -> BaseResponseModel:
         resData=infData
     )
 
-def to_contact_check(epp_response: Epp) -> tuple[bool, int, str]:
+def to_entity_check(epp_response: Epp) -> tuple[bool, int, str]:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
          return None, epp_status, message
@@ -94,14 +94,14 @@ def to_contact_check(epp_response: Epp) -> tuple[bool, int, str]:
 
     return cd.id.avail, epp_status, cd.reason.value if cd.reason else None
 
-def to_contact_create(epp_response) -> BaseResponseModel:
+def to_entity_create(epp_response) -> BaseResponseModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
         return to_base_response(epp_response)
 
     res_data = epp_response.response.res_data.other_element[0]
 
-    resData = ContactCreateResponseModel(
+    resData = EntityCreateResponseModel(
         id=res_data.id,
         createDate=str(res_data.cr_date) if hasattr(res_data, "cr_date") else None)
     
@@ -112,20 +112,20 @@ def to_contact_create(epp_response) -> BaseResponseModel:
         result=to_result_list(epp_response),
         resData=resData)
 
-def to_contact_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
+def to_entity_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
     return to_base_response(epp_response)
 
-def to_contact_update(epp_response: Epp, response: Response) -> BaseResponseModel:
+def to_entity_update(epp_response: Epp, response: Response) -> BaseResponseModel:
     return to_base_response(epp_response)
 
-def to_contact_transfer(epp_response: Epp, response: Response) -> BaseResponseModel:
+def to_entity_transfer(epp_response: Epp, response: Response) -> BaseResponseModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok or not hasattr(epp_response.response.res_data, "other_element"):
         return to_base_response(epp_response)
 
     res_data: TrnDataType = epp_response.response.res_data.other_element[0]
 
-    resData = TransferResponse(
+    resData = EntityTransferResponse(
         id=res_data.id,
         trStatus=res_data.tr_status,
         reId=res_data.re_id,
