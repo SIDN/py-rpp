@@ -87,6 +87,17 @@ async def do_delete(domain_name: str, response: Response,
     update_response(response, epp_response, 204)  # 204 No Content
     to_domain_delete(epp_response, response)
 
+# @router.delete("/{domain_name}/deletion", status_code=204, summary="Delete Domain")
+# async def do_cancel_delete(domain_name: str, response: Response,
+#             rpp_cl_trid: Annotated[str | None, Header()] = None,
+#             conn: EppClient = Depends(get_connection)):
+#     logger.info(f"Cancel delete domain: {domain_name}")
+
+#     epp_request = domain_cancel_delete(DomainCancelDeleteRequest(name=domain_name, clTRID=rpp_cl_trid))
+#     epp_response = await conn.send_command(epp_request)
+
+#     update_response(response, epp_response, 204)  # 204 No Content
+#     to_domain_cancel_delete(epp_response, response)
 
 @router.patch("/{domain_name}", response_model_exclude_none=True, summary="Update Domain")
 async def do_update(update_request: DomainUpdateRequest,

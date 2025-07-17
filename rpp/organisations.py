@@ -11,7 +11,7 @@ from rpp.model.rpp.common import BaseResponseModel
 from rpp.model.rpp.common_converter import is_ok_code
 from fastapi.security import HTTPBasic
 
-from rpp.model.rpp.organisation import OrganisationDeleteRequestModel, OrganisationInfoRequestModel, OrganisationModel, OrganisationUpdateRequestModel
+from rpp.model.rpp.organisation import OrganisationCheckRequest, OrganisationCreateRequest, OrganisationDeleteRequest, OrganisationInfoRequest, OrganisationUpdateRequest
 from rpp.model.rpp.organisation_converter import to_organisation_check, to_organisation_create, to_organisation_delete, to_organisation_info, to_organisation_update
 
 logger = logging.getLogger('uvicorn.error')
@@ -20,10 +20,10 @@ router = APIRouter(dependencies=[Depends(security)])
 
 
 @router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Create Organisation")
-async def do_create(create_request: OrganisationModel,
+async def do_create(create_request: OrganisationCreateRequest,
               response: Response,
               conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
-    logger.info(f"Create organisation: {create_request.name}")
+    logger.info(f"Create organisation: {create_request.id}")
 
     epp_request = None  # Replace with actual EPP request for organisation creation
     epp_response = await conn.send_command(epp_request)
@@ -40,7 +40,7 @@ async def do_info(organisation: str,
 
     logger.info(f"Info for organisation: {organisation}")
 
-    rpp_request = OrganisationInfoRequestModel(name=organisation, clTRID=rpp_cl_trid)
+    rpp_request = OrganisationInfoRequest(id=organisation, clTRID=rpp_cl_trid)
     epp_request = None  # Replace with actual EPP request for organisation info
     epp_response = await conn.send_command(epp_request)
 
@@ -50,7 +50,7 @@ async def do_info(organisation: str,
 @router.post("/{organisation}", response_model_exclude_none=True, summary="Get Organisation Info (message body)")
 async def do_info_with_body(organisation: str, response: Response,
              conn: EppClient = Depends(get_connection),
-             info_request: OrganisationInfoRequestModel = Body(OrganisationInfoRequestModel)) -> BaseResponseModel:
+             info_request: OrganisationInfoRequest = Body(OrganisationInfoRequest)) -> BaseResponseModel:
 
     logger.info(f"Fetching info for organisation: {organisation}")
 
@@ -68,7 +68,7 @@ async def do_check(organisation: str,
 
     logger.info(f"Check for organisation: {organisation}")
 
-    rpp_request = OrganisationInfoRequestModel(name=organisation, clTRID=rpp_cl_trid)
+    rpp_request = OrganisationCheckRequest(id=organisation, clTRID=rpp_cl_trid)
     epp_request = None  # Replace with actual EPP request for organisation info
     epp_response = await conn.send_command(epp_request)
 
@@ -86,7 +86,7 @@ async def do_delete(organisation: str,
 
     logger.info(f"Delete organisation: {organisation}")
 
-    rpp_request = OrganisationDeleteRequestModel(name=organisation, clTRID=rpp_cl_trid)
+    rpp_request = OrganisationDeleteRequest(id=organisation, clTRID=rpp_cl_trid)
     epp_request = None  # Replace with actual EPP request for organisation deletion
     epp_response = await conn.send_command(epp_request)
 
@@ -97,7 +97,7 @@ async def do_delete(organisation: str,
 @router.patch("/{organisation}", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Update Organisation")
 async def do_update(organisation: str,
             response: Response,
-            request: OrganisationUpdateRequestModel,
+            request: OrganisationUpdateRequest,
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
     logger.info(f"Update organisation: {organisation}")

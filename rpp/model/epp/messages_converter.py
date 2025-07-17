@@ -1,10 +1,4 @@
-
-from rpp.model.epp.epp_1_0 import (
-    CommandType,
-    Epp,
-    PollOpType,
-    PollType
-)
+from rpp.model.epp.epp_1_0 import CommandType, Epp, PollOpType, PollType
 from rpp.model.epp.helpers import random_tr_id
 
 
@@ -17,6 +11,7 @@ def get_messages(clTRID: str) -> Epp:
     )
 
     return epp_request
+
 
 def ack_message(clTRID: str, msg_id: int) -> Epp:
     epp_request = Epp(

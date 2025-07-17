@@ -1,4 +1,5 @@
 from xsdata.models.datatype import XmlDate
+
 from rpp.model.epp.domain_1_0 import (
     AddRemType,
     AuthInfoChgType,
@@ -18,12 +19,27 @@ from rpp.model.epp.domain_1_0 import (
     Transfer,
     Update,
 )
-from rpp.model.epp.epp_1_0 import CommandType, Epp, ExtAnyType, ReadWriteType, TransferOpType, TransferType
+from rpp.model.epp.epp_1_0 import (
+    CommandType,
+    Epp,
+    ExtAnyType,
+    ReadWriteType,
+    TransferOpType,
+    TransferType,
+)
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sec_dns_1_1 import Create as SecdnsCreateType
 from rpp.model.epp.sec_dns_1_1 import KeyDataType
-from rpp.model.rpp.domain import DomainCheckRequest, DomainCreateRequest, DomainInfoRequest, DomainRenewRequest, DomainStartTransferRequest, DomainTransferRequest, DomainUpdateRequest
+from rpp.model.rpp.domain import (
+    DomainCheckRequest,
+    DomainCreateRequest,
+    DomainInfoRequest,
+    DomainRenewRequest,
+    DomainStartTransferRequest,
+    DomainTransferRequest,
+    DomainUpdateRequest,
+)
 
 
 def domain_create(req: DomainCreateRequest) -> Epp:
@@ -52,7 +68,9 @@ def domain_create(req: DomainCreateRequest) -> Epp:
     # AuthInfo
     auth_info = None
     if req.authInfo:
-        auth_info = AuthInfoType(pw=PwAuthInfoType(value=req.authInfo.value, roid=req.authInfo.roid))
+        auth_info = AuthInfoType(
+            pw=PwAuthInfoType(value=req.authInfo.value, roid=req.authInfo.roid)
+        )
 
     # dnssec.keyData
     secdns_create = None
@@ -80,23 +98,28 @@ def domain_create(req: DomainCreateRequest) -> Epp:
                     auth_info=auth_info,
                 )
             ),
-            extension=ExtAnyType(
-                other_element=[secdns_create] 
-            )if secdns_create else None,
+            extension=ExtAnyType(other_element=[secdns_create])
+            if secdns_create
+            else None,
             cl_trid=req.clTRID or random_tr_id(),
         )
     )
 
 
 def domain_info(request: DomainInfoRequest) -> Epp:
-
-    auth_info = AuthInfoType(pw=PwAuthInfoType(value=request.authInfo)) if request.authInfo else None
+    auth_info = (
+        AuthInfoType(pw=PwAuthInfoType(value=request.authInfo))
+        if request.authInfo
+        else None
+    )
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
-                other_element=Info(name=InfoNameType(value=request.name), auth_info=auth_info)
+                other_element=Info(
+                    name=InfoNameType(value=request.name), auth_info=auth_info
+                )
             ),
-            cl_trid=request.clTRID or random_tr_id()
+            cl_trid=request.clTRID or random_tr_id(),
         )
     )
 
@@ -104,7 +127,6 @@ def domain_info(request: DomainInfoRequest) -> Epp:
 
 
 def domain_check(request: DomainCheckRequest) -> Epp:
-
     epp_request = Epp(
         command=CommandType(
             check=ReadWriteType(other_element=Check(name=[request.name])),
@@ -131,49 +153,57 @@ def domain_delete(domain: str) -> Epp:
 
     return epp_request
 
-def domain_update(request: DomainUpdateRequest) -> Epp:
 
+def domain_update(request: DomainUpdateRequest) -> Epp:
     add = None
     rem = None
     chg = None
 
     if request.change:
-       chg = ChgType(registrant=request.change.registrant, 
-                    auth_info=AuthInfoChgType(pw=PwAuthInfoType(value=request.change.authInfo.value,
-                                                                roid=request.change.authInfo.roid)) if request.change.authInfo else None) 
+        chg = ChgType(
+            registrant=request.change.registrant,
+            auth_info=AuthInfoChgType(
+                pw=PwAuthInfoType(
+                    value=request.change.authInfo.value,
+                    roid=request.change.authInfo.roid,
+                )
+            )
+            if request.change.authInfo
+            else None,
+        )
 
     if request.add is not None:
-      add = AddRemType(
-                ns=NsType(
-                    host_obj=[n for n in request.add.ns]
-                ),
-                contact=[ContactType(
+        add = AddRemType(
+            ns=NsType(host_obj=[n for n in request.add.ns]),
+            contact=[
+                ContactType(
                     value=c.value,
-                    type_value=ContactAttrType(c.type) if c.type else None
-                ) for c in request.add.contact] if request.add.contact else None,
-                status=request.add.status
-            )
+                    type_value=ContactAttrType(c.type) if c.type else None,
+                )
+                for c in request.add.contact
+            ]
+            if request.add.contact
+            else None,
+            status=request.add.status,
+        )
     if request.remove is not None:
-      rem = AddRemType(
-                ns=NsType(
-                    host_obj=[n for n in request.remove.ns]
-                ),
-                contact=[ContactType(
+        rem = AddRemType(
+            ns=NsType(host_obj=[n for n in request.remove.ns]),
+            contact=[
+                ContactType(
                     value=c.value,
-                    type_value=ContactAttrType(c.type) if c.type else None
-                ) for c in request.remove.contact],
-                status=request.remove.status
-            )
-
+                    type_value=ContactAttrType(c.type) if c.type else None,
+                )
+                for c in request.remove.contact
+            ],
+            status=request.remove.status,
+        )
 
     epp_request = Epp(
         command=CommandType(
             update=ReadWriteType(
                 other_element=Update(
-                    name=request.name,
-                    add=add,
-                    rem=rem,
-                    chg=chg
+                    name=request.name, add=add, rem=rem, chg=chg
                 )
             ),
             cl_trid=request.clTRID or random_tr_id(),
@@ -182,10 +212,13 @@ def domain_update(request: DomainUpdateRequest) -> Epp:
 
     return epp_request
 
+
 def domain_renew(request: DomainRenewRequest) -> Epp:
     period = None
     if request.period:
-        period = PeriodType(value=request.period.value, unit=PUnitType(request.period.unit))
+        period = PeriodType(
+            value=request.period.value, unit=PUnitType(request.period.unit)
+        )
 
     epp_request = Epp(
         command=CommandType(
@@ -193,7 +226,7 @@ def domain_renew(request: DomainRenewRequest) -> Epp:
                 other_element=Renew(
                     name=request.name,
                     cur_exp_date=XmlDate.from_date(request.currentExpiry),
-                    period=period
+                    period=period,
                 )
             ),
             cl_trid=request.clTRID or random_tr_id(),
@@ -202,7 +235,10 @@ def domain_renew(request: DomainRenewRequest) -> Epp:
 
     return epp_request
 
-def domain_transfer(request: DomainStartTransferRequest, op: TransferOpType) -> Epp:
+
+def domain_transfer(
+    request: DomainStartTransferRequest, op: TransferOpType
+) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
@@ -210,16 +246,27 @@ def domain_transfer(request: DomainStartTransferRequest, op: TransferOpType) -> 
                 other_element=Transfer(
                     name=request.name,
                     period=PeriodType(
-                        value=request.period.value, unit=PUnitType(request.period.unit)
-                    ) if request.period else None,
-                    auth_info=AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None,
-                )
+                        value=request.period.value,
+                        unit=PUnitType(request.period.unit),
+                    )
+                    if request.period
+                    else None,
+                    auth_info=AuthInfoType(
+                        pw=PwAuthInfoType(
+                            value=request.authInfo.value,
+                            roid=request.authInfo.roid,
+                        )
+                    )
+                    if request.authInfo
+                    else None,
+                ),
             ),
             cl_trid=request.clTRID or random_tr_id(),
         )
     )
 
     return epp_request
+
 
 def domain_transfer_query(request: DomainTransferRequest) -> Epp:
     epp_request = Epp(
@@ -229,10 +276,20 @@ def domain_transfer_query(request: DomainTransferRequest) -> Epp:
                 other_element=Transfer(
                     name=request.name,
                     period=PeriodType(
-                        value=request.period.value, unit=PUnitType(request.period.unit)
-                    ) if request.period else None,
-                    auth_info=AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid)) if request.authInfo else None,
-                )
+                        value=request.period.value,
+                        unit=PUnitType(request.period.unit),
+                    )
+                    if request.period
+                    else None,
+                    auth_info=AuthInfoType(
+                        pw=PwAuthInfoType(
+                            value=request.authInfo.value,
+                            roid=request.authInfo.roid,
+                        )
+                    )
+                    if request.authInfo
+                    else None,
+                ),
             ),
             cl_trid=request.clTRID or random_tr_id(),
         )
