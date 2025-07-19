@@ -60,7 +60,7 @@ async def do_info_with_body(entity_id: str, response: Response,
     return to_entity_info(epp_response)
 
 @router.head("/{entity_id}/availability", summary="Check Entity Existence")
-async def do_check(entity_id: str, 
+async def do_check_head(entity_id: str, 
             response: Response,
             conn: EppClient = Depends(get_connection),
             rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
@@ -74,6 +74,14 @@ async def do_check(entity_id: str,
     avail, epp_status, reason = to_entity_check(epp_response)
 
     add_check_status(response, epp_status, avail, reason)
+
+@router.get("/{entity_id}/availability", summary="Check Entity Existence")
+async def do_check_get(entity_id: str, 
+            response: Response,
+            conn: EppClient = Depends(get_connection),
+            rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
+
+    logger.info(f"Check for entity: {entity_id}")
 
 @router.delete("/{entity_id}", response_model_exclude_none=True, status_code=204, summary="Delete Entity")
 async def do_delete(entity_id: str, 

@@ -61,7 +61,7 @@ async def do_info_with_body(host: str, response: Response,
     return to_host_info(epp_response)
 
 @router.head("/{host}/availability", summary="Check Host Existence")
-async def do_check(host: str, 
+async def do_check_head(host: str, 
             response: Response,
             conn: EppClient = Depends(get_connection),
             rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
@@ -75,6 +75,14 @@ async def do_check(host: str,
     avail, epp_status, reason = to_host_check(epp_response)
 
     add_check_status(response, epp_status, avail, reason)
+
+@router.get("/{host}/availability", summary="Check Host Existence")
+async def do_check_get(host: str, 
+            response: Response,
+            conn: EppClient = Depends(get_connection),
+            rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
+
+    logger.info(f"Check for host: {host}")
 
 @router.delete("/{host}", response_model_exclude_none=True, status_code=204, summary="Delete Host")
 async def do_delete(host: str,

@@ -60,7 +60,7 @@ async def do_info_with_body(domain_name: str, response: Response,
     return epp_response
 
 @router.head("/{domain_name}/availability", summary="Check Domain Existence")
-async def do_check(domain_name: str, response: Response,
+async def do_check_head(domain_name: str, response: Response,
              rpp_cl_trid: Annotated[str | None, Header()] = None,
              conn: EppClient = Depends(get_connection)):
     
@@ -74,7 +74,7 @@ async def do_check(domain_name: str, response: Response,
     add_check_status(response, epp_status, avail, reason)
 
 @router.get("/{domain_name}/availability", summary="Check Domain Existence")
-async def do_check(domain_name: str, response: Response,
+async def do_check_get(domain_name: str, response: Response,
              rpp_cl_trid: Annotated[str | None, Header()] = None,
              conn: EppClient = Depends(get_connection)):
     logger.info(f"Check domain: {domain_name}")

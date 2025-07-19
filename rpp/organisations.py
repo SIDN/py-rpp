@@ -61,7 +61,7 @@ async def do_info_with_body(organisation: str, response: Response,
     return to_organisation_info(epp_response)
 
 @router.head("/{organisation}/availability", summary="Check Organisation Existence")
-async def do_check(organisation: str,
+async def do_check_head(organisation: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
             rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
@@ -75,6 +75,14 @@ async def do_check(organisation: str,
     avail, epp_status, reason = to_organisation_check(epp_response)
 
     add_check_status(response, epp_status, avail, reason)
+
+@router.head("/{organisation}/availability", summary="Check Organisation Existence")
+async def do_check_get(organisation: str,
+            response: Response,
+            conn: EppClient = Depends(get_connection),
+            rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
+
+    logger.info(f"Check for organisation: {organisation}")
 
 @router.delete("/{organisation}", response_model_exclude_none=True, status_code=204, summary="Delete Organisation")
 async def do_delete(organisation: str,
