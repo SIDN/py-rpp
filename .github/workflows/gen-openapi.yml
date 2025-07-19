@@ -44,7 +44,7 @@ jobs:
       - name: Copy OpenAPI spec to publish folder
         run: |
               mkdir -p publish
-              python gen-openapi.py > ./publish/openapi.json
+              python export_openapi.py > ./publish/openapi.json
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
