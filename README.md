@@ -4,6 +4,8 @@
 
 Currently, py-rpp is tightly bound to the EPP data model. In future versions, this will change as we begin developing a dedicated RPP data model. This will improve flexibility and better reflect the RPP protocol
 
+**SWAGGER UI**: The API is documented using Swagger, the [interactive documentation](https://sidn.github.io/py-rpp/) is available on Github Pages but there is no server running, so the endpoints are not functional.
+
 ## How to Use
 
 You can run easily using Docker. Once running, you can use the RPP API by sending HTTP requests to the server (see the OpenAPI docs at `/docs`).  
