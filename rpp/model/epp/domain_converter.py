@@ -108,7 +108,7 @@ def domain_create(req: DomainCreateRequest) -> Epp:
 
 def domain_info(request: DomainInfoRequest) -> Epp:
     auth_info = (
-        AuthInfoType(pw=PwAuthInfoType(value=request.authInfo))
+        AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid))
         if request.authInfo
         else None
     )

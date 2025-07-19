@@ -75,7 +75,7 @@ def to_host_info(epp_response) -> HostInfoResponseModel | BaseResponseModel:
         resData=infData
     )
 
-def to_host_check(epp_response: Epp) -> tuple[bool, int, str]:
+def do_host_check(epp_response: Epp) -> tuple[bool, int, str]:
 
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:

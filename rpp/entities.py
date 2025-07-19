@@ -2,16 +2,15 @@ import logging
 from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response
 from fastapi.params import Body
-from rpp.common import add_check_status, update_response, update_response_from_code
+from rpp.common import add_check_status, auth_info_from_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 
 from rpp.model.epp.contact_converter import contact_check, contact_create, contact_delete, contact_info, contact_transfer, contact_transfer_query, contact_update
 from rpp.model.epp.epp_1_0 import TransferOpType
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
-from rpp.model.rpp.common_converter import is_ok_code
 from rpp.model.rpp.entity import EntityCheckRequest, EntityCreateRequest, EntityDeleteRequest, EntityInfoRequest, EntityStartTransferRequest, EntityTransferRequest, EntityUpdateRequest
-from rpp.model.rpp.entity_converter import to_entity_check, to_entity_create, to_entity_delete, to_entity_info, to_entity_transfer, to_entity_update
+from rpp.model.rpp.entity_converter import do_entity_check, to_entity_create, to_entity_delete, to_entity_info, to_entity_transfer, to_entity_update
 from fastapi.security import HTTPBasic
 
 logger = logging.getLogger('uvicorn.error')
@@ -37,23 +36,13 @@ async def do_create(request: Request,
 @router.get("/{entity_id}", response_model_exclude_none=True, summary="Get Entity Info")
 async def do_info(entity_id: str, response: Response,
             conn: EppClient = Depends(get_connection),
+            rpp_authorization: Annotated[str | None, Header()] = None,
             rpp_cl_trid: Annotated[str | None, Header()] = None) -> BaseResponseModel:
     logger.info(f"Fetching info for entity: {entity_id}")
 
-    epp_request = contact_info(EntityInfoRequest(id=entity_id, clTRID=rpp_cl_trid))
-    epp_response = await conn.send_command(epp_request)
-
-    update_response(response, epp_response)
-    return to_entity_info(epp_response)
-
-@router.post("/{entity_id}", response_model_exclude_none=True, summary="Get Entity Info (message body)")
-async def do_info_with_body(entity_id: str, response: Response,
-             conn: EppClient = Depends(get_connection),
-             info_request: EntityInfoRequest = Body(EntityInfoRequest)) -> BaseResponseModel:
-
-    logger.info(f"Fetching info for entity: {entity_id}")
-
-    epp_request = contact_info(info_request)
+    auth_info = auth_info_from_header(rpp_authorization)
+    epp_request = contact_info(EntityInfoRequest(id=entity_id, clTRID=rpp_cl_trid, 
+                                authInfo=auth_info))
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
@@ -71,8 +60,7 @@ async def do_check_head(entity_id: str,
     epp_request = contact_check(rpp_request)
     epp_response = await conn.send_command(epp_request)
 
-    avail, epp_status, reason = to_entity_check(epp_response)
-
+    avail, epp_status, reason = do_entity_check(epp_response)
     add_check_status(response, epp_status, avail, reason)
 
 @router.get("/{entity_id}/availability", summary="Check Entity Existence")

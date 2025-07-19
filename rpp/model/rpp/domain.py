@@ -71,6 +71,11 @@ class DomainInfoRequest(BaseRequestModel):
 class DomainCheckRequest(BaseRequestModel):
     name: str
 
+class DomainCheckResponse(BaseModel):
+    name: str
+    avail: bool
+    reason: Optional[str] = None
+
 class DomainInfoResponse(BaseModel):
     name: str
     registrant: str

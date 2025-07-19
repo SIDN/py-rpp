@@ -2,16 +2,15 @@ import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Body, Header
-from rpp.common import add_check_status, update_response, update_response_from_code
+from rpp.common import add_check_status, auth_info_from_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from rpp.model.epp.host_commands import host_check, host_create, host_delete, host_info, host_update
 from fastapi import APIRouter
 
 from rpp.model.rpp.common import BaseResponseModel
-from rpp.model.rpp.common_converter import is_ok_code
 from rpp.model.rpp.host import HostCheckRequest, HostCreateRequest, HostDeleteRequest, HostInfoRequest, HostUpdateRequest
-from rpp.model.rpp.host_converter import to_host_check, to_host_create, to_host_delete, to_host_info, to_host_update
+from rpp.model.rpp.host_converter import do_host_check, to_host_create, to_host_delete, to_host_info, to_host_update
 from fastapi.security import HTTPBasic
 
 logger = logging.getLogger('uvicorn.error')
@@ -47,19 +46,6 @@ async def do_info(host: str,
     update_response(response, epp_response)
     return to_host_info(epp_response)
 
-@router.post("/{host}", response_model_exclude_none=True, summary="Get Host Info (message body)")
-async def do_info_with_body(host: str, response: Response,
-             conn: EppClient = Depends(get_connection),
-             info_request: HostInfoRequest = Body(HostInfoRequest)) -> BaseResponseModel:
-
-    logger.info(f"Fetching info for host: {host}")
-
-    epp_request = host_info(info_request)
-    epp_response = await conn.send_command(epp_request)
-
-    update_response(response, epp_response)
-    return to_host_info(epp_response)
-
 @router.head("/{host}/availability", summary="Check Host Existence")
 async def do_check_head(host: str, 
             response: Response,
@@ -72,7 +58,7 @@ async def do_check_head(host: str,
     epp_request = host_check(rpp_request)
     epp_response = await conn.send_command(epp_request)
 
-    avail, epp_status, reason = to_host_check(epp_response)
+    avail, epp_status, reason = do_host_check(epp_response)
 
     add_check_status(response, epp_status, avail, reason)
 

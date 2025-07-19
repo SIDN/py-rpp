@@ -84,7 +84,7 @@ def to_entity_info(epp_response) -> BaseResponseModel:
         resData=infData
     )
 
-def to_entity_check(epp_response: Epp) -> tuple[bool, int, str]:
+def do_entity_check(epp_response: Epp) -> tuple[bool, int, str]:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
          return None, epp_status, message

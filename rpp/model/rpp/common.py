@@ -64,7 +64,7 @@ class BaseResponseModel(BaseModel):
       )
     type_: Optional[str] = Field(default=None, alias='@type')
     result: List[ResultModel]
-    trID: TrIDModel
+    #trID: TrIDModel
     messages: Optional[MessageQueueModel] = None
     resData: Optional[Any] = None  
     extension: Optional[Any] = None 

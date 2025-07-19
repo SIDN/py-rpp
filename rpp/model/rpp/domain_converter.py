@@ -2,10 +2,11 @@ import base64
 
 from fastapi import Response
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.epp.domain_1_0 import CheckType, ChkDataType, CreDataType, InfData, RenDataType, TrnDataType
+from rpp.model.epp.domain_1_0 import CheckNameType, CheckType, ChkDataType, CreDataType, InfData, RenDataType, TrnDataType
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel, TrIDModel
 from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
 from rpp.model.rpp.domain import (
+    DomainCheckResponse,
     DomainCreateResponse,
     DomainInfoResponse,
     DomainRenewResponse,
@@ -112,7 +113,7 @@ def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
     )
 
 
-def to_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
+def do_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
 
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
@@ -122,6 +123,28 @@ def to_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
     cd: CheckType = check_data.cd[0]
 
     return cd.name.avail, epp_status, cd.reason.value if cd.reason else None
+
+def to_domain_check_response(epp_response: Epp) -> BaseResponseModel:
+
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        return to_base_response(epp_response)
+
+    res_data: ChkDataType = epp_response.response.res_data.other_element[0]
+    check_result: CheckType = res_data.cd[0]
+    resData = DomainCheckResponse(
+        name=check_result.name.value,
+        avail=check_result.name.avail,
+        reason=check_result.reason.value if check_result.reason else None
+    )
+
+    return BaseResponseModel(
+        type_="Domain",
+        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+                       svTRID=epp_response.response.tr_id.sv_trid),
+        result=to_result_list(epp_response),
+        resData=resData
+    )   
 
 def to_domain_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
     return to_base_response(epp_response)

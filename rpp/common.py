@@ -1,16 +1,26 @@
 
+import logging
 from typing import Optional
 from fastapi import HTTPException, Response
 from rpp.model.epp.epp_1_0 import Epp
+from rpp.model.rpp.common import AuthInfoModel
 from rpp.model.rpp.common_converter import get_status_from_response, is_ok_code
+
+logger = logging.getLogger('uvicorn.error')
 
 def update_response(response: Response, epp_response: Epp, default_http_status_code: int = None):
     status_code = get_status_from_response(epp_response)
     update_response_from_code(response, status_code, default_http_status_code)
+    add_transaction_headers(response, epp_response)
 
+def add_transaction_headers(response: Response, epp_response: Epp):
+    response.headers["RPP-Cltrid"] = epp_response.response.tr_id.cl_trid
+    response.headers["RPP-Svtrid"] = epp_response.response.tr_id.sv_trid
+    
 def update_response_from_code(response: Response, status_code: int, default_http_status_code: int = None):
     set_response_status(response, status_code, default_http_status_code)
     add_status_header(response, status_code)
+   
 
 def set_response_status(response: Response, epp_code: int, default_http_status_code: int = None):
     # allow the status code to be overridden by the default_http_status_code
@@ -63,3 +73,21 @@ class EppException(HTTPException):
     def __init__(self, status_code: int = 500, epp_response: Epp = None, headers: Optional[dict] = None):
         self.epp_response = epp_response
         super().__init__(status_code=status_code, headers=headers)
+
+
+def auth_info_from_header(header_value: str) -> AuthInfoModel | None:
+    """
+    Parse the structured header value into a dictionary.
+    Example header value: "AuthInfo=xxx:Roid=yyy"
+    """
+
+    if header_value:
+        # Remove whitespace and parse key=value pairs separated by colon
+        cleaned = header_value.replace(" ", "")
+        parts = dict(item.split("=", 1) for item in cleaned.split(",") if "=" in item)
+        return AuthInfoModel(
+            value=parts.get("AuthInfo"),
+            roid=parts.get("Roid")
+        )
+    
+    return None

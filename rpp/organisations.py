@@ -2,7 +2,7 @@ import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Body, Header
-from rpp.common import add_check_status, update_response
+from rpp.common import add_check_status, auth_info_from_header, update_response
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from fastapi import APIRouter
@@ -36,24 +36,13 @@ async def do_create(create_request: OrganisationCreateRequest,
 async def do_info(organisation: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
+            rpp_authorization: Annotated[str | None, Header()] = None,
             rpp_cl_trid: Annotated[str | None, Header()] = None) -> BaseResponseModel:
 
     logger.info(f"Info for organisation: {organisation}")
 
-    rpp_request = OrganisationInfoRequest(id=organisation, clTRID=rpp_cl_trid)
-    epp_request = None  # Replace with actual EPP request for organisation info
-    epp_response = await conn.send_command(epp_request)
-
-    update_response(response, epp_response)
-    return to_organisation_info(epp_response)
-
-@router.post("/{organisation}", response_model_exclude_none=True, summary="Get Organisation Info (message body)")
-async def do_info_with_body(organisation: str, response: Response,
-             conn: EppClient = Depends(get_connection),
-             info_request: OrganisationInfoRequest = Body(OrganisationInfoRequest)) -> BaseResponseModel:
-
-    logger.info(f"Fetching info for organisation: {organisation}")
-
+    auth_info = auth_info_from_header(rpp_authorization)
+    rpp_request = OrganisationInfoRequest(id=organisation, clTRID=rpp_cl_trid, authInfo=auth_info)
     epp_request = None  # Replace with actual EPP request for organisation info
     epp_response = await conn.send_command(epp_request)
 

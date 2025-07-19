@@ -28,6 +28,9 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
+    title="RPP ",
+    description="Restful Provisioning Protocol - Modern Domain Registry API",
+    version="0.0.1",
     lifespan=lifespan
 )
 
