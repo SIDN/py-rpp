@@ -2,7 +2,7 @@ import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Body, Header
-from rpp.common import add_check_header, update_response, update_response_from_code
+from rpp.common import add_check_status, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from rpp.model.epp.host_commands import host_check, host_create, host_delete, host_info, host_update
@@ -60,7 +60,7 @@ async def do_info_with_body(host: str, response: Response,
     update_response(response, epp_response)
     return to_host_info(epp_response)
 
-@router.head("/{host}", summary="Check Host Existence")
+@router.head("/{host}/availability", summary="Check Host Existence")
 async def do_check(host: str, 
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -74,9 +74,7 @@ async def do_check(host: str,
 
     avail, epp_status, reason = to_host_check(epp_response)
 
-    update_response(response, epp_response)
-    if is_ok_code(epp_status):
-         add_check_header(response, avail, reason)
+    add_check_status(response, epp_status, avail, reason)
 
 @router.delete("/{host}", response_model_exclude_none=True, status_code=204, summary="Delete Host")
 async def do_delete(host: str,

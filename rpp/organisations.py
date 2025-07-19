@@ -2,7 +2,7 @@ import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Body, Header
-from rpp.common import add_check_header, update_response
+from rpp.common import add_check_status, update_response
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from fastapi import APIRouter
@@ -60,7 +60,7 @@ async def do_info_with_body(organisation: str, response: Response,
     update_response(response, epp_response)
     return to_organisation_info(epp_response)
 
-@router.head("/{organisation}", summary="Check Organisation Existence")
+@router.head("/{organisation}/availability", summary="Check Organisation Existence")
 async def do_check(organisation: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -74,9 +74,7 @@ async def do_check(organisation: str,
 
     avail, epp_status, reason = to_organisation_check(epp_response)
 
-    update_response(response, epp_response)
-    if is_ok_code(epp_status):
-         add_check_header(response, avail, reason)
+    add_check_status(response, epp_status, avail, reason)
 
 @router.delete("/{organisation}", response_model_exclude_none=True, status_code=204, summary="Delete Organisation")
 async def do_delete(organisation: str,

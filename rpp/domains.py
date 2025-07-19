@@ -2,7 +2,7 @@ import logging
 from typing import Optional, Annotated
 from fastapi import APIRouter, Depends, HTTPException, Header, Response
 from fastapi.params import Body
-from rpp.common import add_check_header, update_response, update_response_from_code
+from rpp.common import add_check_status, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from rpp.model.epp.domain_converter import domain_check, domain_delete, domain_info, domain_create, domain_renew, domain_transfer, domain_transfer_query, domain_update
@@ -59,7 +59,7 @@ async def do_info_with_body(domain_name: str, response: Response,
     update_response(response, epp_response)
     return epp_response
 
-@router.head("/{domain_name}", summary="Check Domain Existence")
+@router.head("/{domain_name}/availability", summary="Check Domain Existence")
 async def do_check(domain_name: str, response: Response,
              rpp_cl_trid: Annotated[str | None, Header()] = None,
              conn: EppClient = Depends(get_connection)):
@@ -71,9 +71,14 @@ async def do_check(domain_name: str, response: Response,
 
     avail, epp_status, reason = to_domain_check(epp_response)
 
-    update_response(response, epp_response)
-    if is_ok_code(epp_status):
-        add_check_header(response, avail, reason)
+    add_check_status(response, epp_status, avail, reason)
+
+@router.get("/{domain_name}/availability", summary="Check Domain Existence")
+async def do_check(domain_name: str, response: Response,
+             rpp_cl_trid: Annotated[str | None, Header()] = None,
+             conn: EppClient = Depends(get_connection)):
+    logger.info(f"Check domain: {domain_name}")
+    #TODO: implement this
 
 @router.delete("/{domain_name}", status_code=204, summary="Delete Domain")
 async def do_delete(domain_name: str, response: Response,
