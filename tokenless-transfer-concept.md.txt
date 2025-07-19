@@ -1,0 +1,233 @@
+% Secure Tokenless Domain Transfers via "freeForTransfer"
+% Maarten
+% July 17, 2025
+% draft-rpp-freetotransfer-01
+
+# Abstract
+
+This document proposes a secure, tokenless alternative to the traditional
+authInfo-based domain transfer model used in EPP (Extensible Provisioning
+Protocol). It introduces a new domain status flag, "freeForTransfer," which the
+current sponsoring registrar sets to explicitly authorize a domain transfer to
+a specific gaining registrar, scoped by expiration time.
+
+This mechanism addresses longstanding problems with authInfo, including
+phishing, weak entropy, shared secret misuse, and poor user experience.
+
+# Status of This Memo
+
+This Internet-Draft is submitted in full conformance with the provisions of
+BCP 78 and BCP 79.
+
+Internet-Drafts are working documents of the Internet Engineering Task Force
+(IETF). Note that other groups may also distribute working documents as
+Internet-Drafts. The list of current Internet-Drafts is at
+https://datatracker.ietf.org/drafts/current/.
+
+Internet-Drafts are draft documents valid for a maximum of six months and may
+be updated, replaced, or obsoleted by other documents at any time. It is
+inappropriate to use Internet-Drafts as reference material or to cite them
+other than as "work in progress."
+
+# Copyright Notice
+
+Copyright (c) 2025 IETF Trust and the persons identified as the document
+authors. All rights reserved.
+
+This document is subject to BCP 78 and the IETF Trust's Legal Provisions
+Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect
+on the date of publication of this document. Please review these documents
+carefully, as they describe your rights and restrictions with respect to this
+document.
+
+# Table of Contents
+
+1. Introduction  
+2. Terminology  
+3. The freeForTransfer Status  
+4. Domain Transfer Flow  
+5. Security Considerations  
+6. Registry Requirements  
+7. Transition and Coexistence  
+8. Future Extensions  
+9. IANA Considerations  
+10. References  
+11. Authors' Address  
+
+# 1 Introduction
+
+The Extensible Provisioning Protocol (EPP) currently uses an "authInfo"
+shared secret to authorize domain transfers. This method suffers from
+significant drawbacks including vulnerability to phishing, poor user
+experience, and the need for registrants to manage sensitive secrets.
+
+This document introduces a new domain status flag, "freeForTransfer,"
+designed for modern, tokenless transfer authorization within a JSON-based
+Registry Provisioning Protocol (RPP) environment. The flag explicitly
+authorizes transfer to a specified gaining registrar for a limited time.
+
+# 2 Terminology
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+"SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+interpreted as described in [RFC2119].
+
+# 3 The freeForTransfer Status
+
+## 3.1 Definition
+
+The "freeForTransfer" status is a domain metadata object indicating that the
+current sponsoring registrar has authorized the transfer of the domain to a
+specified gaining registrar without requiring the traditional authInfo shared
+secret.
+
+## 3.2 JSON Representation
+
+The status is represented as a JSON object with the following fields:
+
+~~~
+{
+  "freeForTransfer": {
+    "enabled": true,
+    "registrar": "r-gaining-xyz",
+    "expiresAt": "2025-07-20T12:00:00Z"
+  }
+}
+~~~
+
+## 3.3 Field Descriptions
+
+- **enabled** (boolean, REQUIRED): Indicates whether the status is active.
+
+- **registrar** (string, REQUIRED): The identifier of the gaining registrar authorized to request transfer.
+
+- **expiresAt** (date-time string, REQUIRED): The timestamp after which this authorization expires and the status is automatically revoked.
+
+# 4 Domain Transfer Flow
+
+## 4.1 Releasing the Domain
+
+The losing registrar issues an update request to the registry, setting the
+"freeForTransfer" status for the domain:
+
+~~~
+PATCH /domains/example.com
+
+{
+  "freeForTransfer": {
+    "enabled": true,
+    "registrar": "r-gaining-xyz",
+    "expiresAt": "2025-07-20T12:00:00Z"
+  }
+}
+~~~
+
+Only the sponsoring registrar may perform this update.
+
+## 4.2 Initiating Transfer
+
+The gaining registrar submits a transfer request:
+
+~~~
+POST /transfers
+
+{
+  "domain": "example.com",
+  "gainingRegistrar": "r-gaining-xyz"
+}
+~~~
+
+The registry validates that:
+
+- The freeForTransfer status is enabled.
+
+- The gainingRegistrar matches the registrar in the status.
+
+- The current time is before expiresAt.
+
+If validation succeeds, the transfer proceeds per registry policy.
+
+# 5 Security Considerations
+
+## 5.1 Integrity and Confidentiality
+
+All RPP requests and responses MUST be cryptographically signed and
+authenticated using mechanisms such as HTTP Signatures or JWTs to prevent
+tampering and spoofing.
+
+The freeForTransfer status MUST NOT be exposed via unauthenticated WHOIS or
+RDAP queries.
+
+## 5.2 Abuse Mitigation
+
+Registries MUST implement rate limiting on transfer requests and monitor for
+abuse patterns.
+
+Expired freeForTransfer statuses MUST be revoked automatically.
+
+All changes to freeForTransfer status and related transfers MUST be logged for
+audit purposes.
+
+# 6 Registry Requirements
+
+Registries MUST:
+
+- Enforce that transfer requests using freeForTransfer have matching registrar.
+
+- Reject transfer requests with mismatched or missing authorization with HTTP
+  403 Forbidden.
+
+- Remove expired freeForTransfer statuses automatically.
+
+- Allow losing registrars to revoke freeForTransfer by disabling the status.
+
+# 7 Transition and Coexistence
+
+Registries MAY support both traditional authInfo and freeForTransfer-based
+transfers.
+
+Transfer requests MUST use either the authInfo or the freeForTransfer status,
+but NOT both.
+
+Registries MAY reject authInfo transfers if freeForTransfer is active for the
+domain.
+
+# 8 Future Extensions
+
+Potential future extensions include:
+
+- multiUse (boolean): Allow multiple transfers within the expiry window.
+
+- notifyRegistrant (boolean): Trigger notification emails to the registrant
+  when the freeForTransfer status is set.
+
+- comment (string): A field for audit or transfer rationale.
+
+# 9 IANA Considerations
+
+This document requests the registration of the "freeForTransfer" domain status
+under the EPP domain status registry.
+
+# 10 References
+
+## 10.1 Normative References
+
+- [RFC2119] Bradner, S., "Key words for use in RFCs to Indicate Requirement
+  Levels", BCP 14, RFC 2119, March 1997.
+
+## 10.2 Informative References
+
+- [RFC5730] Mealling, M., Gudmundsson, O., St. Jean, F., and J. Klensin,
+  "Extensible Provisioning Protocol (EPP)", RFC 5730, January 2010.
+
+- [RFC5731] Mealling, M., Gudmundsson, O., St. Jean, F., and J. Klensin,
+  "Extensible Provisioning Protocol (EPP) Domain Name Mapping", RFC 5731, January 2010.
+
+- [RFC9154] Kisteleki, A., Faltstrom, P., and A. Newton,
+  "Registry Lock Extensions for the Extensible Provisioning Protocol (EPP)",
+  RFC 9154, May 2022.
+
+# 11 Authors' Address
+
+Maarten  
+Email: maarten@example.com
