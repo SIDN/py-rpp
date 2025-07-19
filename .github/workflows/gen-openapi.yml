@@ -44,7 +44,9 @@ jobs:
       - name: Copy OpenAPI spec to publish folder
         run: |
               mkdir -p publish
+              cp config.yaml.example config.yaml
               python export_openapi.py > ./publish/openapi.json
+              rm -f config.yaml
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

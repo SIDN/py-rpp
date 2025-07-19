@@ -1,5 +1,5 @@
 # hostname of the backend EPP server to use
-rpp_epp_host:
+rpp_epp_host: epp.example.org
 
 # optional settings
 rpp_epp_port: 700
