@@ -119,19 +119,22 @@ async def do_update(update_request: DomainUpdateRequest,
     update_response(response, epp_response)
     return to_domain_update(epp_response, response)
 
-@router.post("/{domainname}/renewal", summary="Renew Domain")
-async def do_renew(renew_request: DomainRenewRequest, 
-             response: Response, conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
+@router.post("/{domainname}/processes/renewals", summary="Renew Domain")
+async def do_renew(domainname: str,
+                   response: Response,
+                   renew_request: DomainRenewRequest,
+                   rpp_cl_trid: Annotated[str | None, Header()] = None,
+                   conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
-    logger.info(f"Renew domain: {renew_request.name}")
+    logger.info(f"Renew domain: {domainname}")
 
-    epp_request = domain_renew(renew_request)
+    epp_request = domain_renew(domainname, renew_request, rpp_cl_trid)
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
     return to_domain_renew(epp_response, response)
 
-@router.post("/{domainname}/transfer", response_model_exclude_none=True, summary="Start Domain Transfer")
+@router.post("/{domainname}/processes/transfers", response_model_exclude_none=True, summary="Start Domain Transfer")
 async def do_start_transfer(domainname: str, response: Response,
             transfer_request: Optional[DomainStartTransferRequest]= Body(default=None),
             rpp_cl_trid: Annotated[str | None, Header()] = None,
@@ -155,7 +158,7 @@ async def do_start_transfer(domainname: str, response: Response,
     update_response(response, epp_response)
     return to_domain_transfer(epp_response, response)
 
-@router.get("/{domainname}/transfer", summary="Query Transfer Status")
+@router.get("/{domainname}/processes/transfers/latest", summary="Query Transfer Status")
 async def do_query_transfer(domainname: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
@@ -172,7 +175,7 @@ async def do_query_transfer(domainname: str, response: Response,
     update_response(response, epp_response)
     return to_domain_transfer(epp_response, response)
 
-@router.post("/{domainname}/transfer/rejection", summary="Reject Domain Transfer")
+@router.post("/{domainname}/processes/transfers/latest/rejection", summary="Reject Domain Transfer")
 async def do_reject_transfer(domainname: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
@@ -182,7 +185,7 @@ async def do_reject_transfer(domainname: str, response: Response,
     return await do_stop_transfer(TransferOpType.REJECT, domainname, response,
             conn=conn, rpp_cl_trid=rpp_cl_trid, rpp_auth_info=rpp_auth_info)
 
-@router.post("/{domainname}/transfer/cancellation", summary="Cancel Domain Transfer")
+@router.post("/{domainname}/processes/transfers/latest/cancellation", summary="Cancel Domain Transfer")
 async def do_cancel_transfer(domainname: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
@@ -192,7 +195,7 @@ async def do_cancel_transfer(domainname: str, response: Response,
     return await do_stop_transfer(TransferOpType.CANCEL, domainname, response,
             conn=conn, rpp_cl_trid=rpp_cl_trid, rpp_auth_info=rpp_auth_info)
 
-@router.post("/{domainname}/transfer/approval", summary="Approve Domain Transfer")
+@router.post("/{domainname}/processes/transfers/latest/approval", summary="Approve Domain Transfer")
 async def do_approve_transfer(domainname: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_auth_info: Annotated[str | None, Header()] = None,
@@ -222,7 +225,7 @@ async def do_stop_transfer(op: TransferOpType,
     return to_domain_transfer(epp_response, response)
 
 
-@router.post("/{domain}/lock", status_code=501, summary="Lock Domain (Not Implemented)")
+@router.post("/{domain}/processes/locks", status_code=501, summary="Lock Domain (Not Implemented)")
 async def do_lock(domain: str, response: Response) -> None:
 
     logger.info(f"Lock domain: {domain}")

@@ -105,8 +105,7 @@ class DomainUpdateRequest(BaseRequestModel):
     change: Optional[DomainUpdateChange] = None
 
 class DomainRenewRequest(BaseRequestModel):
-    name: str
-    currentExpiry: Optional[date] = None
+    currentExpiry: date
     period: Optional[PeriodModel] = None
 
 class DomainRenewResponse(BaseModel):

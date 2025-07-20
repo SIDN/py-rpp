@@ -213,7 +213,7 @@ def domain_update(request: DomainUpdateRequest) -> Epp:
     return epp_request
 
 
-def domain_renew(request: DomainRenewRequest) -> Epp:
+def domain_renew(domainname: str, request: DomainRenewRequest, rpp_cl_trid: str) -> Epp:
     period = None
     if request.period:
         period = PeriodType(
@@ -224,12 +224,12 @@ def domain_renew(request: DomainRenewRequest) -> Epp:
         command=CommandType(
             renew=ReadWriteType(
                 other_element=Renew(
-                    name=request.name,
+                    name=domainname,
                     cur_exp_date=XmlDate.from_date(request.currentExpiry),
                     period=period,
                 )
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
