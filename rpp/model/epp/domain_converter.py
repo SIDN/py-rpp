@@ -57,14 +57,17 @@ def domain_create(req: DomainCreateRequest) -> Epp:
             host_attr=[],
         )
     # Contacts
-    contacts = []
-    for c in req.contact or []:
-        contacts.append(
-            ContactType(
-                value=c.value,
-                type_value=ContactAttrType(c.type) if c.type else None,
+    contacts = None
+    if req.contact:
+        contacts = []
+        for c in req.contact or []:
+            contacts.append(
+                ContactType(
+                    value=c.value,
+                    type_value=ContactAttrType(c.type) if c.type else None,
+                )
             )
-        )
+
     # AuthInfo
     auth_info = None
     if req.authInfo:
