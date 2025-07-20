@@ -54,8 +54,8 @@ class DomainCreateRequest(BaseRequestModel):
     name: str
     period: Optional[PeriodModel] = None
     ns: Optional[List[NsItemModel]] = []
-    registrant: str
-    contact: List[ContactModel]
+    registrant: Optional[str] = None
+    contact: Optional[List[ContactModel]] = None
     authInfo: Optional[AuthInfoModel] = None
     dnssec: Optional[DsOrKeyType] = None
 
