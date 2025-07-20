@@ -86,15 +86,15 @@ class EntityCreateResponseModel(BaseModel):
     id: Optional[str] = None
     createDate: Optional[datetime] = None
 
-class EntityInfoRequest(BaseRequestModel):
-    id: str
-    authInfo: Optional[AuthInfoModel] = None
+# class EntityInfoRequest(BaseRequestModel):
+#     id: str
+#     authInfo: Optional[AuthInfoModel] = None
 
-class EntityCheckRequest(BaseRequestModel):
-    name: str
+# class EntityCheckRequest(BaseRequestModel):
+#     name: str
 
-class EntityDeleteRequest(BaseRequestModel):
-    name: str
+# class EntityDeleteRequest(BaseRequestModel):
+#     name: str
 
 class EntityInfoResponse(BaseModel):
     roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
@@ -111,18 +111,17 @@ class EntityUpdateChange(BaseModel):
     authInfo: AuthInfoModel
 
 class EntityUpdateRequest(BaseRequestModel):
-    id: str
     add: Optional[EntityUpdateAddOrRemove] = None
     remove: Optional[EntityUpdateAddOrRemove] = None
     change: Optional[EntityUpdateChange] = None
 
-class EntityStartTransferRequest(BaseRequestModel):
-    id: str
-    authInfo: AuthInfoModel
+# class EntityStartTransferRequest(BaseRequestModel):
+#     id: str
+#     authInfo: AuthInfoModel
 
-class EntityTransferRequest(BaseRequestModel):
-    id: str
-    authInfo: Optional[AuthInfoModel] = None
+# class EntityTransferRequest(BaseRequestModel):
+#     id: str
+#     authInfo: Optional[AuthInfoModel] = None
 
 class EntityTransferResponse(BaseModel):
     id: str

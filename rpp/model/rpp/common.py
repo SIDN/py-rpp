@@ -35,8 +35,7 @@ class AuthInfoModel(BaseModel):
     roid: Optional[str] = None
 
 class BaseRequestModel(BaseModel):
-    type_: Optional[str] = Field(default=None, alias='@type')   
-    clTRID: Optional[str] = None
+    type_: Optional[str] = Field(default=None, alias='@type')
 
 # Response
 

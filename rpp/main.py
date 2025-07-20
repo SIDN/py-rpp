@@ -2,7 +2,7 @@ import logging
 import pprint
 from fastapi import FastAPI, Depends, Request
 from fastapi.responses import JSONResponse
-from rpp import domains, entities, hosts, messages, organisations
+from rpp import domains, entities, hosts, messages, organisations, processes
 from rpp.common import EppException
 from rpp.model.config import Config
 from rpp.epp_client import EppClient
@@ -28,8 +28,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="RPP ",
-    description="Restful Provisioning Protocol - Modern Domain Registry API",
+    title="Restful Provisioning Protocol (RPP) ",
+    description="A Modern Domain Registry API",
     version="0.0.1",
     lifespan=lifespan
 )
@@ -78,6 +78,7 @@ app.include_router(domains.router, prefix="/domains", tags=["Domains"])
 app.include_router(hosts.router, prefix="/hosts", tags=["Hosts"])
 app.include_router(organisations.router, prefix="/organisations", tags=["Organisations"])
 app.include_router(messages.router, prefix="/messages", tags=["Messages"])
+#app.include_router(processes.router, prefix="/processes", tags=["Processes"])
 
 @app.get("/", tags=["Service"], response_model_exclude_none=True, summary="Service Discovery", description="Returns a description of features supported by the service.")
 async def do_root(conn: EppClient = Depends(get_connection)) -> GreetingModel:

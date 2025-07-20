@@ -88,7 +88,6 @@ class OrganisationUpdateChange(BaseModel):
     contact: List[Card] 
 
 class OrganisationUpdateRequest(BaseRequestModel):
-    id: str
     add: Optional[OrganisationUpdateAddOrRemove] = None
     remove: Optional[OrganisationUpdateAddOrRemove] = None
     change: Optional[OrganisationUpdateChange] = None

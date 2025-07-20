@@ -24,14 +24,14 @@ class HostCreateRequest(BaseRequestModel):
     name: str
     addr: Optional[HostAddr] = None
 
-class HostInfoRequest(BaseRequestModel):
-    name: str
+# class HostInfoRequest(BaseRequestModel):
+#     name: str
 
-class HostDeleteRequest(BaseRequestModel):
-    name: str
+# class HostDeleteRequest(BaseRequestModel):
+#     name: str
 
-class HostCheckRequest(BaseRequestModel):
-    name: str
+# class HostCheckRequest(BaseRequestModel):
+#     name: str
 
 class HostUpdateAddOrRemove(BaseModel):
     addr: List[HostAddr]
@@ -41,7 +41,6 @@ class HostUpdateChange(BaseModel):
     name: str
 
 class HostUpdateRequest(BaseRequestModel):
-    name: str
     add: Optional[HostUpdateAddOrRemove] = None
     remove: Optional[HostUpdateAddOrRemove] = None
     change: Optional[HostUpdateChange] = None

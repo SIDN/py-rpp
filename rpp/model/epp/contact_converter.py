@@ -26,13 +26,10 @@ from rpp.model.epp.epp_1_0 import (
 from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sidn_ext_epp_1_0 import ContactType, CreateType, Ext
+from rpp.model.rpp.common import AuthInfoModel
 from rpp.model.rpp.entity import (
     Card,
-    EntityCheckRequest,
     EntityCreateRequest,
-    EntityDeleteRequest,
-    EntityInfoRequest,
-    EntityTransferRequest,
     EntityUpdateRequest,
 )
 
@@ -44,7 +41,7 @@ def get_value_by_kind(components: list[dict], kind: str) -> str | None:
     return None
 
 
-def contact_create(request: EntityCreateRequest) -> Epp:
+def contact_create(request: EntityCreateRequest, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
             create=ReadWriteType(
@@ -65,7 +62,7 @@ def contact_create(request: EntityCreateRequest) -> Epp:
                     else None,
                 )
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
             extension=ExtAnyType(
                 other_element=[
                     Ext(
@@ -113,45 +110,44 @@ def card_to_postal_info(card: Card) -> PostalInfoType:
     )
 
 
-def contact_info(request: EntityInfoRequest) -> Epp:
+def contact_info(entity_id, rpp_cl_trid, auth_info) -> Epp:
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
                 other_element=Info(
-                    id=request.id,
+                    id=entity_id,
                     auth_info=AuthInfoType(
                         pw=PwAuthInfoType(
-                            value=request.authInfo.value,
-                            roid=request.authInfo.roid,
+                            value=auth_info.value,
+                            roid=auth_info.roid,
                         )
                     )
-                    if request.authInfo
-                    else None,
+                    if auth_info else None,
                 )
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
     return epp_request
 
 
-def contact_check(request: EntityCheckRequest) -> Epp:
+def contact_check(entity_id: str, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
-            check=ReadWriteType(other_element=Check(id=[request.name])),
-            cl_trid=request.clTRID or random_tr_id(),
+            check=ReadWriteType(other_element=Check(id=[entity_id])),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
     return epp_request
 
 
-def contact_delete(request: EntityDeleteRequest) -> Epp:
+def contact_delete(entity_id: str, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
-            delete=ReadWriteType(other_element=Delete(id=request.name)),
-            cl_trid=request.clTRID or random_tr_id(),
+            delete=ReadWriteType(other_element=Delete(id=entity_id)),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
@@ -195,7 +191,7 @@ def get_voice_from_entity_change(request: EntityUpdateRequest) -> str:
             return card.phones.root["voice"].number
 
 
-def contact_update(request: EntityUpdateRequest) -> Epp:
+def contact_update(entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: str) -> Epp:
     add = None
     rem = None
     chg = None
@@ -213,78 +209,71 @@ def contact_update(request: EntityUpdateRequest) -> Epp:
                     roid=request.change.authInfo.roid,
                 )
             )
-            if request.change.authInfo
-            else None,
+            if request.change.authInfo else None,
         )
 
     if request.add is not None:
         add = AddRemType(
-            status=[
-                StatusType(s=StatusValueType(c)) for c in request.add.status
-            ]
+            status=[StatusType(s=c, value=c) for c in request.add.status] if request.add.status else None
         )
 
     if request.remove is not None:
         rem = AddRemType(
-            status=[
-                StatusType(s=StatusValueType(c)) for c in request.remove.status
-            ]
+            status=[StatusType(s=c, value=c) for c in request.remove.status] if request.remove.status else None
         )
 
     epp_request = Epp(
         command=CommandType(
             update=ReadWriteType(
-                other_element=Update(id=request.id, add=add, rem=rem, chg=chg)
+                other_element=Update(id=entity_id, add=add, rem=rem, chg=chg)
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
     return epp_request
 
 
-def contact_transfer(request: EntityTransferRequest, op: str) -> Epp:
+def contact_transfer(entity_id: str, rpp_cl_trid: str, auth_info: AuthInfoModel, op: TransferOpType) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
                 op=op,
                 other_element=Transfer(
-                    id=request.id,
+                    id=entity_id,
                     auth_info=AuthInfoType(
                         pw=PwAuthInfoType(
-                            value=request.authInfo.value,
-                            roid=request.authInfo.roid,
+                            value=auth_info.value,
+                            roid=auth_info.roid,
                         )
                     )
-                    if request.authInfo
-                    else None,
+                    if auth_info else None,
                 ),
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
     return epp_request
 
 
-def contact_transfer_query(request: EntityTransferRequest) -> Epp:
+def contact_transfer_query(entity_id: str, rpp_cl_trid: str, auth_info: AuthInfoModel) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
                 op=TransferOpType.QUERY,
                 other_element=Transfer(
-                    id=request.id,
+                    id=entity_id,
                     auth_info=AuthInfoType(
                         pw=PwAuthInfoType(
-                            value=request.authInfo.value,
-                            roid=request.authInfo.roid,
+                            value=auth_info.value,
+                            roid=auth_info.roid,
                         )
                     )
-                    if request.authInfo
-                    else None,
+                    if auth_info else None,
                 ),
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 

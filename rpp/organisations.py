@@ -22,6 +22,7 @@ router = APIRouter(dependencies=[Depends(security)])
 @router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Create Organisation")
 async def do_create(create_request: OrganisationCreateRequest,
               response: Response,
+              rpp_cl_trid: Annotated[str | None, Header()] = None,
               conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     logger.info(f"Create organisation: {create_request.id}")
 
@@ -49,7 +50,7 @@ async def do_info(organisation: str,
     update_response(response, epp_response)
     return to_organisation_info(epp_response)
 
-@router.head("/{organisation}/availability", summary="Check Organisation Existence")
+@router.head("/{organisation}/availability", summary="Check Organisation Availability")
 async def do_check_head(organisation: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -65,13 +66,13 @@ async def do_check_head(organisation: str,
 
     add_check_status(response, epp_status, avail, reason)
 
-@router.head("/{organisation}/availability", summary="Check Organisation Existence")
-async def do_check_get(organisation: str,
-            response: Response,
-            conn: EppClient = Depends(get_connection),
-            rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
+# @router.get("/{organisation}/availability", summary="Check Organisation Availability")
+# async def do_check_get(organisation: str,
+#             response: Response,
+#             conn: EppClient = Depends(get_connection),
+#             rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
 
-    logger.info(f"Check for organisation: {organisation}")
+#     logger.info(f"Check for organisation: {organisation}")
 
 @router.delete("/{organisation}", response_model_exclude_none=True, status_code=204, summary="Delete Organisation")
 async def do_delete(organisation: str,
@@ -93,6 +94,7 @@ async def do_delete(organisation: str,
 async def do_update(organisation: str,
             response: Response,
             request: OrganisationUpdateRequest,
+            rpp_cl_trid: Annotated[str | None, Header()] = None,
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
     logger.info(f"Update organisation: {organisation}")

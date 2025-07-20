@@ -11,14 +11,12 @@ from rpp.model.epp.host_1_0 import (
     Info,
     IpType,
     MNameType,
+    StatusType,
     Update,
 )
 from rpp.model.rpp.host import (
     HostAddr,
-    HostCheckRequest,
     HostCreateRequest,
-    HostDeleteRequest,
-    HostInfoRequest,
     HostUpdateRequest,
 )
 
@@ -35,7 +33,7 @@ def hostaddr_to_epp(host_addr: HostAddr) -> list[AddrType]:
     return addr_list
 
 
-def host_create(host: HostCreateRequest) -> Epp:
+def host_create(host: HostCreateRequest, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
             create=ReadWriteType(
@@ -43,73 +41,74 @@ def host_create(host: HostCreateRequest) -> Epp:
                     name=host.name, addr=hostaddr_to_epp(host.addr)
                 )
             ),
-            cl_trid=host.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
     return epp_request
 
 
-def host_info(request: HostInfoRequest) -> Epp:
+def host_info(host: str, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
                 other_element=Info(
-                    name=InfoNameType(value=request.name, hosts=HostsType.ALL)
+                    name=InfoNameType(value=host, hosts=HostsType.ALL)
                 )
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
     return epp_request
 
 
-def host_check(request: HostCheckRequest) -> Epp:
+def host_check(host: str, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
-            check=ReadWriteType(other_element=Check(name=[request.name])),
-            cl_trid=request.clTRID or random_tr_id(),
+            check=ReadWriteType(other_element=Check(name=[host])),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
     return epp_request
 
 
-def host_delete(request: HostDeleteRequest) -> Epp:
+def host_delete(host: str, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
-            delete=ReadWriteType(other_element=Delete(name=request.name)),
-            cl_trid=request.clTRID or random_tr_id(),
+            delete=ReadWriteType(other_element=Delete(name=host)),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
     return epp_request
 
 
-def host_update(request: HostUpdateRequest) -> Epp:
+def host_update(host: str, request: HostUpdateRequest, rpp_cl_trid: str) -> Epp:
     add = None
     rem = None
     chg = ChgType(name=request.change.name) if request.change else None
 
     if request.add is not None:
         add = AddRemType(
-            add=hostaddr_to_epp(request.add.addr), status=request.add.status
+            add=hostaddr_to_epp(request.add.addr),
+            status=[StatusType(s=c, value=c) for c in request.add.status] if request.add.status else None
         )
     if request.remove is not None:
         rem = AddRemType(
             add=hostaddr_to_epp(request.remove.addr),
-            status=request.remove.status,
+            status=[StatusType(s=c, value=c) for c in request.remove.status] if request.remove.status else None
         )
 
     epp_request = Epp(
         command=CommandType(
             update=ReadWriteType(
                 other_element=Update(
-                    name=request.name, add=add, rem=rem, chg=chg
+                    name=host, add=add, rem=rem, chg=chg
                 )
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
