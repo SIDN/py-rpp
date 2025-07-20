@@ -174,7 +174,7 @@ def domain_update(request: DomainUpdateRequest) -> Epp:
 
     if request.add is not None:
         add = AddRemType(
-            ns=NsType(host_obj=[n for n in request.add.ns]),
+            ns=NsType(host_obj=[n for n in request.add.ns]) if request.add.ns else None,
             contact=[
                 ContactType(
                     value=c.value,
@@ -188,7 +188,7 @@ def domain_update(request: DomainUpdateRequest) -> Epp:
         )
     if request.remove is not None:
         rem = AddRemType(
-            ns=NsType(host_obj=[n for n in request.remove.ns]),
+            ns=NsType(host_obj=[n for n in request.remove.ns]) if request.remove.ns else None,
             contact=[
                 ContactType(
                     value=c.value,
