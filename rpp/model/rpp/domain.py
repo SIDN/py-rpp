@@ -50,6 +50,11 @@ class EventModel(BaseModel):
     name: Optional[str] = None
     date:  datetime
 
+class StatusModel(BaseModel):
+    value: Optional[str] = None
+    s: str
+    lang: Optional[str] = None
+
 class DomainCreateRequest(BaseRequestModel):
     name: str
     period: Optional[PeriodModel] = None
@@ -91,7 +96,7 @@ class DomainInfoResponse(BaseModel):
 class DomainUpdateAddOrRemove(BaseModel):
     ns: Optional[List[str]] = None
     contact: Optional[List[ContactModel]] = None
-    status: Optional[List[str]] = None
+    status: Optional[List[StatusModel]] = None
 
 class DomainUpdateChange(BaseModel):
     registrant: str

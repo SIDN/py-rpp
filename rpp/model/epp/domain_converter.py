@@ -16,6 +16,8 @@ from rpp.model.epp.domain_1_0 import (
     PeriodType,
     PUnitType,
     Renew,
+    StatusType,
+    StatusValueType,
     Transfer,
     Update,
 )
@@ -184,19 +186,39 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
             ]
             if request.add.contact
             else None,
-            status=request.add.status,
+            status=[
+                StatusType(
+                    value = s.value if s.value else None,
+                    s = StatusValueType(s.s),
+                    lang = s.lang if s.lang else None
+                )
+                for s in request.add.status
+            ]
+            if request.add.status
+            else None
         )
     if request.remove is not None:
         rem = AddRemType(
-            ns=NsType(host_obj=[n for n in request.remove.ns]),
+            ns=NsType(host_obj=[n for n in request.remove.ns]) if request.remove.ns else None,
             contact=[
                 ContactType(
                     value=c.value,
                     type_value=ContactAttrType(c.type) if c.type else None,
                 )
                 for c in request.remove.contact
-            ],
-            status=request.remove.status,
+            ]
+            if request.remove.contact
+            else None,
+            status=[
+                StatusType(
+                    value = s.value if s.value else None,
+                    s = StatusValueType(s.s),
+                    lang = s.lang if s.lang else None
+                )
+                for s in request.remove.status
+            ]
+            if request.remove.status
+            else None,
         )
 
     epp_request = Epp(
