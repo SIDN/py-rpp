@@ -31,6 +31,7 @@ from rpp.model.epp.eppcom_1_0 import PwAuthInfoType
 from rpp.model.epp.helpers import random_str, random_tr_id
 from rpp.model.epp.sec_dns_1_1 import Create as SecdnsCreateType
 from rpp.model.epp.sec_dns_1_1 import KeyDataType
+from rpp.model.rpp.common import AuthInfoModel
 from rpp.model.rpp.domain import (
     DomainCheckRequest,
     DomainCreateRequest,
@@ -42,7 +43,7 @@ from rpp.model.rpp.domain import (
 )
 
 
-def domain_create(req: DomainCreateRequest) -> Epp:
+def domain_create(req: DomainCreateRequest, rpp_cl_trid: str) -> Epp:
     # Period
     period = None
     if req.period:
@@ -101,25 +102,24 @@ def domain_create(req: DomainCreateRequest) -> Epp:
             extension=ExtAnyType(other_element=[secdns_create])
             if secdns_create
             else None,
-            cl_trid=req.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
 
-def domain_info(request: DomainInfoRequest) -> Epp:
-    auth_info = (
-        AuthInfoType(pw=PwAuthInfoType(value=request.authInfo.value, roid=request.authInfo.roid))
-        if request.authInfo
-        else None
+def domain_info(domainname: str, rpp_cl_trid: str, auth_info: AuthInfoModel) -> Epp:
+    auth_inf_type = (
+        AuthInfoType(pw=PwAuthInfoType(value=auth_info.value, roid=auth_info.roid))
+        if auth_info else None
     )
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
                 other_element=Info(
-                    name=InfoNameType(value=request.name), auth_info=auth_info
+                    name=InfoNameType(value=domainname), auth_info=auth_inf_type
                 )
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
@@ -154,7 +154,7 @@ def domain_delete(domain: str) -> Epp:
     return epp_request
 
 
-def domain_update(request: DomainUpdateRequest) -> Epp:
+def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: str) -> Epp:
     add = None
     rem = None
     chg = None
@@ -174,7 +174,7 @@ def domain_update(request: DomainUpdateRequest) -> Epp:
 
     if request.add is not None:
         add = AddRemType(
-            ns=NsType(host_obj=[n for n in request.add.ns]),
+            ns=NsType(host_obj=[n for n in request.add.ns]) if request.add.ns else None,
             contact=[
                 ContactType(
                     value=c.value,
@@ -203,10 +203,10 @@ def domain_update(request: DomainUpdateRequest) -> Epp:
         command=CommandType(
             update=ReadWriteType(
                 other_element=Update(
-                    name=request.name, add=add, rem=rem, chg=chg
+                    name=domainname, add=add, rem=rem, chg=chg
                 )
             ),
-            cl_trid=request.clTRID or random_tr_id(),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 

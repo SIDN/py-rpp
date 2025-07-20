@@ -65,7 +65,6 @@ class DomainCreateResponse(BaseModel):
     exDate: Optional[datetime] = None
 
 class DomainInfoRequest(BaseRequestModel):
-    name: str
     authInfo: Optional[AuthInfoModel] = None
 
 class DomainCheckRequest(BaseRequestModel):
@@ -99,7 +98,6 @@ class DomainUpdateChange(BaseModel):
     authInfo: AuthInfoModel
 
 class DomainUpdateRequest(BaseRequestModel):
-    name: str
     add: Optional[DomainUpdateAddOrRemove] = None
     remove: Optional[DomainUpdateAddOrRemove] = None
     change: Optional[DomainUpdateChange] = None

@@ -23,10 +23,11 @@ router = APIRouter(dependencies=[Depends(security)])
              response_model=BaseResponseModel, response_model_exclude_none=True)
 async def do_create(create_request: DomainCreateRequest, 
               response: Response,
+              rpp_cl_trid: Annotated[str | None, Header()] = None,
               conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     logger.info(f"Create new domain: {create_request.name}")
 
-    epp_request = domain_create(create_request)
+    epp_request = domain_create(create_request, rpp_cl_trid)
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response, 201)  # 201 Created
@@ -42,11 +43,7 @@ async def do_info(domainname: str, response: Response,
 
     auth_info = auth_info_from_header(rpp_authorization)
 
-    epp_request = domain_info(DomainInfoRequest(
-        name=domainname,
-        clTRID=rpp_cl_trid,
-        authInfo=auth_info
-    ))
+    epp_request = domain_info(domainname, rpp_cl_trid, auth_info) 
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
@@ -107,13 +104,15 @@ async def do_delete(domainname: str, response: Response,
 #     to_domain_cancel_delete(epp_response, response)
 
 @router.patch("/{domainname}", response_model_exclude_none=True, summary="Update Domain")
-async def do_update(update_request: DomainUpdateRequest,
+async def do_update(domainname: str,
+            update_request: DomainUpdateRequest,
             response: Response,
+            rpp_cl_trid: Annotated[str | None, Header()] = None,
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
-    logger.info(f"Update domain: {update_request.name}")
+    logger.info(f"Update domain: {domainname}")
 
-    epp_request = domain_update(update_request)
+    epp_request = domain_update(domainname, update_request, rpp_cl_trid)
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
@@ -226,7 +225,8 @@ async def do_stop_transfer(op: TransferOpType,
 
 
 @router.post("/{domain}/processes/locks", status_code=501, summary="Lock Domain (Not Implemented)")
-async def do_lock(domain: str, response: Response) -> None:
+async def do_lock(domain: str, response: Response,
+                  rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
 
     logger.info(f"Lock domain: {domain}")
     update_response_from_code(response, 2101) # Not implemented
