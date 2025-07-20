@@ -60,6 +60,7 @@ def epp_to_rpp_code(code: int) -> int:
 def add_check_status(response: Response, epp_status: int, avail: bool, reason: Optional[str] = None):
     if is_ok_code(epp_status):
         if avail == True:
+            # available
             response.status_code = 200
         else:
             response.status_code = 404

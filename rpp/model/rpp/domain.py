@@ -67,8 +67,8 @@ class DomainCreateResponse(BaseModel):
 class DomainInfoRequest(BaseRequestModel):
     authInfo: Optional[AuthInfoModel] = None
 
-class DomainCheckRequest(BaseRequestModel):
-    name: str
+# class DomainCheckRequest(BaseRequestModel):
+#     name: str
 
 class DomainCheckResponse(BaseModel):
     name: str

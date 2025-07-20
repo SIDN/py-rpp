@@ -16,6 +16,7 @@ from rpp.model.epp.domain_1_0 import (
     PeriodType,
     PUnitType,
     Renew,
+    StatusType,
     Transfer,
     Update,
 )
@@ -33,9 +34,7 @@ from rpp.model.epp.sec_dns_1_1 import Create as SecdnsCreateType
 from rpp.model.epp.sec_dns_1_1 import KeyDataType
 from rpp.model.rpp.common import AuthInfoModel
 from rpp.model.rpp.domain import (
-    DomainCheckRequest,
     DomainCreateRequest,
-    DomainInfoRequest,
     DomainRenewRequest,
     DomainStartTransferRequest,
     DomainTransferRequest,
@@ -126,11 +125,11 @@ def domain_info(domainname: str, rpp_cl_trid: str, auth_info: AuthInfoModel) -> 
     return epp_request
 
 
-def domain_check(request: DomainCheckRequest) -> Epp:
+def domain_check(domainname: str, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
-            check=ReadWriteType(other_element=Check(name=[request.name])),
-            cl_trid=request.clTRID or random_tr_id(),
+            check=ReadWriteType(other_element=Check(name=[domainname])),
+            cl_trid=rpp_cl_trid or random_tr_id(),
         )
     )
 
@@ -182,9 +181,8 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
                 )
                 for c in request.add.contact
             ]
-            if request.add.contact
-            else None,
-            status=request.add.status,
+            if request.add.contact else None,
+            status=StatusType(s=request.add.status, value=request.add.status) if request.add.status else None,
         )
     if request.remove is not None:
         rem = AddRemType(
