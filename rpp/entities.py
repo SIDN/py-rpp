@@ -2,7 +2,7 @@ import logging
 from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response
 from fastapi.params import Body
-from rpp.common import add_check_status, auth_info_from_header, update_response, update_response_from_code
+from rpp.common import RPP_CODE_HEADERS, add_check_status, auth_info_from_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 
@@ -19,7 +19,9 @@ security = HTTPBasic()
 router = APIRouter(dependencies=[Depends(security)])
 
 @router.post("/", description="Create a new entity", summary="Create Entity",
-             response_model=BaseResponseModel, response_model_exclude_none=True)
+             response_model=BaseResponseModel, response_model_exclude_none=True,
+             status_code=201,
+             responses={201: RPP_CODE_HEADERS})
 async def do_create(request: Request, 
               response: Response,
               createRequest: EntityCreateRequest,
@@ -34,7 +36,9 @@ async def do_create(request: Request,
     return to_entity_create(epp_response)
 
 
-@router.get("/{entity_id}", response_model_exclude_none=True, summary="Get Entity Info")
+@router.get("/{entity_id}", response_model_exclude_none=True, summary="Get Entity Info",
+            status_code=200,
+             responses={200: RPP_CODE_HEADERS})
 async def do_info(entity_id: str, response: Response,
             conn: EppClient = Depends(get_connection),
             rpp_authorization: Annotated[str | None, Header()] = None,
@@ -48,7 +52,9 @@ async def do_info(entity_id: str, response: Response,
     update_response(response, epp_response)
     return to_entity_info(epp_response)
 
-@router.head("/{entity_id}/availability", summary="Check Entity Availability")
+@router.head("/{entity_id}/availability", summary="Check Entity Availability",
+             status_code=200,
+             responses={200: RPP_CODE_HEADERS})
 async def do_check_head(entity_id: str, 
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -70,7 +76,9 @@ async def do_check_head(entity_id: str,
 
 #     logger.info(f"Check for entity: {entity_id}")
 
-@router.delete("/{entity_id}", response_model_exclude_none=True, status_code=204, summary="Delete Entity")
+@router.delete("/{entity_id}", response_model_exclude_none=True, summary="Delete Entity",
+               status_code=204,
+             responses={204: RPP_CODE_HEADERS})
 async def do_delete(entity_id: str, 
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -85,7 +93,9 @@ async def do_delete(entity_id: str,
     # delete has no response body, so we just set the status code
     to_entity_delete(epp_response, response)
 
-@router.patch("/{entity_id}", response_model_exclude_none=True, summary="Update Entity")
+@router.patch("/{entity_id}", response_model_exclude_none=True, summary="Update Entity",
+              status_code=200,
+             responses={200: RPP_CODE_HEADERS})
 async def do_update(entity_id: str,
             update_request: EntityUpdateRequest,
             response: Response,
@@ -100,7 +110,9 @@ async def do_update(entity_id: str,
     update_response(response, epp_response)
     return to_entity_update(epp_response, response)
 
-@router.post("/{entity_id}/transfer", response_model_exclude_none=True, summary="Start Entity Transfer")
+@router.post("/{entity_id}/processes/transfers", response_model_exclude_none=True, summary="Start Entity Transfer",
+             status_code=200,
+             responses={200: RPP_CODE_HEADERS})
 async def do_start_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_authorization: Annotated[str | None, Header()] = None,
@@ -115,7 +127,9 @@ async def do_start_transfer(entity_id: str, response: Response,
     update_response(response, epp_response)
     return to_entity_transfer(epp_response, response)
 
-@router.get("/{entity_id}/transfer", summary="Query Transfer Status",)
+@router.get("/{entity_id}/processes/transfers", summary="Query Transfer Status",
+            status_code=200,
+            responses={200: RPP_CODE_HEADERS})
 async def do_query_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_authorization: Annotated[str | None, Header()] = None,
@@ -130,7 +144,9 @@ async def do_query_transfer(entity_id: str, response: Response,
     update_response(response, epp_response)
     return to_entity_transfer(epp_response, response)
 
-@router.post("/{entity_id}/transfer/rejection", summary="Reject Entity Transfer")
+@router.put("/{entity_id}/processes/transfers/rejection", summary="Reject Entity Transfer",
+            status_code=200,
+            responses={200: RPP_CODE_HEADERS})
 async def do_reject_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_authorization: Annotated[str | None, Header()] = None,
@@ -144,7 +160,9 @@ async def do_reject_transfer(entity_id: str, response: Response,
                                   conn,
                                   entity_id, rpp_cl_trid, auth_info)
 
-@router.post("/{entity_id}/transfer/cancellation", summary="Cancel Entity Transfer")
+@router.put("/{entity_id}/processes/transfers/cancellation", summary="Cancel Entity Transfer",
+            status_code=200,
+            responses={200: RPP_CODE_HEADERS})
 async def do_cancel_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_authorization: Annotated[str | None, Header()] = None,
@@ -158,7 +176,9 @@ async def do_cancel_transfer(entity_id: str, response: Response,
                                   conn,
                                   entity_id, rpp_cl_trid, auth_info)
 
-@router.post("/{entity_id}/transfer/approval", summary="Approve Entity Transfer")
+@router.put("/{entity_id}/processes/transfers/approval", summary="Approve Entity Transfer",
+            status_code=200,
+            responses={200: RPP_CODE_HEADERS})
 async def do_approve_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
             rpp_authorization: Annotated[str | None, Header()] = None,
@@ -191,7 +211,9 @@ async def do_stop_transfer(op: TransferOpType,
     update_response(response, epp_response)
     return to_entity_transfer(epp_response, response)
 
-@router.get("/{entity_id}/processes/{proc_name}/{proc_id}", summary="List Processes")
+@router.get("/{entity_id}/processes/{proc_name}/{proc_id}", summary="List Processes",
+            status_code=200,
+            responses={200: RPP_CODE_HEADERS})
 async def do_list_processes(entity_id: str,
                                 proc_name: str,
                                 proc_id: str,

@@ -2,7 +2,7 @@ import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response
 from fastapi.params import Body, Header
-from rpp.common import add_check_status, auth_info_from_header, update_response, update_response_from_code
+from rpp.common import RPP_CODE_HEADERS, add_check_status, auth_info_from_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from rpp.model.epp.host_commands import host_check, host_create, host_delete, host_info, host_update
@@ -18,7 +18,9 @@ security = HTTPBasic()
 router = APIRouter(dependencies=[Depends(security)])
 
 
-@router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Create Host")
+@router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Create Host",
+             status_code=201,
+             responses={201: {"description": "Host created successfully", "model": BaseResponseModel}})
 async def do_create(create_request: HostCreateRequest,
               response: Response,
               rpp_cl_trid: Annotated[str | None, Header()] = None,
@@ -32,7 +34,9 @@ async def do_create(create_request: HostCreateRequest,
     return to_host_create(epp_response)
 
 
-@router.get("/{host}", response_model_exclude_none=True, summary="Get Host Info")
+@router.get("/{host}", response_model_exclude_none=True, summary="Get Host Info",
+            status_code=200,
+             responses={200: RPP_CODE_HEADERS})
 async def do_info(host: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -47,8 +51,10 @@ async def do_info(host: str,
     update_response(response, epp_response)
     return to_host_info(epp_response)
 
-@router.head("/{host}/availability", summary="Check Host Existence")
-async def do_check_head(host: str, 
+@router.head("/{host}/availability", summary="Check Host Existence",
+            status_code=200,
+            responses={200: RPP_CODE_HEADERS})
+async def do_check_head(host: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
             rpp_cl_trid: Annotated[str | None, Header()] = None) -> None:
@@ -70,7 +76,9 @@ async def do_check_head(host: str,
 
 #     logger.info(f"Check for host: {host}")
 
-@router.delete("/{host}", response_model_exclude_none=True, status_code=204, summary="Delete Host")
+@router.delete("/{host}", response_model_exclude_none=True, summary="Delete Host",
+                status_code=204,
+                responses={204: RPP_CODE_HEADERS})
 async def do_delete(host: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
@@ -85,7 +93,9 @@ async def do_delete(host: str,
     # delete has no response body, so we just set the status code
     to_host_delete(epp_response)
 
-@router.patch("/{host}", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Update Host")
+@router.patch("/{host}", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Update Host",
+                status_code=200,
+                responses={200: RPP_CODE_HEADERS})
 async def do_update(host: str,
             response: Response,
             request: HostUpdateRequest,
@@ -101,7 +111,9 @@ async def do_update(host: str,
     update_response(response, epp_response)
     return to_host_update(epp_response)
 
-@router.get("/{host}/processes/{proc_name}/{proc_id}", summary="List Processes")
+@router.get("/{host}/processes/{proc_name}/{proc_id}", summary="List Processes",
+            status_code=200,
+            responses={200: RPP_CODE_HEADERS})
 async def do_list_processes(host: str,
                                 proc_name: str,
                                 proc_id: str,

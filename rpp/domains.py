@@ -54,8 +54,6 @@ async def do_info(domainname: str, response: Response,
     update_response(response, epp_response)
     return to_domain_info(epp_response, response)
 
-
-
 @router.head("/{domainname}/availability", summary="Check Domain Availability",
              status_code=204,
              responses={204: RPP_CODE_HEADERS})
@@ -191,7 +189,7 @@ async def do_query_transfer(domainname: str, response: Response,
     update_response(response, epp_response)
     return to_domain_transfer(epp_response, response)
 
-@router.post("/{domainname}/processes/transfers/latest/rejection", summary="Reject Domain Transfer",
+@router.put("/{domainname}/processes/transfers/latest/rejection", summary="Reject Domain Transfer",
              status_code=200,
              responses={200: RPP_CODE_HEADERS})
 async def do_reject_transfer(domainname: str, response: Response,
@@ -205,7 +203,7 @@ async def do_reject_transfer(domainname: str, response: Response,
     return await do_stop_transfer(TransferOpType.REJECT, domainname, response,
             conn, rpp_cl_trid, auth_info)
 
-@router.post("/{domainname}/processes/transfers/latest/cancellation", summary="Cancel Domain Transfer",
+@router.put("/{domainname}/processes/transfers/latest/cancellation", summary="Cancel Domain Transfer",
              status_code=200,
              responses={200: RPP_CODE_HEADERS})
 async def do_cancel_transfer(domainname: str, response: Response,
@@ -219,7 +217,7 @@ async def do_cancel_transfer(domainname: str, response: Response,
     return await do_stop_transfer(TransferOpType.CANCEL, domainname, response,
             conn, rpp_cl_trid, auth_info)
 
-@router.post("/{domainname}/processes/transfers/latest/approval", summary="Approve Domain Transfer",
+@router.put("/{domainname}/processes/transfers/latest/approval", summary="Approve Domain Transfer",
              status_code=200,
              responses={200: RPP_CODE_HEADERS})
 async def do_approve_transfer(domainname: str, response: Response,
