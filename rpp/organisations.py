@@ -15,8 +15,7 @@ from rpp.model.rpp.organisation import OrganisationCheckRequest, OrganisationCre
 from rpp.model.rpp.organisation_converter import to_organisation_check, to_organisation_create, to_organisation_delete, to_organisation_info, to_organisation_update
 
 logger = logging.getLogger('uvicorn.error')
-security = HTTPBasic()
-router = APIRouter(dependencies=[Depends(security)])
+router = APIRouter()
 
 
 @router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Create Organisation")

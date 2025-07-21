@@ -14,9 +14,7 @@ from rpp.model.rpp.domain import DomainCreateRequest, DomainRenewRequest, Domain
 from rpp.model.rpp.domain_converter import do_domain_check, to_domain_check_response, to_domain_create, to_domain_delete, to_domain_info, to_domain_renew, to_domain_transfer, to_domain_update
 
 logger = logging.getLogger('uvicorn.error')
-security = HTTPBasic()
-
-router = APIRouter(dependencies=[Depends(security)])
+router = APIRouter()
 
 
 @router.post("/", description="Create a new domain", summary="Create Domain",

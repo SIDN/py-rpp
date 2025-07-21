@@ -34,3 +34,4 @@ __pycache__/
 .ruff_cache/
 .vscode
 config.yaml
+config.test.yaml

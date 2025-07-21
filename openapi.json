@@ -1,8 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "FastAPI",
-    "version": "0.1.0"
+    "title": "Restful Provisioning Protocol (RPP) ",
+    "description": "A Modern Domain Registry API",
+    "version": "0.0.1"
   },
   "paths": {
     "/entities/": {
@@ -22,6 +23,22 @@
           }
         ],
         "parameters": [
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
           {
             "name": "session_id",
             "in": "cookie",
@@ -43,12 +60,32 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BaseResponseModel"
+                }
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -92,6 +129,22 @@
             }
           },
           {
+            "name": "rpp-authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Authorization"
+            }
+          },
+          {
             "name": "rpp-cl-trid",
             "in": "header",
             "required": false,
@@ -126,142 +179,25 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Entities"
-        ],
-        "summary": "Get Entity Info (message body)",
-        "operationId": "do_info_with_body_entities__entity_id__post",
-        "security": [
-          {
-            "HTTPBasic": []
-          },
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "entity_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Entity Id"
-            }
-          },
-          {
-            "name": "session_id",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EntityInfoRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseResponseModel"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "head": {
-        "tags": [
-          "Entities"
-        ],
-        "summary": "Check Entity Existence",
-        "operationId": "do_check_entities__entity_id__head",
-        "security": [
-          {
-            "HTTPBasic": []
-          },
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "entity_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Entity Id"
-            }
-          },
-          {
-            "name": "rpp-cl-trid",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
                   "type": "string"
-                },
-                {
-                  "type": "null"
                 }
-              ],
-              "title": "Rpp-Cl-Trid"
-            }
-          },
-          {
-            "name": "session_id",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -329,7 +265,27 @@
         ],
         "responses": {
           "204": {
-            "description": "Successful Response"
+            "description": "Successful Response",
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -359,6 +315,31 @@
         ],
         "parameters": [
           {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
             "name": "session_id",
             "in": "cookie",
             "required": false,
@@ -387,50 +368,25 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "type": "string"
                 }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/entities/{entity_id}/renewal": {
-      "post": {
-        "tags": [
-          "Entities"
-        ],
-        "summary": "Renew Entity (Not Implemented)",
-        "operationId": "do_renew_entities__entity_id__renewal_post",
-        "security": [
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "entity_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Entity Id"
-            }
-          }
-        ],
-        "responses": {
-          "501": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -447,13 +403,13 @@
         }
       }
     },
-    "/entities/{entity_id}/transfer": {
-      "post": {
+    "/entities/{entity_id}/availability": {
+      "head": {
         "tags": [
           "Entities"
         ],
-        "summary": "Start Entity Transfer",
-        "operationId": "do_start_transfer_entities__entity_id__transfer_post",
+        "summary": "Check Entity Availability",
+        "operationId": "do_check_head_entities__entity_id__availability_head",
         "security": [
           {
             "HTTPBasic": []
@@ -489,7 +445,84 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entities/{entity_id}/processes/transfers": {
+      "post": {
+        "tags": [
+          "Entities"
+        ],
+        "summary": "Start Entity Transfer",
+        "operationId": "do_start_transfer_entities__entity_id__processes_transfers_post",
+        "security": [
+          {
+            "HTTPBasic": []
+          },
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
             "in": "header",
             "required": false,
             "schema": {
@@ -501,7 +534,23 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
+            "name": "rpp-authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -514,23 +563,6 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/EntityTransferRequest"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Transfer Request"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -538,6 +570,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BaseResponseModel"
+                }
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -559,7 +611,7 @@
           "Entities"
         ],
         "summary": "Query Transfer Status",
-        "operationId": "do_query_transfer_entities__entity_id__transfer_get",
+        "operationId": "do_query_transfer_entities__entity_id__processes_transfers_get",
         "security": [
           {
             "HTTPBasic": []
@@ -595,7 +647,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -607,7 +659,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -629,6 +681,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -644,13 +716,13 @@
         }
       }
     },
-    "/entities/{entity_id}/transfer/rejection": {
-      "post": {
+    "/entities/{entity_id}/processes/transfers/rejection": {
+      "put": {
         "tags": [
           "Entities"
         ],
         "summary": "Reject Entity Transfer",
-        "operationId": "do_reject_transfer_entities__entity_id__transfer_rejection_post",
+        "operationId": "do_reject_transfer_entities__entity_id__processes_transfers_rejection_put",
         "security": [
           {
             "HTTPBasic": []
@@ -686,7 +758,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -698,7 +770,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -720,6 +792,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -735,13 +827,13 @@
         }
       }
     },
-    "/entities/{entity_id}/transfer/cancellation": {
-      "post": {
+    "/entities/{entity_id}/processes/transfers/cancellation": {
+      "put": {
         "tags": [
           "Entities"
         ],
         "summary": "Cancel Entity Transfer",
-        "operationId": "do_cancel_transfer_entities__entity_id__transfer_cancellation_post",
+        "operationId": "do_cancel_transfer_entities__entity_id__processes_transfers_cancellation_put",
         "security": [
           {
             "HTTPBasic": []
@@ -777,7 +869,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -789,7 +881,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -811,6 +903,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -826,13 +938,13 @@
         }
       }
     },
-    "/entities/{entity_id}/transfer/approval": {
-      "post": {
+    "/entities/{entity_id}/processes/transfers/approval": {
+      "put": {
         "tags": [
           "Entities"
         ],
         "summary": "Approve Entity Transfer",
-        "operationId": "do_approve_transfer_entities__entity_id__transfer_approval_post",
+        "operationId": "do_approve_transfer_entities__entity_id__processes_transfers_approval_put",
         "security": [
           {
             "HTTPBasic": []
@@ -868,7 +980,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -880,7 +992,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -899,6 +1011,153 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entities/{entity_id}/processes/{proc_name}/{proc_id}": {
+      "get": {
+        "tags": [
+          "Entities"
+        ],
+        "summary": "List Processes",
+        "operationId": "do_list_processes_entities__entity_id__processes__proc_name___proc_id__get",
+        "security": [
+          {
+            "HTTPBasic": []
+          },
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          },
+          {
+            "name": "proc_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proc Name"
+            }
+          },
+          {
+            "name": "proc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proc Id"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
+            "name": "rpp-authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Authorization"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -933,6 +1192,22 @@
         ],
         "parameters": [
           {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
             "name": "session_id",
             "in": "cookie",
             "required": false,
@@ -953,12 +1228,32 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BaseResponseModel"
+                }
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -976,13 +1271,13 @@
         }
       }
     },
-    "/domains/{domain_name}": {
+    "/domains/{domainname}": {
       "get": {
         "tags": [
           "Domains"
         ],
-        "summary": "Get Domain Info (no message body)",
-        "operationId": "do_info_domains__domain_name__get",
+        "summary": "Get Domain Info",
+        "operationId": "do_info_domains__domainname__get",
         "security": [
           {
             "HTTPBasic": []
@@ -993,12 +1288,38 @@
         ],
         "parameters": [
           {
-            "name": "domain_name",
+            "name": "domainname",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Domain Name"
+              "title": "Domainname"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "all",
+              "title": "Filter"
+            }
+          },
+          {
+            "name": "rpp-authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -1036,142 +1357,25 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Domains"
-        ],
-        "summary": "Get Domain Info (message body)",
-        "operationId": "do_info_with_body_domains__domain_name__post",
-        "security": [
-          {
-            "HTTPBasic": []
-          },
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "domain_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Domain Name"
-            }
-          },
-          {
-            "name": "session_id",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DomainInfoRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseResponseModel"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "head": {
-        "tags": [
-          "Domains"
-        ],
-        "summary": "Check Domain Existence",
-        "operationId": "do_check_domains__domain_name__head",
-        "security": [
-          {
-            "HTTPBasic": []
-          },
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "domain_name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Domain Name"
-            }
-          },
-          {
-            "name": "rpp-cl-trid",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
                   "type": "string"
-                },
-                {
-                  "type": "null"
                 }
-              ],
-              "title": "Rpp-Cl-Trid"
-            }
-          },
-          {
-            "name": "session_id",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -1192,7 +1396,7 @@
           "Domains"
         ],
         "summary": "Delete Domain",
-        "operationId": "do_delete_domains__domain_name__delete",
+        "operationId": "do_delete_domains__domainname__delete",
         "security": [
           {
             "HTTPBasic": []
@@ -1203,12 +1407,12 @@
         ],
         "parameters": [
           {
-            "name": "domain_name",
+            "name": "domainname",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Domain Name"
+              "title": "Domainname"
             }
           },
           {
@@ -1239,7 +1443,27 @@
         ],
         "responses": {
           "204": {
-            "description": "Successful Response"
+            "description": "Successful Response",
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -1258,7 +1482,7 @@
           "Domains"
         ],
         "summary": "Update Domain",
-        "operationId": "do_update_domains__domain_name__patch",
+        "operationId": "do_update_domains__domainname__patch",
         "security": [
           {
             "HTTPBasic": []
@@ -1268,6 +1492,31 @@
           }
         ],
         "parameters": [
+          {
+            "name": "domainname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domainname"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
           {
             "name": "session_id",
             "in": "cookie",
@@ -1297,6 +1546,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -1312,13 +1581,13 @@
         }
       }
     },
-    "/domains/{domain_name}/renewal": {
-      "post": {
+    "/domains/{domainname}/availability": {
+      "head": {
         "tags": [
           "Domains"
         ],
-        "summary": "Renew Domain",
-        "operationId": "do_renew_domains__domain_name__renewal_post",
+        "summary": "Check Domain Availability",
+        "operationId": "do_check_head_domains__domainname__availability_head",
         "security": [
           {
             "HTTPBasic": []
@@ -1328,6 +1597,212 @@
           }
         ],
         "parameters": [
+          {
+            "name": "domainname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domainname"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response",
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Domains"
+        ],
+        "summary": "Check Domain Availability",
+        "operationId": "do_check_get_domains__domainname__availability_get",
+        "security": [
+          {
+            "HTTPBasic": []
+          },
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "domainname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domainname"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseResponseModel"
+                }
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/domains/{domainname}/processes/renewals": {
+      "post": {
+        "tags": [
+          "Domains"
+        ],
+        "summary": "Renew Domain",
+        "operationId": "do_renew_domains__domainname__processes_renewals_post",
+        "security": [
+          {
+            "HTTPBasic": []
+          },
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "domainname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domainname"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
           {
             "name": "session_id",
             "in": "cookie",
@@ -1357,6 +1832,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -1372,13 +1867,13 @@
         }
       }
     },
-    "/domains/{domain_name}/transfer": {
+    "/domains/{domainname}/processes/transfers": {
       "post": {
         "tags": [
           "Domains"
         ],
         "summary": "Start Domain Transfer",
-        "operationId": "do_start_transfer_domains__domain_name__transfer_post",
+        "operationId": "do_start_transfer_domains__domainname__processes_transfers_post",
         "security": [
           {
             "HTTPBasic": []
@@ -1389,12 +1884,12 @@
         ],
         "parameters": [
           {
-            "name": "domain_name",
+            "name": "domainname",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Domain Name"
+              "title": "Domainname"
             }
           },
           {
@@ -1414,7 +1909,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -1426,7 +1921,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -1443,15 +1938,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
+                "allOf": [
                   {
-                    "$ref": "#/components/schemas/DomainStartTransferRequest"
-                  },
-                  {
-                    "type": "null"
+                    "$ref": "#/components/schemas/DomainTransferRequest"
                   }
                 ],
-                "title": "Transfer Request"
+                "title": "Request"
               }
             }
           }
@@ -1465,6 +1957,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -1478,14 +1990,15 @@
             }
           }
         }
-      },
+      }
+    },
+    "/domains/{domainname}/processes/transfers/latest": {
       "get": {
         "tags": [
           "Domains"
         ],
         "summary": "Query Transfer Status",
-        "description": "Query a transfer for the specified domain.",
-        "operationId": "do_query_transfer_domains__domain_name__transfer_get",
+        "operationId": "do_query_transfer_domains__domainname__processes_transfers_latest_get",
         "security": [
           {
             "HTTPBasic": []
@@ -1496,12 +2009,12 @@
         ],
         "parameters": [
           {
-            "name": "domain_name",
+            "name": "domainname",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Domain Name"
+              "title": "Domainname"
             }
           },
           {
@@ -1521,7 +2034,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -1533,7 +2046,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -1555,6 +2068,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -1570,13 +2103,13 @@
         }
       }
     },
-    "/domains/{domain_name}/transfer/rejection": {
-      "post": {
+    "/domains/{domainname}/processes/transfers/latest/rejection": {
+      "put": {
         "tags": [
           "Domains"
         ],
         "summary": "Reject Domain Transfer",
-        "operationId": "do_reject_transfer_domains__domain_name__transfer_rejection_post",
+        "operationId": "do_reject_transfer_domains__domainname__processes_transfers_latest_rejection_put",
         "security": [
           {
             "HTTPBasic": []
@@ -1587,12 +2120,12 @@
         ],
         "parameters": [
           {
-            "name": "domain_name",
+            "name": "domainname",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Domain Name"
+              "title": "Domainname"
             }
           },
           {
@@ -1612,7 +2145,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -1624,7 +2157,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -1646,6 +2179,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -1661,13 +2214,13 @@
         }
       }
     },
-    "/domains/{domain_name}/transfer/cancellation": {
-      "post": {
+    "/domains/{domainname}/processes/transfers/latest/cancellation": {
+      "put": {
         "tags": [
           "Domains"
         ],
         "summary": "Cancel Domain Transfer",
-        "operationId": "do_cancel_transfer_domains__domain_name__transfer_cancellation_post",
+        "operationId": "do_cancel_transfer_domains__domainname__processes_transfers_latest_cancellation_put",
         "security": [
           {
             "HTTPBasic": []
@@ -1678,12 +2231,12 @@
         ],
         "parameters": [
           {
-            "name": "domain_name",
+            "name": "domainname",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Domain Name"
+              "title": "Domainname"
             }
           },
           {
@@ -1703,7 +2256,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -1715,7 +2268,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -1737,6 +2290,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -1752,13 +2325,13 @@
         }
       }
     },
-    "/domains/{domain_name}/transfer/approval": {
-      "post": {
+    "/domains/{domainname}/processes/transfers/latest/approval": {
+      "put": {
         "tags": [
           "Domains"
         ],
         "summary": "Approve Domain Transfer",
-        "operationId": "do_approve_transfer_domains__domain_name__transfer_approval_post",
+        "operationId": "do_approve_transfer_domains__domainname__processes_transfers_latest_approval_put",
         "security": [
           {
             "HTTPBasic": []
@@ -1769,12 +2342,12 @@
         ],
         "parameters": [
           {
-            "name": "domain_name",
+            "name": "domainname",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Domain Name"
+              "title": "Domainname"
             }
           },
           {
@@ -1794,7 +2367,7 @@
             }
           },
           {
-            "name": "rpp-auth-info",
+            "name": "rpp-authorization",
             "in": "header",
             "required": false,
             "schema": {
@@ -1806,7 +2379,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Rpp-Auth-Info"
+              "title": "Rpp-Authorization"
             }
           },
           {
@@ -1826,6 +2399,26 @@
               "application/json": {
                 "schema": {}
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -1841,13 +2434,13 @@
         }
       }
     },
-    "/domains/{domain}/lock": {
+    "/domains/{domain}/processes/locks": {
       "post": {
         "tags": [
           "Domains"
         ],
         "summary": "Lock Domain (Not Implemented)",
-        "operationId": "do_lock_domains__domain__lock_post",
+        "operationId": "do_lock_domains__domain__processes_locks_post",
         "security": [
           {
             "HTTPBasic": []
@@ -1862,14 +2455,177 @@
               "type": "string",
               "title": "Domain"
             }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
           }
         ],
         "responses": {
-          "501": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/domains/{domainname}/processes/{proc_name}/{proc_id}": {
+      "get": {
+        "tags": [
+          "Domains"
+        ],
+        "summary": "List Processes",
+        "operationId": "do_list_processes_domains__domainname__processes__proc_name___proc_id__get",
+        "security": [
+          {
+            "HTTPBasic": []
+          },
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "domainname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domainname"
+            }
+          },
+          {
+            "name": "proc_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proc Name"
+            }
+          },
+          {
+            "name": "proc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proc Id"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
+            "name": "rpp-authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Authorization"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -1903,6 +2659,22 @@
         ],
         "parameters": [
           {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
             "name": "session_id",
             "in": "cookie",
             "required": false,
@@ -1923,8 +2695,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Successful Response",
+          "201": {
+            "description": "Host created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2006,142 +2778,25 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Get Host Info (message body)",
-        "operationId": "do_info_with_body_hosts__host__post",
-        "security": [
-          {
-            "HTTPBasic": []
-          },
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "host",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Host"
-            }
-          },
-          {
-            "name": "session_id",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HostInfoRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseResponseModel"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "head": {
-        "tags": [
-          "Hosts"
-        ],
-        "summary": "Check Host Existence",
-        "operationId": "do_check_hosts__host__head",
-        "security": [
-          {
-            "HTTPBasic": []
-          },
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "host",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Host"
-            }
-          },
-          {
-            "name": "rpp-cl-trid",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
                   "type": "string"
-                },
-                {
-                  "type": "null"
                 }
-              ],
-              "title": "Rpp-Cl-Trid"
-            }
-          },
-          {
-            "name": "session_id",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -2209,7 +2864,27 @@
         ],
         "responses": {
           "204": {
-            "description": "Successful Response"
+            "description": "Successful Response",
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -2248,6 +2923,22 @@
             }
           },
           {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
             "name": "session_id",
             "in": "cookie",
             "required": false,
@@ -2276,6 +2967,26 @@
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
               }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
             }
           },
           "422": {
@@ -2291,14 +3002,17 @@
         }
       }
     },
-    "/hosts/{host}/renewal": {
-      "post": {
+    "/hosts/{host}/availability": {
+      "head": {
         "tags": [
           "Hosts"
         ],
-        "summary": "Renew Host (Not Implemented)",
-        "operationId": "do_renew_hosts__host__renewal_post",
+        "summary": "Check Host Existence",
+        "operationId": "do_check_head_hosts__host__availability_head",
         "security": [
+          {
+            "HTTPBasic": []
+          },
           {
             "HTTPBasic": []
           }
@@ -2312,14 +3026,186 @@
               "type": "string",
               "title": "Host"
             }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
           }
         ],
         "responses": {
-          "501": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hosts/{host}/processes/{proc_name}/{proc_id}": {
+      "get": {
+        "tags": [
+          "Hosts"
+        ],
+        "summary": "List Processes",
+        "operationId": "do_list_processes_hosts__host__processes__proc_name___proc_id__get",
+        "security": [
+          {
+            "HTTPBasic": []
+          },
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "host",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Host"
+            }
+          },
+          {
+            "name": "proc_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proc Name"
+            }
+          },
+          {
+            "name": "proc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proc Id"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
+            "name": "rpp-authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Authorization"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           },
@@ -2352,6 +3238,22 @@
           }
         ],
         "parameters": [
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
           {
             "name": "session_id",
             "in": "cookie",
@@ -2422,6 +3324,22 @@
             }
           },
           {
+            "name": "rpp-authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Authorization"
+            }
+          },
+          {
             "name": "rpp-cl-trid",
             "in": "header",
             "required": false,
@@ -2455,143 +3373,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Organisations"
-        ],
-        "summary": "Get Organisation Info (message body)",
-        "operationId": "do_info_with_body_organisations__organisation__post",
-        "security": [
-          {
-            "HTTPBasic": []
-          },
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "organisation",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Organisation"
-            }
-          },
-          {
-            "name": "session_id",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OrganisationInfoRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseResponseModel"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "head": {
-        "tags": [
-          "Organisations"
-        ],
-        "summary": "Check Organisation Existence",
-        "operationId": "do_check_organisations__organisation__head",
-        "security": [
-          {
-            "HTTPBasic": []
-          },
-          {
-            "HTTPBasic": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "organisation",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Organisation"
-            }
-          },
-          {
-            "name": "rpp-cl-trid",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Rpp-Cl-Trid"
-            }
-          },
-          {
-            "name": "session_id",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Session Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
               }
             }
           },
@@ -2698,6 +3479,22 @@
             }
           },
           {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
             "name": "session_id",
             "in": "cookie",
             "required": false,
@@ -2725,6 +3522,79 @@
                 "schema": {
                   "$ref": "#/components/schemas/BaseResponseModel"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organisations/{organisation}/availability": {
+      "head": {
+        "tags": [
+          "Organisations"
+        ],
+        "summary": "Check Organisation Availability",
+        "operationId": "do_check_head_organisations__organisation__availability_head",
+        "security": [
+          {
+            "HTTPBasic": []
+          },
+          {
+            "HTTPBasic": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "organisation",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Organisation"
+            }
+          },
+          {
+            "name": "rpp-cl-trid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rpp-Cl-Trid"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -2790,6 +3660,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BaseResponseModel"
+                }
+              }
+            },
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
                 }
               }
             }
@@ -2860,7 +3750,27 @@
         ],
         "responses": {
           "204": {
-            "description": "Successful Response"
+            "description": "Successful Response",
+            "headers": {
+              "RPP-Code": {
+                "description": "RPP result code",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Cltrid": {
+                "description": "RPP client transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "RPP-Svtrid": {
+                "description": "RPP server transaction ID",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -3062,9 +3972,6 @@
             "type": "array",
             "title": "Result"
           },
-          "trID": {
-            "$ref": "#/components/schemas/TrIDModel"
-          },
           "messages": {
             "anyOf": [
               {
@@ -3096,8 +4003,7 @@
         },
         "type": "object",
         "required": [
-          "result",
-          "trID"
+          "result"
         ],
         "title": "BaseResponseModel"
       },
@@ -3324,17 +4230,6 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
           "name": {
             "type": "string",
             "title": "Name"
@@ -3404,51 +4299,6 @@
         ],
         "title": "DomainCreateRequest"
       },
-      "DomainInfoRequest": {
-        "properties": {
-          "@type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Type"
-          },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "authInfo": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AuthInfoModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "DomainInfoRequest"
-      },
       "DomainRenewRequest": {
         "properties": {
           "@type": {
@@ -3462,31 +4312,9 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
           "currentExpiry": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date",
             "title": "Currentexpiry"
           },
           "period": {
@@ -3502,11 +4330,11 @@
         },
         "type": "object",
         "required": [
-          "name"
+          "currentExpiry"
         ],
         "title": "DomainRenewRequest"
       },
-      "DomainStartTransferRequest": {
+      "DomainTransferRequest": {
         "properties": {
           "@type": {
             "anyOf": [
@@ -3519,21 +4347,6 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
           "period": {
             "anyOf": [
               {
@@ -3543,17 +4356,10 @@
                 "type": "null"
               }
             ]
-          },
-          "authInfo": {
-            "$ref": "#/components/schemas/AuthInfoModel"
           }
         },
         "type": "object",
-        "required": [
-          "name",
-          "authInfo"
-        ],
-        "title": "DomainStartTransferRequest"
+        "title": "DomainTransferRequest"
       },
       "DomainUpdateAddOrRemove": {
         "properties": {
@@ -3589,7 +4395,7 @@
             "anyOf": [
               {
                 "items": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/StatusModel"
                 },
                 "type": "array"
               },
@@ -3633,21 +4439,6 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
           "add": {
             "anyOf": [
               {
@@ -3680,9 +4471,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "name"
-        ],
         "title": "DomainUpdateRequest"
       },
       "DsOrKeyType": {
@@ -3752,17 +4540,6 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
           "card": {
             "$ref": "#/components/schemas/Card"
           },
@@ -3783,101 +4560,11 @@
         ],
         "title": "EntityCreateRequest"
       },
-      "EntityInfoRequest": {
-        "properties": {
-          "@type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Type"
-          },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "authInfo": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AuthInfoModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id"
-        ],
-        "title": "EntityInfoRequest"
-      },
-      "EntityTransferRequest": {
-        "properties": {
-          "@type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Type"
-          },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "authInfo": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AuthInfoModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id"
-        ],
-        "title": "EntityTransferRequest"
-      },
       "EntityUpdateAddOrRemove": {
         "properties": {
           "status": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/StatusModel"
             },
             "type": "array",
             "title": "Status"
@@ -3922,21 +4609,6 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
           "add": {
             "anyOf": [
               {
@@ -3969,9 +4641,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "id"
-        ],
         "title": "EntityUpdateRequest"
       },
       "GreetingModel": {
@@ -4064,17 +4733,6 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
           "name": {
             "type": "string",
             "title": "Name"
@@ -4096,41 +4754,6 @@
         ],
         "title": "HostCreateRequest"
       },
-      "HostInfoRequest": {
-        "properties": {
-          "@type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Type"
-          },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "HostInfoRequest"
-      },
       "HostUpdateAddOrRemove": {
         "properties": {
           "addr": {
@@ -4141,17 +4764,23 @@
             "title": "Addr"
           },
           "status": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StatusModel"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Status"
           }
         },
         "type": "object",
         "required": [
-          "addr",
-          "status"
+          "addr"
         ],
         "title": "HostUpdateAddOrRemove"
       },
@@ -4180,21 +4809,6 @@
               }
             ],
             "title": "@Type"
-          },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
           },
           "add": {
             "anyOf": [
@@ -4228,9 +4842,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "name"
-        ],
         "title": "HostUpdateRequest"
       },
       "LinkType": {
@@ -4484,17 +5095,6 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
           "id": {
             "type": "string",
             "title": "Id"
@@ -4563,41 +5163,6 @@
           "role"
         ],
         "title": "OrganisationCreateRequest"
-      },
-      "OrganisationInfoRequest": {
-        "properties": {
-          "@type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "@Type"
-          },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "id": {
-            "type": "string",
-            "title": "Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id"
-        ],
-        "title": "OrganisationInfoRequest"
       },
       "OrganisationRole": {
         "properties": {
@@ -4701,21 +5266,6 @@
             ],
             "title": "@Type"
           },
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
           "add": {
             "anyOf": [
               {
@@ -4748,9 +5298,6 @@
           }
         },
         "type": "object",
-        "required": [
-          "id"
-        ],
         "title": "OrganisationUpdateRequest"
       },
       "Organization": {
@@ -4945,6 +5492,30 @@
         ],
         "title": "SidnLegalForm"
       },
+      "StatusModel": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "StatusModel"
+      },
       "SvcMenuModel": {
         "properties": {
           "versions": {
@@ -4990,34 +5561,6 @@
           "objects"
         ],
         "title": "SvcMenuModel"
-      },
-      "TrIDModel": {
-        "properties": {
-          "clTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cltrid"
-          },
-          "svTRID": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Svtrid"
-          }
-        },
-        "type": "object",
-        "title": "TrIDModel"
       },
       "ValidationError": {
         "properties": {

@@ -179,7 +179,7 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
         )
     if request.remove is not None:
         rem = AddRemType(
-            ns=NsType(host_obj=[n for n in request.remove.ns]),
+            ns=NsType(host_obj=[n for n in request.remove.ns]) if request.remove.ns else None,
             contact=[
                 ContactType(
                     value=c.value,

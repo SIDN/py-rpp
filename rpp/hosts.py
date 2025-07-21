@@ -14,8 +14,7 @@ from rpp.model.rpp.host_converter import do_host_check, to_host_create, to_host_
 from fastapi.security import HTTPBasic
 
 logger = logging.getLogger('uvicorn.error')
-security = HTTPBasic()
-router = APIRouter(dependencies=[Depends(security)])
+router = APIRouter()
 
 
 @router.post("/", response_model=BaseResponseModel, response_model_exclude_none=True, summary="Create Host",

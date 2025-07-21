@@ -103,6 +103,10 @@ def auth_info_from_header(header_value: str) -> AuthInfoModel | None:
         # Remove whitespace and parse key=value pairs separated by colon
         cleaned = header_value.replace(" ", "")
         parts = dict(item.split("=", 1) for item in cleaned.split(",") if "=" in item)
+
+        if parts.get("method","").lower() != "authinfo":
+            raise ValueError("Invalid rpp_authorization header format")
+
         return AuthInfoModel(
             value=parts.get("AuthInfo"),
             roid=parts.get("Roid")

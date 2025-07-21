@@ -14,9 +14,8 @@ from rpp.model.rpp.entity_converter import do_entity_check, to_entity_create, to
 from fastapi.security import HTTPBasic
 
 logger = logging.getLogger('uvicorn.error')
-security = HTTPBasic()
 
-router = APIRouter(dependencies=[Depends(security)])
+router = APIRouter()
 
 @router.post("/", description="Create a new entity", summary="Create Entity",
              response_model=BaseResponseModel, response_model_exclude_none=True,

@@ -11,8 +11,7 @@ from rpp.model.rpp.message_converter import to_ack_response, to_messages
 
 
 logger = logging.getLogger('uvicorn.error')
-security = HTTPBasic()
-router = APIRouter(dependencies=[Depends(security)])
+router = APIRouter()
 
 @router.get("/", response_model_exclude_none=True, summary="Get Messages",
                 status_code=200,
