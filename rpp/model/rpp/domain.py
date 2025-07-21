@@ -71,7 +71,7 @@ class DomainCheckResponse(BaseModel):
 
 class DomainInfoResponse(BaseModel):
     name: str
-    registrant: str
+    registrant: Optional[str] = None
     roid: str
     status: Optional[List[str]] = None
     dnssec: Optional[DsOrKeyType] = None
