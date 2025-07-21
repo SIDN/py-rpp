@@ -190,3 +190,14 @@ async def do_stop_transfer(op: TransferOpType,
     
     update_response(response, epp_response)
     return to_entity_transfer(epp_response, response)
+
+@router.get("/{entity_id}/processes/{proc_name}/{proc_id}", summary="List Processes")
+async def do_list_processes(entity_id: str,
+                                proc_name: str,
+                                proc_id: str,
+                                response: Response,
+                                rpp_cl_trid: Annotated[str | None, Header()] = None,
+                                rpp_authorization: Annotated[str | None, Header()] = None,
+                                conn: EppClient = Depends(get_connection)):
+
+    logger.info(f"List {proc_name}/{proc_id} processes for entity: {entity_id}")

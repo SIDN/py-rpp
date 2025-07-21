@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Dict, Optional
 from pydantic import BaseModel, ConfigDict, Field, RootModel, field_validator
 
-from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel
+from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, StatusModel
 
 class NameComponent(BaseModel):
     kind: str
@@ -86,16 +86,6 @@ class EntityCreateResponseModel(BaseModel):
     id: Optional[str] = None
     createDate: Optional[datetime] = None
 
-# class EntityInfoRequest(BaseRequestModel):
-#     id: str
-#     authInfo: Optional[AuthInfoModel] = None
-
-# class EntityCheckRequest(BaseRequestModel):
-#     name: str
-
-# class EntityDeleteRequest(BaseRequestModel):
-#     name: str
-
 class EntityInfoResponse(BaseModel):
     roid: Optional[str] = Field(default=None, alias='rpp.ietf.org:roid')
     card: Card 
@@ -104,7 +94,7 @@ class EntityInfoResponse(BaseModel):
     events: Optional[Dict[str, EventModel]] = None
 
 class EntityUpdateAddOrRemove(BaseModel):
-    status: List[str]
+    status: List[StatusModel]
 
 class EntityUpdateChange(BaseModel):
     contact: List[Card] 
@@ -114,14 +104,6 @@ class EntityUpdateRequest(BaseRequestModel):
     add: Optional[EntityUpdateAddOrRemove] = None
     remove: Optional[EntityUpdateAddOrRemove] = None
     change: Optional[EntityUpdateChange] = None
-
-# class EntityStartTransferRequest(BaseRequestModel):
-#     id: str
-#     authInfo: AuthInfoModel
-
-# class EntityTransferRequest(BaseRequestModel):
-#     id: str
-#     authInfo: Optional[AuthInfoModel] = None
 
 class EntityTransferResponse(BaseModel):
     id: str

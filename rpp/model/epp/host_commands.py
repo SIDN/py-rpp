@@ -10,7 +10,6 @@ from rpp.model.epp.host_1_0 import (
     Delete,
     Info,
     IpType,
-    MNameType,
     StatusType,
     Update,
 )
@@ -53,7 +52,7 @@ def host_info(host: str, rpp_cl_trid: str) -> Epp:
         command=CommandType(
             info=ReadWriteType(
                 other_element=Info(
-                    name=InfoNameType(value=host, hosts=HostsType.ALL)
+                    name=InfoNameType(value=host)
                 )
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
@@ -93,12 +92,12 @@ def host_update(host: str, request: HostUpdateRequest, rpp_cl_trid: str) -> Epp:
     if request.add is not None:
         add = AddRemType(
             add=hostaddr_to_epp(request.add.addr),
-            status=[StatusType(s=c, value=c) for c in request.add.status] if request.add.status else None
+            status=[StatusType(status=status.name, value=status.reason) for status in request.add.status] if request.add.status else None
         )
     if request.remove is not None:
         rem = AddRemType(
             add=hostaddr_to_epp(request.remove.addr),
-            status=[StatusType(s=c, value=c) for c in request.remove.status] if request.remove.status else None
+            status=[StatusType(status=status.name, value=status.reason) for status in request.remove.status] if request.remove.status else None
         )
 
     epp_request = Epp(

@@ -214,12 +214,12 @@ def contact_update(entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: st
 
     if request.add is not None:
         add = AddRemType(
-            status=[StatusType(s=c, value=c) for c in request.add.status] if request.add.status else None
+            status=[StatusType(s=status.name, value=status.reason) for status in request.add.status] if request.add.status else None
         )
 
     if request.remove is not None:
         rem = AddRemType(
-            status=[StatusType(s=c, value=c) for c in request.remove.status] if request.remove.status else None
+            status=[StatusType(s=status.name, value=status.reason) for status in request.remove.status] if request.remove.status else None
         )
 
     epp_request = Epp(

@@ -8,6 +8,23 @@ from rpp.model.rpp.common_converter import get_status_from_response, is_ok_code
 
 logger = logging.getLogger('uvicorn.error')
 
+RPP_CODE_HEADERS = {
+    "headers": {
+        "RPP-Code": {
+            "description": "RPP result code",
+            "schema": {"type": "string"}
+        },
+        "RPP-Cltrid": {
+            "description": "RPP client transaction ID",
+            "schema": {"type": "string"}
+        },
+        "RPP-Svtrid": {
+            "description": "RPP server transaction ID",
+            "schema": {"type": "string"}
+        }
+    }
+}
+
 def update_response(response: Response, epp_response: Epp, default_http_status_code: int = None):
     status_code = get_status_from_response(epp_response)
     update_response_from_code(response, status_code, default_http_status_code)

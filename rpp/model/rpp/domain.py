@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
-from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel
+from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel, StatusModel
 
 class NsItemModel(BaseModel):
     type: str
@@ -64,12 +64,6 @@ class DomainCreateResponse(BaseModel):
     creDate: datetime
     exDate: Optional[datetime] = None
 
-class DomainInfoRequest(BaseRequestModel):
-    authInfo: Optional[AuthInfoModel] = None
-
-# class DomainCheckRequest(BaseRequestModel):
-#     name: str
-
 class DomainCheckResponse(BaseModel):
     name: str
     avail: bool
@@ -91,7 +85,7 @@ class DomainInfoResponse(BaseModel):
 class DomainUpdateAddOrRemove(BaseModel):
     ns: Optional[List[str]] = None
     contact: Optional[List[ContactModel]] = None
-    status: Optional[List[str]] = None
+    status: Optional[List[StatusModel]] = None
 
 class DomainUpdateChange(BaseModel):
     registrant: str
@@ -110,17 +104,8 @@ class DomainRenewResponse(BaseModel):
     name: str
     expDate: Optional[datetime] = None
 
-class DomainDeleteRequest(BaseRequestModel):
-    name: str
-
-class DomainStartTransferRequest(BaseRequestModel):
-    name: str
-    period: Optional[PeriodModel] = None
-    authInfo: AuthInfoModel
-
 class DomainTransferRequest(BaseRequestModel):
-    name: str
-    authInfo: Optional[AuthInfoModel] = None
+    period: Optional[PeriodModel] = None
 
 class DomainTransferResponse(BaseModel):
     name: str

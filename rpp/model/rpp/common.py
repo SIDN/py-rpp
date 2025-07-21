@@ -68,3 +68,6 @@ class BaseResponseModel(BaseModel):
     resData: Optional[Any] = None  
     extension: Optional[Any] = None 
     
+class StatusModel(BaseModel):
+    name: str
+    reason: Optional[str] = None

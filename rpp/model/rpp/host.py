@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional, Dict
 from pydantic import BaseModel, IPvAnyAddress
 
-from rpp.model.rpp.common import BaseRequestModel
+from rpp.model.rpp.common import BaseRequestModel, StatusModel
 
 class HostEventModel(BaseModel):
     name: str
@@ -24,18 +24,9 @@ class HostCreateRequest(BaseRequestModel):
     name: str
     addr: Optional[HostAddr] = None
 
-# class HostInfoRequest(BaseRequestModel):
-#     name: str
-
-# class HostDeleteRequest(BaseRequestModel):
-#     name: str
-
-# class HostCheckRequest(BaseRequestModel):
-#     name: str
-
 class HostUpdateAddOrRemove(BaseModel):
     addr: List[HostAddr]
-    status: List[str]
+    status: Optional[List[StatusModel]] = None
 
 class HostUpdateChange(BaseModel):
     name: str

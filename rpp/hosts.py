@@ -36,7 +36,8 @@ async def do_create(create_request: HostCreateRequest,
 async def do_info(host: str,
             response: Response,
             conn: EppClient = Depends(get_connection),
-            rpp_cl_trid: Annotated[str | None, Header()] = None) -> BaseResponseModel:
+            rpp_cl_trid: Annotated[str | None, Header()] = None
+            ) -> BaseResponseModel:
 
     logger.info(f"Info for host: {host}")
 
@@ -99,3 +100,14 @@ async def do_update(host: str,
 
     update_response(response, epp_response)
     return to_host_update(epp_response)
+
+@router.get("/{host}/processes/{proc_name}/{proc_id}", summary="List Processes")
+async def do_list_processes(host: str,
+                                proc_name: str,
+                                proc_id: str,
+                                response: Response,
+                                rpp_cl_trid: Annotated[str | None, Header()] = None,
+                                rpp_authorization: Annotated[str | None, Header()] = None,
+                                conn: EppClient = Depends(get_connection)):
+
+    logger.info(f"List {proc_name}/{proc_id} processes for host: {host}")
