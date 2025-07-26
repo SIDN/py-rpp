@@ -1,7 +1,7 @@
 from typing import Dict
 import threading
 import secrets
-from rpp.common import EppException, epp_to_rpp_code
+from rpp.common import EppException, epp_auth_info_from_header, epp_to_rpp_code
 from rpp.model.rpp.common_converter import get_status_from_response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from rpp.epp_client import EppClient
@@ -101,7 +101,7 @@ class ConnectionPool:
 
             elif not conn.logged_in:
                 epp_status: int = get_status_from_response(epp_result)
-                raise EppException(epp_to_rpp_code(epp_status), epp_result, {"Rpp-Epp-Code": str(epp_status)})
+                raise EppException(epp_to_rpp_code(epp_status), epp_result, {"Rpp-Code": str(epp_status)})
 
         return conn
         

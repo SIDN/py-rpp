@@ -1,17 +1,16 @@
 import logging
-from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response
-from fastapi.params import Body
-from rpp.common import RPP_CODE_HEADERS, add_check_status, auth_info_from_header, update_response, update_response_from_code
+from typing import Annotated
+from fastapi import APIRouter, Depends, Header, Request, Response
+from rpp.common import RPP_CODE_HEADERS, add_check_status, epp_auth_info_from_header, update_response
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 
 from rpp.model.epp.contact_converter import contact_check, contact_create, contact_delete, contact_info, contact_transfer, contact_transfer_query, contact_update
 from rpp.model.epp.epp_1_0 import TransferOpType
-from rpp.model.rpp.common import BaseResponseModel
+from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
 from rpp.model.rpp.entity import EntityCreateRequest, EntityUpdateRequest
 from rpp.model.rpp.entity_converter import do_entity_check, to_entity_create, to_entity_delete, to_entity_info, to_entity_transfer, to_entity_update
-from fastapi.security import HTTPBasic
+
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -40,12 +39,11 @@ async def do_create(request: Request,
              responses={200: RPP_CODE_HEADERS})
 async def do_info(entity_id: str, response: Response,
             conn: EppClient = Depends(get_connection),
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             rpp_cl_trid: Annotated[str | None, Header()] = None) -> BaseResponseModel:
     logger.info(f"Fetching info for entity: {entity_id}")
 
-    auth_info = auth_info_from_header(rpp_authorization)
-    epp_request = contact_info(entity_id, rpp_cl_trid, auth_info)
+    epp_request = contact_info(entity_id, rpp_cl_trid, epp_authorization)
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
@@ -114,13 +112,11 @@ async def do_update(entity_id: str,
              responses={200: RPP_CODE_HEADERS})
 async def do_start_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     logger.info(f"Start transfer for entity: {entity_id}")
 
-    auth_info = auth_info_from_header(rpp_authorization)
-
-    epp_request = contact_transfer(entity_id, rpp_cl_trid, auth_info, op=TransferOpType.REQUEST)
+    epp_request = contact_transfer(entity_id, rpp_cl_trid, epp_authorization, op=TransferOpType.REQUEST)
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
@@ -131,13 +127,12 @@ async def do_start_transfer(entity_id: str, response: Response,
             responses={200: RPP_CODE_HEADERS})
 async def do_query_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
     logger.info(f"Query transfer for entity: {entity_id}")
-    auth_info = auth_info_from_header(rpp_authorization)
 
-    epp_request = contact_transfer_query(entity_id, rpp_cl_trid, auth_info)
+    epp_request = contact_transfer_query(entity_id, rpp_cl_trid, epp_authorization)
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
@@ -148,48 +143,45 @@ async def do_query_transfer(entity_id: str, response: Response,
             responses={200: RPP_CODE_HEADERS})
 async def do_reject_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
     logger.info(f"Reject transfer for entity: {entity_id}")
-    auth_info = auth_info_from_header(rpp_authorization)
 
     return await do_stop_transfer(TransferOpType.REJECT, 
                                   response,
                                   conn,
-                                  entity_id, rpp_cl_trid, auth_info)
+                                  entity_id, rpp_cl_trid, epp_authorization)
 
 @router.put("/{entity_id}/processes/transfers/cancellation", summary="Cancel Entity Transfer",
             status_code=200,
             responses={200: RPP_CODE_HEADERS})
 async def do_cancel_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
 
     logger.info(f"Cancel transfer for entity: {entity_id}")
-    auth_info = auth_info_from_header(rpp_authorization)
 
     return await do_stop_transfer(TransferOpType.CANCEL, 
                                   response,
                                   conn,
-                                  entity_id, rpp_cl_trid, auth_info)
+                                  entity_id, rpp_cl_trid, epp_authorization)
 
 @router.put("/{entity_id}/processes/transfers/approval", summary="Approve Entity Transfer",
             status_code=200,
             responses={200: RPP_CODE_HEADERS})
 async def do_approve_transfer(entity_id: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             conn: EppClient = Depends(get_connection)):
 
     logger.info(f"Approve transfer for entity: {entity_id}")
-    auth_info = auth_info_from_header(rpp_authorization)
 
     return await do_stop_transfer(TransferOpType.APPROVE, 
                                   response,
                                   conn,
-                                  entity_id, rpp_cl_trid, auth_info)
+                                  entity_id, rpp_cl_trid, epp_authorization)
 
 
 
@@ -218,7 +210,6 @@ async def do_list_processes(entity_id: str,
                                 proc_id: str,
                                 response: Response,
                                 rpp_cl_trid: Annotated[str | None, Header()] = None,
-                                rpp_authorization: Annotated[str | None, Header()] = None,
                                 conn: EppClient = Depends(get_connection)):
 
     logger.info(f"List {proc_name}/{proc_id} processes for entity: {entity_id}")

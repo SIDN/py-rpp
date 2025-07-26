@@ -2,13 +2,12 @@ import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Header, Response
 from fastapi.params import Body
-from rpp.common import RPP_CODE_HEADERS, add_check_status, auth_info_from_header, update_response, update_response_from_code
+from rpp.common import RPP_CODE_HEADERS, add_check_status, epp_auth_info_from_header, update_response, update_response_from_code
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from rpp.model.epp.domain_converter import domain_check, domain_delete, domain_info, domain_create, domain_renew, domain_transfer, domain_transfer_query, domain_update
 from rpp.model.epp.epp_1_0 import TransferOpType
 from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel
-from fastapi.security import HTTPBasic
 
 from rpp.model.rpp.domain import DomainCreateRequest, DomainRenewRequest, DomainTransferRequest, DomainUpdateRequest
 from rpp.model.rpp.domain_converter import do_domain_check, to_domain_check_response, to_domain_create, to_domain_delete, to_domain_info, to_domain_renew, to_domain_transfer, to_domain_update
@@ -38,15 +37,13 @@ async def do_create(create_request: DomainCreateRequest,
              responses={200: RPP_CODE_HEADERS})
 async def do_info(domainname: str, response: Response,
              conn: EppClient = Depends(get_connection),
-             rpp_authorization: Annotated[str | None, Header()] = None,
+             epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
              rpp_cl_trid: Annotated[str | None, Header()] = None,
              filter: str = "all") -> BaseResponseModel:
 
     logger.info(f"Fetching info for domain: {domainname}")
 
-    auth_info = auth_info_from_header(rpp_authorization)
-
-    epp_request = domain_info(domainname, filter, rpp_cl_trid, auth_info) 
+    epp_request = domain_info(domainname, filter, rpp_cl_trid, epp_authorization)
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
@@ -56,6 +53,7 @@ async def do_info(domainname: str, response: Response,
              status_code=204,
              responses={204: RPP_CODE_HEADERS})
 async def do_check_head(domainname: str, response: Response,
+                        
              rpp_cl_trid: Annotated[str | None, Header()] = None,
              conn: EppClient = Depends(get_connection)):
 
@@ -151,18 +149,17 @@ async def do_renew(domainname: str,
              responses={200: RPP_CODE_HEADERS})
 async def do_start_transfer(domainname: str,
                             response: Response,
+                            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
                             request: DomainTransferRequest = Body(None),
                             rpp_cl_trid: Annotated[str | None, Header()] = None,
-                            rpp_authorization: Annotated[str | None, Header()] = None,
                             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     logger.info(f"Start transfer for domain: {domainname}")
 
-    auth_info = auth_info_from_header(rpp_authorization)
-    if not auth_info:
-        logger.error("rpp_auth_info required when no transfer request body is provided")
-        raise HTTPException(status_code=400, detail="rpp_auth_info required when no transfer request body is provided")
-        
-    epp_request = domain_transfer(domainname, request, rpp_cl_trid, auth_info, op=TransferOpType.REQUEST)
+
+    if not epp_authorization:
+        raise HTTPException(status_code=400, detail="epp_authorization required")
+
+    epp_request = domain_transfer(domainname, request, rpp_cl_trid, epp_authorization, op=TransferOpType.REQUEST)
     epp_response = await conn.send_command(epp_request)
 
     update_response(response, epp_response)
@@ -173,14 +170,12 @@ async def do_start_transfer(domainname: str,
                 responses={200: RPP_CODE_HEADERS})
 async def do_query_transfer(domainname: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
    
     logger.info(f"Query transfer for domain: {domainname}")
 
-    auth_info = auth_info_from_header(rpp_authorization)
-
-    epp_request = domain_transfer_query(domainname, rpp_cl_trid, auth_info)
+    epp_request = domain_transfer_query(domainname, rpp_cl_trid, epp_authorization)
 
     epp_response = await conn.send_command(epp_request)
     
@@ -192,42 +187,39 @@ async def do_query_transfer(domainname: str, response: Response,
              responses={200: RPP_CODE_HEADERS})
 async def do_reject_transfer(domainname: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     
     logger.info(f"Reject transfer for domain: {domainname}")
-    auth_info = auth_info_from_header(rpp_authorization)
 
     return await do_stop_transfer(TransferOpType.REJECT, domainname, response,
-            conn, rpp_cl_trid, auth_info)
+            conn, rpp_cl_trid, epp_authorization)
 
 @router.put("/{domainname}/processes/transfers/latest/cancellation", summary="Cancel Domain Transfer",
              status_code=200,
              responses={200: RPP_CODE_HEADERS})
 async def do_cancel_transfer(domainname: str, response: Response,
             rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
+            epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
             conn: EppClient = Depends(get_connection)) -> BaseResponseModel:
     
     logger.info(f"Cancel transfer for domain: {domainname}")
-    auth_info = auth_info_from_header(rpp_authorization)
 
     return await do_stop_transfer(TransferOpType.CANCEL, domainname, response,
-            conn, rpp_cl_trid, auth_info)
+            conn, rpp_cl_trid, epp_authorization)
 
 @router.put("/{domainname}/processes/transfers/latest/approval", summary="Approve Domain Transfer",
              status_code=200,
              responses={200: RPP_CODE_HEADERS})
 async def do_approve_transfer(domainname: str, response: Response,
-            rpp_cl_trid: Annotated[str | None, Header()] = None,
-            rpp_authorization: Annotated[str | None, Header()] = None,
-            conn: EppClient = Depends(get_connection)):
+                                epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
+                                rpp_cl_trid: Annotated[str | None, Header()] = None,
+                                conn: EppClient = Depends(get_connection)):
 
     logger.info(f"Approve transfer for domain: {domainname}")
-    auth_info = auth_info_from_header(rpp_authorization)
 
     return await do_stop_transfer(TransferOpType.APPROVE, domainname, response,
-            conn, rpp_cl_trid, auth_info)
+            conn, rpp_cl_trid, epp_authorization)
 
 async def do_stop_transfer(op: TransferOpType,
                     domainname: str,

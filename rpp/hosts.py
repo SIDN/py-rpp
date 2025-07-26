@@ -1,8 +1,8 @@
 import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response
-from fastapi.params import Body, Header
-from rpp.common import RPP_CODE_HEADERS, add_check_status, auth_info_from_header, update_response, update_response_from_code
+from fastapi.params import Header
+from rpp.common import RPP_CODE_HEADERS, add_check_status, epp_auth_info_from_header, update_response
 from rpp.epp_connection_pool import get_connection
 from rpp.epp_client import EppClient
 from rpp.model.epp.host_commands import host_check, host_create, host_delete, host_info, host_update
@@ -11,7 +11,6 @@ from fastapi import APIRouter
 from rpp.model.rpp.common import BaseResponseModel
 from rpp.model.rpp.host import HostCreateRequest, HostUpdateRequest
 from rpp.model.rpp.host_converter import do_host_check, to_host_create, to_host_delete, to_host_info, to_host_update
-from fastapi.security import HTTPBasic
 
 logger = logging.getLogger('uvicorn.error')
 router = APIRouter()

@@ -1,7 +1,7 @@
-
 import logging
-from typing import Optional
+from typing import Annotated, Optional
 from fastapi import HTTPException, Response
+from fastapi.params import Header
 from rpp.model.epp.epp_1_0 import Epp
 from rpp.model.rpp.common import AuthInfoModel
 from rpp.model.rpp.common_converter import get_status_from_response, is_ok_code
@@ -93,23 +93,35 @@ class EppException(HTTPException):
         super().__init__(status_code=status_code, headers=headers)
 
 
-def auth_info_from_header(header_value: str) -> AuthInfoModel | None:
+def epp_auth_info_from_header(rpp_authorization: Annotated[str, Header()] = None) -> AuthInfoModel:
+   """
+    Parse the structured header value into an AuthInfoModel.
+    Example header value: "authinfo value=xxx, roid=yyy"
+    Only the keys and 'authinfo' prefix are case-insensitive.
     """
-    Parse the structured header value into a dictionary.
-    Example header value: "AuthInfo=xxx:Roid=yyy"
-    """
+   if rpp_authorization:
+        # Split on whitespace, check prefix case-insensitively
+        parts = rpp_authorization.strip().split(None, 1)
+        if len(parts) != 2:
+            raise ValueError(f"Invalid rpp_authorization header value")
+        if not parts or parts[0].lower() != "authinfo":
+            raise ValueError(f"Invalid authorization scheme: {parts[0]}")
 
-    if header_value:
-        # Remove whitespace and parse key=value pairs separated by colon
-        cleaned = header_value.replace(" ", "")
-        parts = dict(item.split("=", 1) for item in cleaned.split(",") if "=" in item)
+        # Split by comma, then by '='
+        kv = {}
+        for item in parts[1].split(","):
+            if "=" in item:
+                k, v = item.split("=", 1)
+                k = k.strip().lower()  # keys are case-insensitive
+                v = v.strip()          # values preserve case
+                kv[k] = v
 
-        if parts.get("method","").lower() != "authinfo":
-            raise ValueError("Invalid rpp_authorization header format")
+        if not kv.get("value"):
+            raise ValueError("Missing 'value' in rpp_authorization header")
 
         return AuthInfoModel(
-            value=parts.get("AuthInfo"),
-            roid=parts.get("Roid")
-        )
-    
-    return None
+                    value=kv.get("value"),
+                    roid=kv.get("roid")
+                )
+   
+   return None

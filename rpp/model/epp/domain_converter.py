@@ -107,15 +107,12 @@ def domain_create(req: DomainCreateRequest, rpp_cl_trid: str) -> Epp:
 
 
 def domain_info(domainname: str, filter: str, rpp_cl_trid: str, auth_info: AuthInfoModel) -> Epp:
-    auth_inf_type = (
-        AuthInfoType(pw=PwAuthInfoType(value=auth_info.value, roid=auth_info.roid))
-        if auth_info else None
-    )
+
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
                 other_element=Info(
-                    name=InfoNameType(value=domainname, hosts=HostsType(filter)), auth_info=auth_inf_type
+                    name=InfoNameType(value=domainname, hosts=HostsType(filter)), auth_info=create_auth_info(auth_info)
                 )
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
@@ -123,6 +120,13 @@ def domain_info(domainname: str, filter: str, rpp_cl_trid: str, auth_info: AuthI
     )
 
     return epp_request
+
+def create_auth_info(auth_info):
+    return (
+        AuthInfoType(pw=PwAuthInfoType(value=auth_info.value, roid=auth_info.roid))
+        if auth_info else None
+    )
+
 
 
 def domain_check(domainname: str, rpp_cl_trid: str) -> Epp:
@@ -241,13 +245,7 @@ def domain_transfer(domainname: str, request: DomainTransferRequest, rpp_cl_trid
                     )
                     if request.period
                     else None,
-                    auth_info=AuthInfoType(
-                        pw=PwAuthInfoType(
-                            value=auth_info.value,
-                            roid=auth_info.roid,
-                        )
-                    )
-                    if auth_info else None,
+                    auth_info=create_auth_info(auth_info),
                 ),
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
@@ -264,13 +262,7 @@ def domain_transfer_query(domainname: str, rpp_cl_trid: str, auth_info: AuthInfo
                 op=TransferOpType.QUERY,
                 other_element=Transfer(
                     name=domainname,
-                    auth_info=AuthInfoType(
-                        pw=PwAuthInfoType(
-                            value=auth_info.value,
-                            roid=auth_info.roid,
-                        )
-                    )
-                    if auth_info else None,
+                    auth_info=create_auth_info(auth_info)
                 ),
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
