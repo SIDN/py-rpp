@@ -70,4 +70,20 @@ class BaseResponseModel(BaseModel):
     
 class StatusModel(BaseModel):
     name: str
+    #reason: Optional[str] = None
+
+class ErrorModel(BaseModel):
+    code: str
+    message: str
+    lang: Optional[str] = None
+
+class ProblemModel(BaseModel):
+    type: Optional[str] = None
+    status: int
+    title: str
+    detail: Optional[str] = None
+    errors: Optional[List[ErrorModel]] = None
+
+class BaseCheckResponse(BaseModel):
+    avail: bool
     reason: Optional[str] = None

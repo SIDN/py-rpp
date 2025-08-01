@@ -179,7 +179,7 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
                 for c in request.add.contact
             ]
             if request.add.contact else None,
-            status=[StatusType(s=status.name, value=status.reason) for status in request.add.status] if request.add.status else None,
+            status=[StatusType(s=status.name) for status in request.add.status] if request.add.status else None,
         )
     if request.remove is not None:
         rem = AddRemType(
@@ -191,7 +191,7 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
                 )
                 for c in request.remove.contact
             ],
-            status=[StatusType(s=status.name, value=status.reason) for status in request.remove.status] if request.remove.status else None,
+            status=[StatusType(s=status.name) for status in request.remove.status] if request.remove.status else None,
         )
 
     epp_request = Epp(

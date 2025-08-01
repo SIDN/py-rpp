@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
-from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel, StatusModel
+from rpp.model.rpp.common import AuthInfoModel, BaseCheckResponse, BaseRequestModel, PeriodModel, StatusModel
 
 class NsItemModel(BaseModel):
     type: str
@@ -61,13 +61,13 @@ class DomainCreateRequest(BaseRequestModel):
 
 class DomainCreateResponse(BaseModel):
     name: str
-    creDate: datetime
-    exDate: Optional[datetime] = None
+    created: datetime
+    expires: Optional[datetime] = None
 
-class DomainCheckResponse(BaseModel):
+class DomainCheckResponse(BaseCheckResponse):
     name: str
-    avail: bool
-    reason: Optional[str] = None
+    # avail: bool
+    # reason: Optional[str] = None
 
 class DomainInfoResponse(BaseModel):
     name: str

@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Dict, List, Optional
-from pydantic import BaseModel, Field, RootModel, conlist
+from pydantic import BaseModel, Field, RootModel
 from enum import Enum
 
-from rpp.model.rpp.common import BaseRequestModel
+from rpp.model.rpp.common import BaseCheckResponse, BaseRequestModel
 from rpp.model.rpp.entity import Card
 
 class RoleStatusType(str, Enum):
@@ -91,3 +91,6 @@ class OrganisationUpdateRequest(BaseRequestModel):
     add: Optional[OrganisationUpdateAddOrRemove] = None
     remove: Optional[OrganisationUpdateAddOrRemove] = None
     change: Optional[OrganisationUpdateChange] = None
+
+class OrganisationCheckResponse(BaseCheckResponse):
+    id: str

@@ -103,7 +103,7 @@ class EppClient:
         self.greeting = epp_response.greeting
         return self.greeting
 
-    async def send_command(self, epp_request: Epp, login: bool =False) -> Epp:
+    async def send_command(self, epp_request: Epp, login: bool = False) -> Epp:
         xml_payload = serializer.render(epp_request, ns_map=self.ns_map)
         if login:
             masked_xml_payload = re.sub(r"(<.*:pw>)(.*?)(</.*:pw>)", r"\1********\3", xml_payload, flags=re.DOTALL)

@@ -1,17 +1,17 @@
 from typing import List, Dict
 
 from fastapi import Response
-from rpp.model.epp.contact_1_0 import CheckType, ChkDataType, TrnDataType
+from rpp.model.epp.contact_1_0 import CheckType, ChkDataType, CreData, TrnDataType
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel, TrIDModel
-from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
-from rpp.model.rpp.entity import Card, EntityCreateResponseModel, EntityInfoResponse, EventModel, Name, AddressComponent, Organization, Address, EntityTransferResponse
+from rpp.model.rpp.common import AuthInfoModel, ProblemModel
+from rpp.model.rpp.common_converter import is_ok_response, to_error_response
+from rpp.model.rpp.entity import Card, EntityCheckResponse, EntityCreateResponseModel, EntityInfoResponse, EventModel, Name, AddressComponent, Organization, Address, EntityTransferResponse
 
-def to_entity_info(epp_response) -> BaseResponseModel:
+def to_entity_info(epp_response) -> EntityInfoResponse | ProblemModel:
 
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
-        return to_base_response(epp_response)
+        return to_error_response(epp_response)
 
     res_data = epp_response.response.res_data.other_element[0]
 
@@ -69,22 +69,22 @@ def to_entity_info(epp_response) -> BaseResponseModel:
         addresses=addresses,
     )
 
-    infData = EntityInfoResponse(
+    return EntityInfoResponse(
         card=card,
         status=[s.s.value for s in res_data.status],
         events=events,
         authInfo=authInfo
     )
 
-    return BaseResponseModel(
-        type_="Entity",
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-        svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=infData
-    )
+    # return BaseResponseModel(
+    #     type_="Entity",
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #     svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=infData
+    # )
 
-def do_entity_check(epp_response: Epp) -> tuple[bool, int, str]:
+def do_entity_check(epp_response: Epp) -> EntityCheckResponse | ProblemModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
          return None, epp_status, message
@@ -92,40 +92,54 @@ def do_entity_check(epp_response: Epp) -> tuple[bool, int, str]:
     check_data: ChkDataType = epp_response.response.res_data.other_element[0]
     cd: CheckType = check_data.cd[0]
 
-    return cd.id.avail, epp_status, cd.reason.value if cd.reason else None
+    return EntityCheckResponse(
+        name=cd.id.value,
+        status=cd.id.avail,
+        reason=cd.reason.value if cd.reason else None
+    )
 
-def to_entity_create(epp_response) -> BaseResponseModel:
+def to_entity_create(epp_response) -> EntityCreateResponseModel | ProblemModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
-        return to_base_response(epp_response)
+        return to_error_response(epp_response)
 
-    res_data = epp_response.response.res_data.other_element[0]
+    res_data: CreData = epp_response.response.res_data.other_element[0]
 
-    resData = EntityCreateResponseModel(
+    return EntityCreateResponseModel(
         id=res_data.id,
         createDate=str(res_data.cr_date) if hasattr(res_data, "cr_date") else None)
     
-    return BaseResponseModel(
-        type_="Entity",
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-                                svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=resData)
+    # return BaseResponseModel(
+    #     type_="Entity",
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #                             svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=resData)
 
-def to_entity_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
-    return to_base_response(epp_response)
+def to_entity_delete(epp_response: Epp) -> None | ProblemModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        return to_error_response(epp_response)
+    
+    return None
+    # return to_base_response(epp_response)
 
-def to_entity_update(epp_response: Epp, response: Response) -> BaseResponseModel:
-    return to_base_response(epp_response)
+def to_entity_update(epp_response: Epp) ->  None | ProblemModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        return to_error_response(epp_response)
+    
+    return None
+#     return to_base_response(epp_response)
 
-def to_entity_transfer(epp_response: Epp, response: Response) -> BaseResponseModel:
+def to_entity_transfer(epp_response: Epp) -> EntityTransferResponse | ProblemModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok or not hasattr(epp_response.response.res_data, "other_element"):
-        return to_base_response(epp_response)
+        return to_error_response(epp_response)
 
     res_data: TrnDataType = epp_response.response.res_data.other_element[0]
 
-    resData = EntityTransferResponse(
+    return EntityTransferResponse(
         id=res_data.id,
         trStatus=res_data.tr_status,
         reId=res_data.re_id,
@@ -135,10 +149,10 @@ def to_entity_transfer(epp_response: Epp, response: Response) -> BaseResponseMod
         exDate=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
     )
 
-    return BaseResponseModel(
-        type_="Entity",
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-                       svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=resData
-    )
+    # return BaseResponseModel(
+    #     type_="Entity",
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #                    svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=resData
+    # )

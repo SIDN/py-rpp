@@ -4,21 +4,22 @@ from rpp.model.epp.domain_1_0 import TrnData as DomainTrnData
 from rpp.model.epp.contact_1_0 import TrnData
 from rpp.model.epp.epp_1_0 import Epp
 from rpp.model.epp.sidn_ext_epp_1_0 import PollData
-from rpp.model.rpp.common import BaseResponseModel, MessageQueueModel, TrIDModel
-from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
+from rpp.model.rpp.common import MessageQueueModel, ProblemModel
+from rpp.model.rpp.common_converter import is_ok_response, to_error_response
 from rpp.model.rpp.domain import DomainTransferResponse
+from rpp.model.rpp.message import MessageAckModel
 
 logger = logging.getLogger('uvicorn.error')
 
-def to_messages(epp_response: Epp) -> BaseResponseModel:
+def to_messages(epp_response: Epp) -> MessageQueueModel | ProblemModel:
 
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
-         return to_base_response(epp_response)
+         return to_error_response(epp_response)
 
     #TODO: convert the EPP resData to RPP model
     resData = None
-    message_queue = None
+    message_queue: MessageQueueModel = None
     if hasattr(epp_response.response, 'msg_q') and epp_response.response.msg_q is not None:
         message_queue = MessageQueueModel(
             count=epp_response.response.msg_q.count,
@@ -49,14 +50,21 @@ def to_messages(epp_response: Epp) -> BaseResponseModel:
                     exDate=resData.ex_date.to_datetime() if hasattr(resData, "ex_date") and resData.ex_date is not None else None
                 )
 
+    return message_queue
+    # return BaseResponseModel(
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #     svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=resData,
+    #     messages=message_queue
+    # )
 
-    return BaseResponseModel(
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-        svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=resData,
-        messages=message_queue
+def to_ack_response(epp_response: Epp) -> MessageAckModel | ProblemModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+         return to_error_response(epp_response)
+    
+    return MessageAckModel(
+        count=epp_response.response.msg_q.count,
+        id=epp_response.response.msg_q.id
     )
-
-def to_ack_response(epp_response: Epp) -> BaseResponseModel:
-    return to_base_response(epp_response)

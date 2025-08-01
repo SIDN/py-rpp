@@ -6,3 +6,4 @@ xsdata==25.4
 uvicorn==0.34.3
 trio
 asgi-lifespan
+pytest-order

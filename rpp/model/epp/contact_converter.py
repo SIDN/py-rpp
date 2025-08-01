@@ -158,9 +158,7 @@ def card_to_chg_postal_info(card: Card) -> ChgPostalInfoType:
     return ChgPostalInfoType(
         type_value="int" if card.int_ else "loc",
         name=card.name.full,
-        org=card.organizations["org"].name
-        if "org" in card.organizations
-        else None,
+        org=card.organizations["org"].name if "org" in card.organizations else None,
         addr=AddrType(
             street=get_value_by_kind(
                 card.addresses.root["addr"].components, "name"
@@ -179,16 +177,14 @@ def card_to_chg_postal_info(card: Card) -> ChgPostalInfoType:
     )
 
 
-def get_email_from_entity_change(request: EntityUpdateRequest) -> str:
-    for card in request.change.contact:
-        if hasattr(card, "emails") and "email" in card.emails.root:
-            return card.emails.root["email"].address
+def get_email_from_card(card: Card) -> str:
+    if hasattr(card, "emails") and "email" in card.emails.root:
+        return card.emails.root["email"].address
 
 
-def get_voice_from_entity_change(request: EntityUpdateRequest) -> str:
-    for card in request.change.contact:
-        if hasattr(card, "phones") and "voice" in card.phones.root:
-            return card.phones.root["voice"].number
+def get_voice_from_card(card: Card) -> str:
+    if hasattr(card, "phones") and "voice" in card.phones.root:
+        return card.phones.root["voice"].number
 
 
 def contact_update(entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: str) -> Epp:
@@ -198,11 +194,9 @@ def contact_update(entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: st
 
     if request.change is not None:
         chg = ChgType(
-            postal_info=[
-                card_to_chg_postal_info(c) for c in request.change.contact
-            ],
-            voice=E164Type(value=get_voice_from_entity_change(request)),
-            email=get_email_from_entity_change(request),
+            postal_info=[card_to_chg_postal_info(request.change.card)],
+            voice=E164Type(value=get_voice_from_card(request.change.card)),
+            email=get_email_from_card(request.change.card),
             auth_info=AuthInfoType(
                 pw=PwAuthInfoType(
                     value=request.change.authInfo.value,
@@ -214,12 +208,12 @@ def contact_update(entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: st
 
     if request.add is not None:
         add = AddRemType(
-            status=[StatusType(s=status.name, value=status.reason) for status in request.add.status] if request.add.status else None
+            status=[StatusType(s=status.name) for status in request.add.status] if request.add.status else None
         )
 
     if request.remove is not None:
         rem = AddRemType(
-            status=[StatusType(s=status.name, value=status.reason) for status in request.remove.status] if request.remove.status else None
+            status=[StatusType(s=status.name) for status in request.remove.status] if request.remove.status else None
         )
 
     epp_request = Epp(

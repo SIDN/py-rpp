@@ -2,9 +2,9 @@ import base64
 
 from fastapi import Response
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.epp.domain_1_0 import CheckNameType, CheckType, ChkDataType, CreDataType, InfData, RenDataType, TrnDataType
-from rpp.model.rpp.common import AuthInfoModel, BaseResponseModel, TrIDModel
-from rpp.model.rpp.common_converter import is_ok_response, to_base_response, to_result_list
+from rpp.model.epp.domain_1_0 import CheckType, ChkDataType, CreDataType, InfData, RenDataType, TrnDataType
+from rpp.model.rpp.common import AuthInfoModel, ProblemModel
+from rpp.model.rpp.common_converter import is_ok_response, to_error_response
 from rpp.model.rpp.domain import (
     DomainCheckResponse,
     DomainCreateResponse,
@@ -20,11 +20,11 @@ from rpp.model.rpp.domain import (
 )
 
 
-def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
+def to_domain_info(epp_response: Epp) -> DomainInfoResponse | ProblemModel:
 
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
-        return to_base_response(epp_response)
+        return to_error_response(epp_response)
 
     res_data: InfData = epp_response.response.res_data.other_element[0]
 
@@ -90,7 +90,7 @@ def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
                 roid=res_data.auth_info.pw.roid
             )
 
-    infData = DomainInfoResponse(
+    return DomainInfoResponse(
         name=res_data.name,
         registrant=res_data.registrant,
         contacts=contacts,
@@ -104,104 +104,112 @@ def to_domain_info(epp_response: Epp, response: Response) -> BaseResponseModel:
         authInfo=authInfo
     )
    
-    return BaseResponseModel(
-        type_="Domain",
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-        svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=infData
-    )
+    # return BaseResponseModel(
+    #     type_="Domain",
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #     svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=infData
+    # )
 
 
-def do_domain_check(epp_response: Epp) -> tuple[bool, int, str]:
+# def do_domain_check(epp_response: Epp) -> tuple[bool, int, str] | ProblemModel:
 
-    ok, epp_status, message = is_ok_response(epp_response)
-    if not ok:
-        return None, epp_status, message
+#     ok, epp_status, message = is_ok_response(epp_response)
+#     if not ok:
+#         return to_error_response(epp_response)
     
-    check_data: ChkDataType = epp_response.response.res_data.other_element[0]
-    cd: CheckType = check_data.cd[0]
+#     check_data: ChkDataType = epp_response.response.res_data.other_element[0]
+#     cd: CheckType = check_data.cd[0]
 
-    return cd.name.avail, epp_status, cd.reason.value if cd.reason else None
+#     return cd.name.avail, epp_status, cd.reason.value if cd.reason else None
 
-def to_domain_check_response(epp_response: Epp) -> BaseResponseModel:
+def to_domain_check_response(epp_response: Epp) -> DomainCheckResponse | ProblemModel:
 
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
-        return to_base_response(epp_response)
+        return to_error_response(epp_response)
 
     res_data: ChkDataType = epp_response.response.res_data.other_element[0]
-    check_result: CheckType = res_data.cd[0]
-    resData = DomainCheckResponse(
-        name=check_result.name.value,
-        avail=check_result.name.avail,
-        reason=check_result.reason.value if check_result.reason else None
+    cd: CheckType = res_data.cd[0]
+    return DomainCheckResponse(
+        name=cd.name.value,
+        avail=cd.name.avail,
+        reason=cd.reason.value if cd.reason else None
     )
 
-    return BaseResponseModel(
-        type_="Domain",
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-                       svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=resData
-    )   
+    # return BaseResponseModel(
+    #     type_="Domain",
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #                    svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=resData
+    # )   
 
-def to_domain_delete(epp_response: Epp, response: Response) -> BaseResponseModel:
-    return to_base_response(epp_response)
-
-
-def to_domain_create(epp_response: Epp) -> BaseResponseModel:
+def to_domain_delete(epp_response: Epp) -> None | ProblemModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
-        return to_base_response(epp_response)
+        return to_error_response(epp_response)
+    
+    return None
+
+
+def to_domain_create(epp_response: Epp) -> DomainCreateResponse | ProblemModel:
+    ok, epp_status, message = is_ok_response(epp_response)
+    if not ok:
+        return to_error_response(epp_response)
 
     res_data: CreDataType = epp_response.response.res_data.other_element[0]
 
-    resData = DomainCreateResponse(
+    return DomainCreateResponse(
         name=res_data.name,
-        creDate=res_data.cr_date.to_datetime(),
-        exDate=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
+        created=res_data.cr_date.to_datetime(),
+        expires=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
     )
 
-    return BaseResponseModel(
-        type_="Domain",
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-                       svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=resData
-    )
+    # return BaseResponseModel(
+    #     type_="Domain",
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #                    svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=resData
+    # )
 
-def to_domain_update(epp_response: Epp, response: Response) -> BaseResponseModel:
-    return to_base_response(epp_response)
+def to_domain_update(epp_response: Epp, response: Response) -> None | ProblemModel:
+     ok, epp_status, message = is_ok_response(epp_response)
+     if not ok:
+        return to_error_response(epp_response)
+     
+     return None
 
-def to_domain_renew(epp_response: Epp, response: Response) -> BaseResponseModel:
+def to_domain_renew(epp_response: Epp) -> DomainRenewResponse | ProblemModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
-        return to_base_response(epp_response)
+        return to_error_response(epp_response)
 
     res_data: RenDataType = epp_response.response.res_data.other_element[0]
 
-    resData = DomainRenewResponse(
+    return DomainRenewResponse(
         name=res_data.name,
         expDate=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
     )
 
-    return BaseResponseModel(
-        type_="Domain",
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-                       svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=resData
-    )
+    # return BaseResponseModel(
+    #     type_="Domain",
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #                    svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=resData
+    # )
 
-def to_domain_transfer(epp_response: Epp, response: Response) -> BaseResponseModel:
+def to_domain_transfer(epp_response: Epp) -> DomainTransferResponse | ProblemModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok or not hasattr(epp_response.response.res_data, "other_element"):
-        return to_base_response(epp_response)
+        return to_error_response(epp_response)
 
     res_data: TrnDataType = epp_response.response.res_data.other_element[0]
 
-    resData = DomainTransferResponse(
+    return DomainTransferResponse(
         name=res_data.name,
         trStatus=res_data.tr_status,
         reId=res_data.re_id,
@@ -211,10 +219,10 @@ def to_domain_transfer(epp_response: Epp, response: Response) -> BaseResponseMod
         exDate=res_data.ex_date.to_datetime() if hasattr(res_data, "ex_date") and res_data.ex_date is not None else None
     )
 
-    return BaseResponseModel(
-        type_="Domain",
-        trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
-                       svTRID=epp_response.response.tr_id.sv_trid),
-        result=to_result_list(epp_response),
-        resData=resData
-    )
+    # return BaseResponseModel(
+    #     type_="Domain",
+    #     trID=TrIDModel(clTRID=epp_response.response.tr_id.cl_trid,
+    #                    svTRID=epp_response.response.tr_id.sv_trid),
+    #     result=to_result_list(epp_response),
+    #     resData=resData
+    # )
