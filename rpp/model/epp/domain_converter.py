@@ -45,10 +45,15 @@ from rpp.model.rpp.domain import (
 def domain_create(req: DomainCreateRequest, rpp_cl_trid: str) -> Epp:
     # Period
     period = None
-    if req.period:
+    if req.processes and req.processes.creation and req.processes.creation.period:
         period = PeriodType(
-            value=int(req.period.value), unit=PUnitType(req.period.unit)
+            value=req.processes.creation.period.value,
+            unit=PUnitType(req.processes.creation.period.unit.value),
         )
+    # if req.period:
+    #     period = PeriodType(
+    #         value=int(req.period.value), unit=PUnitType(req.period.unit.value)
+    #     )
     # NS
     ns = None
     if req.ns:
@@ -210,9 +215,10 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
 
 def domain_renew(domainname: str, request: DomainRenewRequest, rpp_cl_trid: str) -> Epp:
     period = None
-    if request.period:
+    if request.processes and request.processes.renewal and request.processes.renewal.period:
         period = PeriodType(
-            value=request.period.value, unit=PUnitType(request.period.unit)
+            value=request.processes.renewal.period.value,
+            unit=PUnitType(request.processes.renewal.period.unit.value),
         )
 
     epp_request = Epp(
@@ -233,18 +239,21 @@ def domain_renew(domainname: str, request: DomainRenewRequest, rpp_cl_trid: str)
 
 def domain_transfer(domainname: str, request: DomainTransferRequest, rpp_cl_trid: str, auth_info: AuthInfoModel, op: TransferOpType
 ) -> Epp:
+    
+    period = None
+    if request.processes and request.processes.transfer and request.processes.transfer.period:
+        period = PeriodType(
+            value=request.processes.transfer.period.value,
+            unit=PUnitType(request.processes.transfer.period.unit.value),
+        )
+
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
                 op=op,
                 other_element=Transfer(
                     name=domainname,
-                    period=PeriodType(
-                        value=request.period.value,
-                        unit=PUnitType(request.period.unit),
-                    )
-                    if request.period
-                    else None,
+                    period=period,
                     auth_info=create_auth_info(auth_info),
                 ),
             ),

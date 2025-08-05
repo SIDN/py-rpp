@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
@@ -26,8 +27,12 @@ class GreetingModel(BaseModel):
     services: SvcMenuModel
     dcp: DcpModel
 
+class PeriodUnit(str, Enum):
+    m = "m"
+    y = "y"
+    
 class PeriodModel(BaseModel):
-    unit: str
+    unit: PeriodUnit
     value: int
 
 class AuthInfoModel(BaseModel):

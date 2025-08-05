@@ -121,14 +121,14 @@ class DomainCreateResponse(BaseResponseModelWithFee):
     expires: Optional[datetime] = None
 
 
-class DomainCreateProcess(BaseModel):
+class DomainTransferProcess(BaseModel):
     period: PeriodModel
 
-class BaseDomainCreateProcess(BaseModel):
-    creation: DomainCreateProcess
+class BaseDomainTransferProcess(BaseModel):
+    transfer: DomainTransferProcess
 
 class DomainTransferRequest(BaseRequestModel):
-    processes: Optional[BaseDomainCreateProcess] = None
+    processes: Optional[BaseDomainTransferProcess] = None
 
 class DomainTransferResponse(BaseResponseModelWithFee):
     name: str
