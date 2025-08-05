@@ -2,7 +2,7 @@ import logging
 from typing import Annotated
 from fastapi import APIRouter, Depends, Header, Response
 from fastapi.security import HTTPBasic
-from rpp.common import RPP_CODE_HEADERS, RPP_PROBLEM_REPORT_SCHEMA, update_response
+from rpp.common import RPP_CODE_HEADERS, RPP_MESSAGE_HEADERS, RPP_PROBLEM_REPORT_SCHEMA, update_response
 from rpp.epp_client import EppClient
 from rpp.epp_connection_pool import get_connection
 from rpp.model.epp.messages_converter import ack_message, get_messages
@@ -16,7 +16,10 @@ router = APIRouter()
 
 @router.get("/", response_model_exclude_none=True, summary="Get Messages",
                 status_code=200,
-                responses={200: RPP_CODE_HEADERS,
+                responses={200: {"headers": {
+                                **RPP_CODE_HEADERS["headers"],
+                                **RPP_MESSAGE_HEADERS["headers"],
+                        }},
                            422: RPP_PROBLEM_REPORT_SCHEMA})
 async def do_get_messages(response: Response, 
                     conn: EppClient = Depends(get_connection),

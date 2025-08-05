@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import List, Optional, Any
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Dict, List, Optional, Any
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 # Greeting
 
@@ -35,7 +35,8 @@ class AuthInfoModel(BaseModel):
     roid: Optional[str] = None
 
 class BaseRequestModel(BaseModel):
-    type_: Optional[str] = Field(default=None, alias='@type')
+    pass
+    #type_: Optional[str] = Field(default=None, alias='@type')
 
 # Response
 
@@ -46,8 +47,8 @@ class TrIDModel(BaseModel):
 class MessageQueueModel(BaseModel):
     count: int
     id: Optional[str] = None
-    qDate: datetime = None
-    message: str = None
+    qDate: Optional[datetime] = None
+    message: Optional[str] = None
 
 class ResultModel(BaseModel):
     code: int
@@ -78,12 +79,37 @@ class ErrorModel(BaseModel):
     lang: Optional[str] = None
 
 class ProblemModel(BaseModel):
-    type: Optional[str] = None
+    type: str = Field(default="https://www.example.org/rpp/problem", alias='type')
     status: int
     title: str
-    detail: Optional[str] = None
     errors: Optional[List[ErrorModel]] = None
 
 class BaseCheckResponse(BaseModel):
     avail: bool
     reason: Optional[str] = None
+
+# Fee Models
+# from: https://datatracker.ietf.org/doc/html/rfc8748#
+
+class FeeCreditModel(BaseModel):
+    description: str
+    value: float
+    lang: Optional[str] = None
+
+class FeeModel(BaseModel):
+    description: Optional[str] = None
+    refundable: Optional[bool] = None
+    gracePeriod: Optional[PeriodModel] = None
+    applied: Optional[bool] = None
+    lang: Optional[str] = None
+
+class RegistryFeeModel(BaseModel):
+    currency: Optional[str] = None
+    period: Optional[PeriodModel] = None
+    fees: List[FeeModel]
+    credit: Optional[List[FeeCreditModel]] = None
+    balance: Optional[float] = None
+    creditLimit: Optional[float] = None
+    
+class BaseResponseModelWithFee(BaseModel):
+    registryFee: Optional[RegistryFeeModel] = None

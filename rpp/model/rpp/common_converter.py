@@ -84,6 +84,21 @@ def to_error_response(epp_response: Epp) -> ProblemModel:
         errors.append(ErrorModel(code=str(res.code.value), message=res.msg.value,
                 lang=res.msg.lang if res.msg.lang else None))
         
+    
+    if epp_response.response.extension and epp_response.response.extension.other_element:
+        # If the response has an SIDN extension, we can assume it is a ResponseType
+        response_ext: List[Ext] = epp_response.response.extension.other_element
+        msgs: List[Msg] = []
+        for ext in response_ext:
+            if ext.response is not None:
+                # If the extension has a response, we can assume it is a SIDNExtMessageModel
+                for msg in ext.response.msg:
+                    errors.append(ErrorModel(message=msg.value, code=msg.code)) #field=msg.field_value)
+
+        # rpp_response.extension = SIDNExtMessageModel(
+        #     sidn_messages=msgs
+        # )
+
     epp_status: int = get_status_from_response(epp_response)
     return ProblemModel(
         #type=f"urn:ietf:params:rpp:code:{get_status_from_response(epp_response)}",

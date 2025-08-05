@@ -10,6 +10,7 @@ from rpp.model.rpp.domain import (
     DomainCreateResponse,
     DomainInfoResponse,
     DomainRenewResponse,
+    DomainUpdateResponse,
     EventModel,
     NameserverModel,
     ContactModel,
@@ -134,7 +135,7 @@ def to_domain_check_response(epp_response: Epp) -> DomainCheckResponse | Problem
     cd: CheckType = res_data.cd[0]
     return DomainCheckResponse(
         name=cd.name.value,
-        avail=cd.name.avail,
+        available=cd.name.avail,
         reason=cd.reason.value if cd.reason else None
     )
 
@@ -180,7 +181,7 @@ def to_domain_update(epp_response: Epp, response: Response) -> None | ProblemMod
      if not ok:
         return to_error_response(epp_response)
      
-     return None
+     return DomainUpdateResponse()
 
 def to_domain_renew(epp_response: Epp) -> DomainRenewResponse | ProblemModel:
     ok, epp_status, message = is_ok_response(epp_response)

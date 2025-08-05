@@ -16,6 +16,10 @@ def to_messages(epp_response: Epp) -> MessageQueueModel | ProblemModel:
     ok, epp_status, message = is_ok_response(epp_response)
     if not ok:
          return to_error_response(epp_response)
+    
+    if epp_status == 1300:
+        # EPP response code 1300 indicates no messages available
+        return MessageQueueModel(count=0, id=None, qDate=None, message=None)
 
     #TODO: convert the EPP resData to RPP model
     resData = None

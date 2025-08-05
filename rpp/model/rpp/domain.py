@@ -1,7 +1,7 @@
 from datetime import date, datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, Literal
 from pydantic import BaseModel, Field
-from rpp.model.rpp.common import AuthInfoModel, BaseCheckResponse, BaseRequestModel, PeriodModel, StatusModel
+from rpp.model.rpp.common import AuthInfoModel, BaseCheckResponse, BaseRequestModel, BaseResponseModelWithFee, PeriodModel, StatusModel
 
 class NsItemModel(BaseModel):
     type: str
@@ -50,24 +50,10 @@ class EventModel(BaseModel):
     name: Optional[str] = None
     date:  datetime
 
-class DomainCreateRequest(BaseRequestModel):
+class DomainCheckResponse(BaseResponseModelWithFee):
     name: str
-    period: Optional[PeriodModel] = None
-    ns: Optional[List[NsItemModel]] = []
-    registrant: str
-    contact: List[ContactModel]
-    authInfo: Optional[AuthInfoModel] = None
-    dnssec: Optional[DsOrKeyType] = None
-
-class DomainCreateResponse(BaseModel):
-    name: str
-    created: datetime
-    expires: Optional[datetime] = None
-
-class DomainCheckResponse(BaseCheckResponse):
-    name: str
-    # avail: bool
-    # reason: Optional[str] = None
+    available: bool
+    reason: Optional[str] = None
 
 class DomainInfoResponse(BaseModel):
     name: str
@@ -96,22 +82,63 @@ class DomainUpdateRequest(BaseRequestModel):
     remove: Optional[DomainUpdateAddOrRemove] = None
     change: Optional[DomainUpdateChange] = None
 
-class DomainRenewRequest(BaseRequestModel):
+class DomainUpdateResponse(BaseResponseModelWithFee):
+    pass
+
+class DomainRenewProcess(BaseModel):
     currentExpiry: date
     period: Optional[PeriodModel] = None
 
-class DomainRenewResponse(BaseModel):
+class BaseDomainRenewProcess(BaseModel):
+    renewal: DomainRenewProcess
+
+class DomainRenewRequest(BaseModel):
+    processes: Optional[BaseDomainRenewProcess] = None
+
+class DomainRenewResponse(BaseResponseModelWithFee):
     name: str
     expDate: Optional[datetime] = None
 
-class DomainTransferRequest(BaseRequestModel):
-    period: Optional[PeriodModel] = None
+class DomainCreateProcess(BaseModel):
+    period: PeriodModel
 
-class DomainTransferResponse(BaseModel):
+class BaseDomainCreateProcess(BaseModel):
+    creation: DomainCreateProcess
+
+class DomainCreateRequest(BaseRequestModel):
+    name: str
+    period: Optional[PeriodModel] = None
+    ns: Optional[List[NsItemModel]] = []
+    registrant: str
+    contact: List[ContactModel]
+    authInfo: Optional[AuthInfoModel] = None
+    dnssec: Optional[DsOrKeyType] = None
+    processes: Optional[BaseDomainCreateProcess] = None
+
+class DomainCreateResponse(BaseResponseModelWithFee):
+    name: str
+    created: datetime
+    expires: Optional[datetime] = None
+
+
+class DomainCreateProcess(BaseModel):
+    period: PeriodModel
+
+class BaseDomainCreateProcess(BaseModel):
+    creation: DomainCreateProcess
+
+class DomainTransferRequest(BaseRequestModel):
+    processes: Optional[BaseDomainCreateProcess] = None
+
+class DomainTransferResponse(BaseResponseModelWithFee):
     name: str
     trStatus: str
     reId: str
     reDate: datetime
     acID: str
     acDate: datetime
-    exDate: Optional[datetime] = None 
+    exDate: Optional[datetime] = None
+
+
+#TODO: add registry fee to request models
+# see: https://datatracker.ietf.org/doc/html/rfc8748

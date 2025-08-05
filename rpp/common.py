@@ -3,7 +3,7 @@ from typing import Annotated, Optional
 from fastapi import HTTPException, Response
 from fastapi.params import Header
 from rpp.model.epp.epp_1_0 import Epp
-from rpp.model.rpp.common import AuthInfoModel, BaseCheckResponse, ProblemModel
+from rpp.model.rpp.common import AuthInfoModel, BaseCheckResponse, MessageQueueModel, ProblemModel
 from rpp.model.rpp.common_converter import epp_to_rpp_code, get_status_from_response, is_ok_code
 from rpp.model.rpp.domain import DomainCheckResponse
 from rpp.model.rpp.message import MessageAckModel
@@ -15,22 +15,30 @@ RPP_AUTH_INFO_HEADER_EPP_SCHEME = "authinfo"
 RPP_CODE_HEADERS = {
     "headers": {
         "RPP-Code": {
-            "description": "RPP result code",
+            "description": "Result code",
             "schema": {"type": "string"}
         },
         "RPP-Cltrid": {
-            "description": "RPP client transaction ID",
+            "description": "Client transaction ID",
             "schema": {"type": "string"}
         },
         "RPP-Svtrid": {
-            "description": "RPP server transaction ID",
+            "description": "Server transaction ID",
+            "schema": {"type": "string"}
+        }
+    }
+}
+
+RPP_MESSAGE_HEADERS = {
+    "headers": {
+        "RPP-Msg-Count": {
+            "description": "Message count",
             "schema": {"type": "string"}
         }
     }
 }
 
 RPP_PROBLEM_REPORT_SCHEMA = {
-    #"model": ProblemModel,
     "description": "Validation Error",
     "content": {
                 "application/problem+json": {
@@ -47,14 +55,16 @@ def update_response(response: Response, epp_response: Epp,
     status_code = get_status_from_response(epp_response)
     update_response_from_code(response, status_code, default_http_status_code)
     add_transaction_headers(response, epp_response)
-    if location:
-        response.headers["Location"] = location
 
     if isinstance(rpp_response, ProblemModel):
         response.headers["Content-Type"] = "application/problem+json"
+        return rpp_response
+    
+    if location:
+        response.headers["Location"] = location
 
-    if isinstance(rpp_response, MessageAckModel):
-        response.headers["RPP-Msg-Count"] = str(rpp_response.msg_count)
+    if isinstance(rpp_response, MessageAckModel | MessageQueueModel):
+        response.headers["RPP-Msg-Count"] = str(rpp_response.count) if hasattr(rpp_response, 'count') else None
     return rpp_response
 
 def add_transaction_headers(response: Response, epp_response: Epp):
