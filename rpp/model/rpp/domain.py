@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel, StatusModel
 from rpp.model.rpp.dnssec import DsOrKeyType
-from rpp.model.rpp.registry_fee import BaseResponseModelWithFee, FeeCheckType, FeeChkDataType, FeeTransformResultType
+from rpp.model.rpp.registry_fee import BaseResponseModelWithFee, FeeCheckType, FeeChkDataType, FeeTransformCommandType, FeeTransformResultType
 
 class NsItemModel(BaseModel):
     type: str
@@ -26,7 +26,6 @@ class EventModel(BaseModel):
     date:  datetime
 
 class DomainCheckRequest(BaseModel):
-    currency: Optional[str] = None
     fees: Optional[FeeCheckType] = None
 
 class DomainCheckResponse(BaseModel):
@@ -61,7 +60,7 @@ class DomainUpdateRequest(BaseRequestModel):
     add: Optional[DomainUpdateAddOrRemove] = None
     remove: Optional[DomainUpdateAddOrRemove] = None
     change: Optional[DomainUpdateChange] = None
-    fees: Optional[FeeTransformResultType] = None
+    fees: Optional[FeeTransformCommandType] = None
 
 class DomainUpdateResponse(BaseResponseModelWithFee):
     pass
@@ -75,7 +74,7 @@ class BaseDomainRenewProcess(BaseModel):
 
 class DomainRenewRequest(BaseModel):
     processes: Optional[BaseDomainRenewProcess] = None
-    fees: Optional[FeeTransformResultType] = None
+    fees: Optional[FeeTransformCommandType] = None
 
 class DomainRenewResponse(BaseResponseModelWithFee):
     name: str
@@ -96,7 +95,7 @@ class DomainCreateRequest(BaseRequestModel):
     authInfo: Optional[AuthInfoModel] = None
     dnssec: Optional[DsOrKeyType] = None
     processes: Optional[BaseDomainCreateProcess] = None
-    fees: Optional[FeeTransformResultType] = None
+    fees: Optional[FeeTransformCommandType] = None
 
 class DomainCreateResponse(BaseResponseModelWithFee):
     name: str
@@ -112,7 +111,7 @@ class BaseDomainTransferProcess(BaseModel):
 
 class DomainTransferRequest(BaseRequestModel):
     processes: Optional[BaseDomainTransferProcess] = None
-    fees: Optional[FeeTransformResultType] = None
+    fees: Optional[FeeTransformCommandType] = None
 
 class DomainTransferResponse(BaseResponseModelWithFee):
     name: str
