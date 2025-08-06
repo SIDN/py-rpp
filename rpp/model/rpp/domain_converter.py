@@ -14,9 +14,6 @@ from rpp.model.rpp.domain import (
     EventModel,
     NameserverModel,
     ContactModel,
-    DSDataModel,
-    SecDNSKeyDataModel,
-    DsOrKeyType,
     DomainTransferResponse
 )
 

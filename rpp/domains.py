@@ -10,7 +10,7 @@ from rpp.model.epp.domain_converter import domain_check, domain_delete, domain_i
 from rpp.model.epp.epp_1_0 import TransferOpType
 from rpp.model.rpp.common import AuthInfoModel, ProblemModel
 
-from rpp.model.rpp.domain import DomainCheckResponse, DomainCreateRequest, DomainCreateResponse, DomainInfoResponse, DomainRenewRequest, DomainRenewResponse, DomainTransferRequest, DomainTransferResponse, DomainUpdateRequest, DomainUpdateResponse
+from rpp.model.rpp.domain import DomainCheckRequest, DomainCheckResponse, DomainCreateRequest, DomainCreateResponse, DomainInfoResponse, DomainRenewRequest, DomainRenewResponse, DomainTransferRequest, DomainTransferResponse, DomainUpdateRequest, DomainUpdateResponse
 from rpp.model.rpp.domain_converter import to_domain_check_response, to_domain_create, to_domain_delete, to_domain_info, to_domain_renew, to_domain_transfer, to_domain_update
 
 logger = logging.getLogger('uvicorn.error')
@@ -76,6 +76,7 @@ async def do_check_head(domainname: str, response: Response,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
 async def do_check_get(domainname: str, response: Response,
+                       rpp_request: DomainCheckRequest = Body(None),
              rpp_cl_trid: Annotated[str | None, Header()] = None,
              conn: EppClient = Depends(get_connection)) -> DomainCheckResponse | ProblemModel:
     logger.info(f"Check domain: {domainname}")

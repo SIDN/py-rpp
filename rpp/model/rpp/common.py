@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
+
 # Greeting
 
 class SvcMenuModel(BaseModel):
@@ -93,28 +94,3 @@ class BaseCheckResponse(BaseModel):
     avail: bool
     reason: Optional[str] = None
 
-# Fee Models
-# from: https://datatracker.ietf.org/doc/html/rfc8748#
-
-class FeeCreditModel(BaseModel):
-    description: str
-    value: float
-    lang: Optional[str] = None
-
-class FeeModel(BaseModel):
-    description: Optional[str] = None
-    refundable: Optional[bool] = None
-    gracePeriod: Optional[PeriodModel] = None
-    applied: Optional[bool] = None
-    lang: Optional[str] = None
-
-class RegistryFeeModel(BaseModel):
-    currency: Optional[str] = None
-    period: Optional[PeriodModel] = None
-    fees: List[FeeModel]
-    credit: Optional[List[FeeCreditModel]] = None
-    balance: Optional[float] = None
-    creditLimit: Optional[float] = None
-    
-class BaseResponseModelWithFee(BaseModel):
-    registryFee: Optional[RegistryFeeModel] = None

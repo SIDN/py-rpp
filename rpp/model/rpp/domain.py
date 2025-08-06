@@ -1,7 +1,9 @@
 from datetime import date, datetime
-from typing import Dict, List, Optional, Union, Literal
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
-from rpp.model.rpp.common import AuthInfoModel, BaseCheckResponse, BaseRequestModel, BaseResponseModelWithFee, PeriodModel, StatusModel
+from rpp.model.rpp.common import AuthInfoModel, BaseRequestModel, PeriodModel, StatusModel
+from rpp.model.rpp.dnssec import DsOrKeyType
+from rpp.model.rpp.registry_fee import BaseResponseModelWithFee, FeeCheckType, FeeChkDataType, FeeTransformResultType
 
 class NsItemModel(BaseModel):
     type: str
@@ -10,34 +12,7 @@ class NsItemModel(BaseModel):
 class ContactModel(BaseModel):
     type: str
     value: str
-
-class SecDNSKeyDataModel(BaseModel):
-    flags: int
-    protocol: int
-    alg: int
-    pubKey: str
-
-class DSDataModel(BaseModel):
-    keyTag: int
-    algorithm: int
-    digestType: int
-    digest: str
-
-class DNSSECModel(BaseModel):
-    delegationSigned: bool
-    dsData: List[DSDataModel]
-
-class DsOrKeyType(BaseModel):
-    keyData: Optional[List[SecDNSKeyDataModel]] = None
-    dsData: Optional[List[DSDataModel]] = None
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        if self.keyData is not None and self.dsData is not None:
-            raise ValueError("Only one of keyData or dsData can be set.")
-        if self.keyData is None and self.dsData is None:
-            raise ValueError("One of keyData or dsData must be set.")
-        
+      
 class AddressListModel(BaseModel):
     v4: Optional[List[str]] = []
     v6: Optional[List[str]] = []
@@ -50,10 +25,15 @@ class EventModel(BaseModel):
     name: Optional[str] = None
     date:  datetime
 
-class DomainCheckResponse(BaseResponseModelWithFee):
+class DomainCheckRequest(BaseModel):
+    currency: Optional[str] = None
+    fees: Optional[FeeCheckType] = None
+
+class DomainCheckResponse(BaseModel):
     name: str
     available: bool
     reason: Optional[str] = None
+    fees: Optional[FeeChkDataType] = None
 
 class DomainInfoResponse(BaseModel):
     name: str
@@ -81,6 +61,7 @@ class DomainUpdateRequest(BaseRequestModel):
     add: Optional[DomainUpdateAddOrRemove] = None
     remove: Optional[DomainUpdateAddOrRemove] = None
     change: Optional[DomainUpdateChange] = None
+    fees: Optional[FeeTransformResultType] = None
 
 class DomainUpdateResponse(BaseResponseModelWithFee):
     pass
@@ -94,6 +75,7 @@ class BaseDomainRenewProcess(BaseModel):
 
 class DomainRenewRequest(BaseModel):
     processes: Optional[BaseDomainRenewProcess] = None
+    fees: Optional[FeeTransformResultType] = None
 
 class DomainRenewResponse(BaseResponseModelWithFee):
     name: str
@@ -114,6 +96,7 @@ class DomainCreateRequest(BaseRequestModel):
     authInfo: Optional[AuthInfoModel] = None
     dnssec: Optional[DsOrKeyType] = None
     processes: Optional[BaseDomainCreateProcess] = None
+    fees: Optional[FeeTransformResultType] = None
 
 class DomainCreateResponse(BaseResponseModelWithFee):
     name: str
@@ -129,6 +112,7 @@ class BaseDomainTransferProcess(BaseModel):
 
 class DomainTransferRequest(BaseRequestModel):
     processes: Optional[BaseDomainTransferProcess] = None
+    fees: Optional[FeeTransformResultType] = None
 
 class DomainTransferResponse(BaseResponseModelWithFee):
     name: str
