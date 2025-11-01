@@ -3,6 +3,7 @@ pydantic==2.8.0
 pydantic-settings==2.8.0
 pyepp==0.1.6
 xsdata==25.4
+gunicorn
 uvicorn==0.34.3
 trio
 asgi-lifespan

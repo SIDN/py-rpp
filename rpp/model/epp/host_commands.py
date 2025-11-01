@@ -1,4 +1,5 @@
 from typing import List
+
 from rpp.model.epp.domain_1_0 import HostsType, InfoNameType
 from rpp.model.epp.epp_1_0 import CommandType, Epp, ReadWriteType
 from rpp.model.epp.helpers import random_tr_id
@@ -27,7 +28,12 @@ def hostaddr_to_epp(host_addr: List[HostAddr]) -> list[AddrType]:
         return addr_list  # Return empty list if no address is provided
 
     for ip in host_addr or []:
-        addr_list.append(AddrType(value=str(ip.address), ip=IpType.V4 if ip.family == "v4" else IpType.V6))
+        addr_list.append(
+            AddrType(
+                value=str(ip.address),
+                ip=IpType.V4 if ip.family == "v4" else IpType.V6,
+            )
+        )
     # for ip in host_addr.v6 or []:
     #     addr_list.append(AddrType(value=str(ip), ip=IpType.V6))
     return addr_list
@@ -52,9 +58,7 @@ def host_info(host: str, rpp_cl_trid: str) -> Epp:
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
-                other_element=Info(
-                    name=InfoNameType(value=host)
-                )
+                other_element=Info(name=InfoNameType(value=host))
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
         )
@@ -85,7 +89,9 @@ def host_delete(host: str, rpp_cl_trid: str) -> Epp:
     return epp_request
 
 
-def host_update(host: str, request: HostUpdateRequest, rpp_cl_trid: str) -> Epp:
+def host_update(
+    host: str, request: HostUpdateRequest, rpp_cl_trid: str
+) -> Epp:
     add = None
     rem = None
     chg = ChgType(name=request.change.name) if request.change else None
@@ -93,20 +99,24 @@ def host_update(host: str, request: HostUpdateRequest, rpp_cl_trid: str) -> Epp:
     if request.add is not None:
         add = AddRemType(
             addr=hostaddr_to_epp(request.add.addr),
-            status=[StatusType(s=status.name) for status in request.add.status] if request.add.status else None
+            status=[StatusType(s=status.name) for status in request.add.status]
+            if request.add.status
+            else None,
         )
     if request.remove is not None:
         rem = AddRemType(
             addr=hostaddr_to_epp(request.remove.addr),
-            status=[StatusType(s=status.name) for status in request.remove.status] if request.remove.status else None
+            status=[
+                StatusType(s=status.name) for status in request.remove.status
+            ]
+            if request.remove.status
+            else None,
         )
 
     epp_request = Epp(
         command=CommandType(
             update=ReadWriteType(
-                other_element=Update(
-                    name=host, add=add, rem=rem, chg=chg
-                )
+                other_element=Update(name=host, add=add, rem=rem, chg=chg)
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
         )

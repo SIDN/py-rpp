@@ -19,7 +19,8 @@ def login(
     login_options = CredsOptionsType(version=version, lang=lang)
 
     login_svc = LoginSvcType(
-        obj_uri=obj_uri, svc_extension=ExtUritype(ext_uri=ext_uri) if ext_uri else None
+        obj_uri=obj_uri,
+        svc_extension=ExtUritype(ext_uri=ext_uri) if ext_uri else None,
     )
 
     login = LoginType(

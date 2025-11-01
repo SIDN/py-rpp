@@ -18,6 +18,7 @@ router = APIRouter()
 
 
 @router.post("/", description="Create a new domain", summary="Create Domain",
+             response_model=DomainCreateResponse,
              status_code=201,
              responses={201: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA}, response_model_exclude_none=True)
@@ -36,6 +37,7 @@ async def do_create(create_request: DomainCreateRequest,
     return update_response(response, epp_response, 201, location, rpp_response)  # 201 Created
 
 @router.get("/{domainname}", response_model_exclude_none=True, summary="Get Domain Info",
+            response_model=DomainInfoResponse,
              status_code=200,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -72,6 +74,7 @@ async def do_check_head(domainname: str, response: Response,
     add_check_status(response, rpp_response)
 
 @router.get("/{domainname}/availability", response_model_exclude_none=True, summary="Check Domain Availability",
+            response_model=DomainCheckResponse,
              status_code=200,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -93,7 +96,6 @@ async def do_check_get(domainname: str, response: Response,
 
 @router.delete("/{domainname}", summary="Delete Domain",
                 status_code=204,
-                response_model_exclude_none=True,
                responses={204: RPP_CODE_HEADERS,
                           422: RPP_PROBLEM_REPORT_SCHEMA})
 async def do_delete(domainname: str, response: Response,
@@ -122,6 +124,7 @@ async def do_delete(domainname: str, response: Response,
 #     to_domain_cancel_delete(epp_response, response)
 
 @router.patch("/{domainname}", response_model_exclude_none=True, summary="Update Domain",
+                response_model=DomainUpdateResponse,
                 status_code=200,
                 responses={200: RPP_CODE_HEADERS,
                            422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -141,6 +144,8 @@ async def do_update(domainname: str,
     #return to_domain_update(epp_response, response)
 
 @router.post("/{domainname}/processes/renewals", summary="Renew Domain",
+             response_model=DomainRenewResponse,
+             response_model_exclude_none=True,
              status_code=200,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -159,6 +164,7 @@ async def do_renew(domainname: str,
     return update_response(response, epp_response, rpp_response=rpp_response) 
 
 @router.post("/{domainname}/processes/transfers", response_model_exclude_none=True, summary="Start Domain Transfer",
+             response_model=DomainTransferResponse,
              status_code=200,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -181,6 +187,8 @@ async def do_start_transfer(domainname: str,
     return update_response(response, epp_response, rpp_response=rpp_response)
 
 @router.get("/{domainname}/processes/transfers/latest", summary="Query Transfer Status",
+                response_model_exclude_none=True, 
+                response_model=DomainTransferResponse,
                 status_code=200,
                 responses={200: RPP_CODE_HEADERS,
                            422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -199,6 +207,8 @@ async def do_query_transfer(domainname: str, response: Response,
     return update_response(response, epp_response, rpp_response=rpp_response)
 
 @router.put("/{domainname}/processes/transfers/latest/rejection", summary="Reject Domain Transfer",
+             response_model_exclude_none=True,
+             response_model=DomainTransferResponse,
              status_code=200,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -213,6 +223,8 @@ async def do_reject_transfer(domainname: str, response: Response,
             conn, rpp_cl_trid, epp_authorization)
 
 @router.put("/{domainname}/processes/transfers/latest/cancellation", summary="Cancel Domain Transfer",
+             response_model_exclude_none=True,
+             response_model=DomainTransferResponse,
              status_code=200,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -227,13 +239,15 @@ async def do_cancel_transfer(domainname: str, response: Response,
             conn, rpp_cl_trid, epp_authorization)
 
 @router.put("/{domainname}/processes/transfers/latest/approval", summary="Approve Domain Transfer",
-             status_code=200,
-             responses={200: RPP_CODE_HEADERS,
-                        422: RPP_PROBLEM_REPORT_SCHEMA})
+                response_model_exclude_none=True,
+                response_model=DomainTransferResponse,
+                status_code=200,
+                responses={200: RPP_CODE_HEADERS,
+                            422: RPP_PROBLEM_REPORT_SCHEMA})
 async def do_approve_transfer(domainname: str, response: Response,
                                 epp_authorization: AuthInfoModel | None = Depends(epp_auth_info_from_header),
                                 rpp_cl_trid: Annotated[str | None, Header()] = None,
-                                conn: EppClient = Depends(get_connection)):
+                                conn: EppClient = Depends(get_connection)) -> DomainTransferResponse | ProblemModel:
 
     logger.info(f"Approve transfer for domain: {domainname}")
 

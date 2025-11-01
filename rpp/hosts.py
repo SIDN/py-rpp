@@ -16,7 +16,9 @@ logger = logging.getLogger('uvicorn.error')
 router = APIRouter()
 
 
-@router.post("/", response_model_exclude_none=True, summary="Create Host", status_code=201,
+@router.post("/", response_model_exclude_none=True, summary="Create Host",
+             response_model=HostCreateResponse,
+             status_code=201,
              responses={201: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
 async def do_create(create_request: HostCreateRequest,
@@ -35,6 +37,7 @@ async def do_create(create_request: HostCreateRequest,
 
 
 @router.get("/{host}", response_model_exclude_none=True, summary="Get Host Info",
+            response_model=HostInfoResponse,
             responses={200: RPP_CODE_HEADERS,
                        422: RPP_PROBLEM_REPORT_SCHEMA})
 async def do_info(host: str,

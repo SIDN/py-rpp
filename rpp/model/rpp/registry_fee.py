@@ -12,29 +12,6 @@ from enum import Enum
 
 from rpp.model.rpp.common import PeriodModel
 
-# class FeeCreditModel(BaseModel):
-#     description: str
-#     value: float
-#     lang: Optional[str] = None
-
-# class FeeModel(BaseModel):
-#     description: Optional[str] = None
-#     refundable: Optional[bool] = None
-#     gracePeriod: Optional[PeriodModel] = None
-#     applied: Optional[bool] = None
-#     lang: Optional[str] = None
-
-# class RegistryFeeModel(BaseModel):
-#     currency: Optional[str] = None
-#     period: Optional[PeriodModel] = None
-#     fees: List[FeeModel]
-#     credit: Optional[List[FeeCreditModel]] = None
-#     balance: Optional[float] = None
-#     creditLimit: Optional[float] = None
-
-
-
-
 class FeeCommandEnum(str, Enum):
     create = "create"
     delete = "delete"
@@ -109,11 +86,6 @@ class FeeTransformResultType(BaseModel):
     credit: Optional[List[CreditType]] = None
     balance: Optional[Decimal] = None
     creditLimit: Optional[Decimal] = None
-
-# # For forward references
-# from pydantic import ConfigDict
-# FeeCommandType.model_rebuild()
-# FeeTransformResultType.model_rebuild()
 
 class BaseResponseModelWithFee(BaseModel):
     fees: Optional[FeeTransformResultType] = None

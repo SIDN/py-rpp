@@ -17,6 +17,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model_exclude_none=True, summary="Create Organisation",
+             response_model=OrganisationCreateResponse,
              status_code=201,
              responses={201: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -24,7 +25,7 @@ async def do_create(create_request: OrganisationCreateRequest,
               response: Response,
               request: Request,
               rpp_cl_trid: Annotated[str | None, Header()] = None,
-              conn: EppClient = Depends(get_connection)) -> None | ProblemModel:
+              conn: EppClient = Depends(get_connection)) -> OrganisationCreateResponse | ProblemModel:
 
     logger.info(f"Create organisation: {create_request.id}")
 
@@ -37,6 +38,7 @@ async def do_create(create_request: OrganisationCreateRequest,
 
 
 @router.get("/{organisation}", response_model_exclude_none=True, summary="Get Organisation Info",
+            response_model=OrganisationInfoResponse,
             responses={200: RPP_CODE_HEADERS,
                        422: RPP_PROBLEM_REPORT_SCHEMA})
 async def do_info(organisation: str,

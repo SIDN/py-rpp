@@ -45,7 +45,11 @@ from rpp.model.rpp.domain import (
 def domain_create(req: DomainCreateRequest, rpp_cl_trid: str) -> Epp:
     # Period
     period = None
-    if req.processes and req.processes.creation and req.processes.creation.period:
+    if (
+        req.processes
+        and req.processes.creation
+        and req.processes.creation.period
+    ):
         period = PeriodType(
             value=req.processes.creation.period.value,
             unit=PUnitType(req.processes.creation.period.unit.value),
@@ -111,13 +115,17 @@ def domain_create(req: DomainCreateRequest, rpp_cl_trid: str) -> Epp:
     )
 
 
-def domain_info(domainname: str, filter: str, rpp_cl_trid: str, auth_info: AuthInfoModel) -> Epp:
-
+def domain_info(
+    domainname: str, filter: str, rpp_cl_trid: str, auth_info: AuthInfoModel
+) -> Epp:
     epp_request = Epp(
         command=CommandType(
             info=ReadWriteType(
                 other_element=Info(
-                    name=InfoNameType(value=domainname, hosts=HostsType(filter)), auth_info=create_auth_info(auth_info)
+                    name=InfoNameType(
+                        value=domainname, hosts=HostsType(filter)
+                    ),
+                    auth_info=create_auth_info(auth_info),
                 )
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
@@ -126,12 +134,15 @@ def domain_info(domainname: str, filter: str, rpp_cl_trid: str, auth_info: AuthI
 
     return epp_request
 
+
 def create_auth_info(auth_info):
     return (
-        AuthInfoType(pw=PwAuthInfoType(value=auth_info.value, roid=auth_info.roid))
-        if auth_info else None
+        AuthInfoType(
+            pw=PwAuthInfoType(value=auth_info.value, roid=auth_info.roid)
+        )
+        if auth_info
+        else None
     )
-
 
 
 def domain_check(domainname: str, rpp_cl_trid: str) -> Epp:
@@ -146,7 +157,6 @@ def domain_check(domainname: str, rpp_cl_trid: str) -> Epp:
 
 
 def domain_delete(domainname: str, rpp_cl_trid) -> Epp:
-
     epp_request = Epp(
         command=CommandType(
             delete=ReadWriteType(other_element=Delete(name=domainname)),
@@ -157,7 +167,9 @@ def domain_delete(domainname: str, rpp_cl_trid) -> Epp:
     return epp_request
 
 
-def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: str) -> Epp:
+def domain_update(
+    domainname: str, request: DomainUpdateRequest, rpp_cl_trid: str
+) -> Epp:
     add = None
     rem = None
     chg = None
@@ -170,12 +182,16 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
                     value=request.change.authInfo.value,
                     roid=request.change.authInfo.roid,
                 )
-            ) if request.change.authInfo else None,
+            )
+            if request.change.authInfo
+            else None,
         )
 
     if request.add is not None:
         add = AddRemType(
-            ns=NsType(host_obj=[n for n in request.add.ns]) if request.add.ns else None,
+            ns=NsType(host_obj=[n for n in request.add.ns])
+            if request.add.ns
+            else None,
             contact=[
                 ContactType(
                     value=c.value,
@@ -183,12 +199,17 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
                 )
                 for c in request.add.contact
             ]
-            if request.add.contact else None,
-            status=[StatusType(s=status.name) for status in request.add.status] if request.add.status else None,
+            if request.add.contact
+            else None,
+            status=[StatusType(s=status.name) for status in request.add.status]
+            if request.add.status
+            else None,
         )
     if request.remove is not None:
         rem = AddRemType(
-            ns=NsType(host_obj=[n for n in request.remove.ns]) if request.remove.ns else None,
+            ns=NsType(host_obj=[n for n in request.remove.ns])
+            if request.remove.ns
+            else None,
             contact=[
                 ContactType(
                     value=c.value,
@@ -196,7 +217,11 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
                 )
                 for c in request.remove.contact
             ],
-            status=[StatusType(s=status.name) for status in request.remove.status] if request.remove.status else None,
+            status=[
+                StatusType(s=status.name) for status in request.remove.status
+            ]
+            if request.remove.status
+            else None,
         )
 
     epp_request = Epp(
@@ -213,9 +238,15 @@ def domain_update(domainname: str, request: DomainUpdateRequest, rpp_cl_trid: st
     return epp_request
 
 
-def domain_renew(domainname: str, request: DomainRenewRequest, rpp_cl_trid: str) -> Epp:
+def domain_renew(
+    domainname: str, request: DomainRenewRequest, rpp_cl_trid: str
+) -> Epp:
     period = None
-    if request.processes and request.processes.renewal and request.processes.renewal.period:
+    if (
+        request.processes
+        and request.processes.renewal
+        and request.processes.renewal.period
+    ):
         period = PeriodType(
             value=request.processes.renewal.period.value,
             unit=PUnitType(request.processes.renewal.period.unit.value),
@@ -237,11 +268,19 @@ def domain_renew(domainname: str, request: DomainRenewRequest, rpp_cl_trid: str)
     return epp_request
 
 
-def domain_transfer(domainname: str, request: DomainTransferRequest, rpp_cl_trid: str, auth_info: AuthInfoModel, op: TransferOpType
+def domain_transfer(
+    domainname: str,
+    request: DomainTransferRequest,
+    rpp_cl_trid: str,
+    auth_info: AuthInfoModel,
+    op: TransferOpType,
 ) -> Epp:
-    
     period = None
-    if request.processes and request.processes.transfer and request.processes.transfer.period:
+    if (
+        request.processes
+        and request.processes.transfer
+        and request.processes.transfer.period
+    ):
         period = PeriodType(
             value=request.processes.transfer.period.value,
             unit=PUnitType(request.processes.transfer.period.unit.value),
@@ -264,14 +303,15 @@ def domain_transfer(domainname: str, request: DomainTransferRequest, rpp_cl_trid
     return epp_request
 
 
-def domain_transfer_query(domainname: str, rpp_cl_trid: str, auth_info: AuthInfoModel) -> Epp:
+def domain_transfer_query(
+    domainname: str, rpp_cl_trid: str, auth_info: AuthInfoModel
+) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
                 op=TransferOpType.QUERY,
                 other_element=Transfer(
-                    name=domainname,
-                    auth_info=create_auth_info(auth_info)
+                    name=domainname, auth_info=create_auth_info(auth_info)
                 ),
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),

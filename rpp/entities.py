@@ -18,6 +18,7 @@ router = APIRouter()
 
 @router.post("/", description="Create a new entity", summary="Create Entity",
              response_model_exclude_none=True,
+             response_model=EntityCreateResponseModel,
              status_code=201,
              responses={201: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -39,6 +40,7 @@ async def do_create(request: Request,
 
 
 @router.get("/{entity_id}", response_model_exclude_none=True, summary="Get Entity Info",
+            response_model=EntityInfoResponse,
             status_code=200,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -119,6 +121,7 @@ async def do_update(entity_id: str,
     #return to_entity_update(epp_response, response)
 
 @router.post("/{entity_id}/processes/transfers", response_model_exclude_none=True, summary="Start Entity Transfer",
+             response_model=EntityTransferResponse,
              status_code=200,
              responses={200: RPP_CODE_HEADERS,
                         422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -135,6 +138,8 @@ async def do_start_transfer(entity_id: str, response: Response,
     return to_entity_transfer(epp_response, response)
 
 @router.get("/{entity_id}/processes/transfers", summary="Query Transfer Status",
+            response_model=EntityTransferResponse,
+                response_model_exclude_none=True,
             status_code=200,
             responses={200: RPP_CODE_HEADERS,
                        422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -153,6 +158,8 @@ async def do_query_transfer(entity_id: str, response: Response,
  
 
 @router.put("/{entity_id}/processes/transfers/rejection", summary="Reject Entity Transfer",
+            response_model=EntityTransferResponse,
+            response_model_exclude_none=True,
             status_code=200,
             responses={200: RPP_CODE_HEADERS,
                        422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -169,6 +176,8 @@ async def do_reject_transfer(entity_id: str, response: Response,
                                   entity_id, rpp_cl_trid, epp_authorization)
 
 @router.put("/{entity_id}/processes/transfers/cancellation", summary="Cancel Entity Transfer",
+            response_model=EntityTransferResponse,
+                response_model_exclude_none=True,
             status_code=200,
             responses={200: RPP_CODE_HEADERS,
                        422: RPP_PROBLEM_REPORT_SCHEMA})
@@ -185,6 +194,8 @@ async def do_cancel_transfer(entity_id: str, response: Response,
                                   entity_id, rpp_cl_trid, epp_authorization)
 
 @router.put("/{entity_id}/processes/transfers/approval", summary="Approve Entity Transfer",
+            response_model=EntityTransferResponse,
+            response_model_exclude_none=True,
             status_code=200,
             responses={200: RPP_CODE_HEADERS,
                        422: RPP_PROBLEM_REPORT_SCHEMA})

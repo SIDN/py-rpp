@@ -122,7 +122,8 @@ def contact_info(entity_id, rpp_cl_trid, auth_info) -> Epp:
                             roid=auth_info.roid,
                         )
                     )
-                    if auth_info else None,
+                    if auth_info
+                    else None,
                 )
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
@@ -158,7 +159,9 @@ def card_to_chg_postal_info(card: Card) -> ChgPostalInfoType:
     return ChgPostalInfoType(
         type_value="int" if card.int_ else "loc",
         name=card.name.full,
-        org=card.organizations["org"].name if "org" in card.organizations else None,
+        org=card.organizations["org"].name
+        if "org" in card.organizations
+        else None,
         addr=AddrType(
             street=get_value_by_kind(
                 card.addresses.root["addr"].components, "name"
@@ -187,7 +190,9 @@ def get_voice_from_card(card: Card) -> str:
         return card.phones.root["voice"].number
 
 
-def contact_update(entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: str) -> Epp:
+def contact_update(
+    entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: str
+) -> Epp:
     add = None
     rem = None
     chg = None
@@ -203,17 +208,24 @@ def contact_update(entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: st
                     roid=request.change.authInfo.roid,
                 )
             )
-            if request.change.authInfo else None,
+            if request.change.authInfo
+            else None,
         )
 
     if request.add is not None:
         add = AddRemType(
-            status=[StatusType(s=status.name) for status in request.add.status] if request.add.status else None
+            status=[StatusType(s=status.name) for status in request.add.status]
+            if request.add.status
+            else None
         )
 
     if request.remove is not None:
         rem = AddRemType(
-            status=[StatusType(s=status.name) for status in request.remove.status] if request.remove.status else None
+            status=[
+                StatusType(s=status.name) for status in request.remove.status
+            ]
+            if request.remove.status
+            else None
         )
 
     epp_request = Epp(
@@ -228,7 +240,12 @@ def contact_update(entity_id: str, request: EntityUpdateRequest, rpp_cl_trid: st
     return epp_request
 
 
-def contact_transfer(entity_id: str, rpp_cl_trid: str, auth_info: AuthInfoModel, op: TransferOpType) -> Epp:
+def contact_transfer(
+    entity_id: str,
+    rpp_cl_trid: str,
+    auth_info: AuthInfoModel,
+    op: TransferOpType,
+) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
@@ -241,7 +258,8 @@ def contact_transfer(entity_id: str, rpp_cl_trid: str, auth_info: AuthInfoModel,
                             roid=auth_info.roid,
                         )
                     )
-                    if auth_info else None,
+                    if auth_info
+                    else None,
                 ),
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),
@@ -251,7 +269,9 @@ def contact_transfer(entity_id: str, rpp_cl_trid: str, auth_info: AuthInfoModel,
     return epp_request
 
 
-def contact_transfer_query(entity_id: str, rpp_cl_trid: str, auth_info: AuthInfoModel) -> Epp:
+def contact_transfer_query(
+    entity_id: str, rpp_cl_trid: str, auth_info: AuthInfoModel
+) -> Epp:
     epp_request = Epp(
         command=CommandType(
             transfer=TransferType(
@@ -264,7 +284,8 @@ def contact_transfer_query(entity_id: str, rpp_cl_trid: str, auth_info: AuthInfo
                             roid=auth_info.roid,
                         )
                     )
-                    if auth_info else None,
+                    if auth_info
+                    else None,
                 ),
             ),
             cl_trid=rpp_cl_trid or random_tr_id(),

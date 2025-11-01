@@ -15,6 +15,7 @@ logger = logging.getLogger('uvicorn.error')
 router = APIRouter()
 
 @router.get("/", response_model_exclude_none=True, summary="Get Messages",
+                response_model=MessageQueueModel,
                 status_code=200,
                 responses={200: {"headers": {
                                 **RPP_CODE_HEADERS["headers"],

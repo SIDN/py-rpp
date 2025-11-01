@@ -21,8 +21,6 @@ logger = logging.getLogger('uvicorn.error')
 cfg = Config()
 logger.info(f'Using config:\n {pprint.pformat(cfg.model_dump())}')
 
-logger.info(f'ProblemModel JSON Schema:\n {pprint.pformat(ProblemModel.model_json_schema())}')
-
 async def create_connection_pool():
     return ConnectionPool(cfg)
 
